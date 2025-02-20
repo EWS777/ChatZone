@@ -1,4 +1,4 @@
-﻿namespace Chat.Models.Enums;
+﻿namespace Chat.Core.Models.Enums;
 
 public enum PersonRole
 {

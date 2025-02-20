@@ -1,4 +1,4 @@
-﻿namespace Chat.Models;
+﻿namespace Chat.Core.Models;
 
 public class Statistic
 {

@@ -1,6 +1,6 @@
-﻿using Chat.Models.Enums;
+﻿using Chat.Core.Models.Enums;
 
-namespace Chat.Models;
+namespace Chat.Core.Models;
 
 public class GroupChat : Chat
 {

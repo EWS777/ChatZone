@@ -1,4 +1,6 @@
-﻿namespace Chat.Models;
+﻿using Chat.Core.Models.Enums;
+
+namespace Chat.Core.Models;
 
 public class PersonSettings
 {
