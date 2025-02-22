@@ -1,5 +1,4 @@
 ﻿using ChatZone.Core.Models;
-using ChatZone.Core.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,7 +13,38 @@ public class PersonEfConfig : IEntityTypeConfiguration<Person>
 
         builder
             .Property(x => x.Role)
-            .HasDefaultValue(PersonRole.User)
+            .IsRequired();
+        
+        builder
+            .Property(x => x.Username)
+            .HasMaxLength(20);
+
+        builder
+            .HasIndex(x => x.Username)
+            .IsUnique();
+
+        builder
+            .Property(x => x.Email)
+            .HasMaxLength(50);
+        
+        builder
+            .HasIndex(x => x.Email)
+            .IsUnique();
+
+        builder
+            .Property(x => x.Password)
+            .HasMaxLength(50);
+
+        builder
+            .Property(x => x.Salt)
+            .IsRequired();
+        
+        builder
+            .Property(x => x.RefreshToken)
+            .IsRequired();
+        
+        builder
+            .Property(x => x.Salt)
             .IsRequired();
 
         builder.ToTable(nameof(Person));
