@@ -1,5 +1,5 @@
-﻿using ChatZone.DTO.Requests;
-using ChatZone.DTO.Responses;
+﻿using ChatZone.Core.DTO.Requests;
+using ChatZone.Core.DTO.Responses;
 using ChatZone.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

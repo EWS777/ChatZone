@@ -1,4 +1,4 @@
-﻿namespace ChatZone.DTO.Requests;
+﻿namespace ChatZone.Core.DTO.Requests;
 
 public class RegisterRequest
 {
