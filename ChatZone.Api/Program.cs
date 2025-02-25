@@ -1,15 +1,26 @@
 using System.Text;
 using ChatZone.Context;
+using ChatZone.Repositories;
+using ChatZone.Repositories.Interfaces;
+using ChatZone.Services;
+using ChatZone.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args); //zwraca obiekt i sluzy dla konfiguracji webowej
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
-builder.Services.AddDbContext<ChatDbContext>(opt =>
+builder.Services.AddEndpointsApiExplorer(); //to create Swagger
+builder.Services.AddSwaggerGen(); //to create Swagger
+builder.Services.AddControllers(); //find all classes derived from ControllerBase which can be used
+
+
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+
+
+builder.Services.AddDbContext<ChatZoneDbContext>(opt =>
 {
     string connString = builder.Configuration.GetConnectionString("DeffaultConnection");
     opt.UseSqlServer(connString);
@@ -67,6 +78,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.MapControllers();
+app.MapControllers(); //with 'builder.Services.AddControllers();'
 
 app.Run();

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Context;
 
-public class ChatDbContext : DbContext
+public class ChatZoneDbContext : DbContext
 {
     public DbSet<BlockedPeople> BlockedPeoples { get; set; }
     public DbSet<Chat> Chats { get; set; }
@@ -19,7 +19,7 @@ public class ChatDbContext : DbContext
     public DbSet<Report> Reports { get; set; }
     public DbSet<Statistic> Statistics { get; set; }
 
-    public ChatDbContext(DbContextOptions options) : base(options)
+    public ChatZoneDbContext(DbContextOptions<ChatZoneDbContext> options) : base(options)
     {
         
     }

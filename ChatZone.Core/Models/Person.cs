@@ -1,4 +1,5 @@
-﻿using ChatZone.Core.Models.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using ChatZone.Core.Models.Enums;
 
 namespace ChatZone.Core.Models;
 
@@ -7,6 +8,7 @@ public class Person
     public int PersonId { get; set; }
     public required PersonRole Role { get; set; }
     public required string Username { get; set; }
+    [EmailAddress]
     public required string Email { get; set; }
     public required string Password { get; set; }
     public required string Salt { get; set; }
