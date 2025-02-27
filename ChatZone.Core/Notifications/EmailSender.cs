@@ -4,23 +4,69 @@ using Microsoft.Extensions.Configuration;
 
 namespace ChatZone.Core.Notifications;
 
-public class EmailSender(IConfiguration configuration)
+public class EmailSender()
 {
-    public  void SendCodeToEmail(string message)
+    private static  IConfiguration _configuration;
+
+    public static void EmailSettings(IConfiguration configuration)
     {
-        using (var smtpClient = new SmtpClient(configuration["Gmail:SMTPServer"], Convert.ToInt32(configuration["Gmail:SMTPPort"])))
+        _configuration = configuration;
+    }
+
+    public static void SendCodeToEmail(string email, string link)
+    {
+        string linkToClick = _configuration["Gmail:LinkToClick"] + link;
+        
+        using (var smtpClient = new SmtpClient(_configuration["Gmail:SMTPServer"], Convert.ToInt32(_configuration["Gmail:SMTPPort"])))
         {
-            smtpClient.Credentials =
-                new NetworkCredential(configuration["Gmail:SMTPEmail"], configuration["Gmail:SMTPPassword"]);
+            smtpClient.Credentials = new NetworkCredential(_configuration["Gmail:SMTPEmail"], _configuration["Gmail:SMTPPassword"]);
 
             smtpClient.EnableSsl = true;
 
             using (var mailMessage = new MailMessage())
             {
-                mailMessage.From = new MailAddress(configuration["Gmail:SMTPEmail"]);
-                mailMessage.To.Add(message);
-                mailMessage.Subject = "Hello";
-                mailMessage.Body = "Hello from Body!";
+                mailMessage.From = new MailAddress(_configuration["Gmail:SMTPEmail"]);
+                mailMessage.To.Add(email);
+                mailMessage.Subject = "Hello! Please confirm the registration";
+                mailMessage.IsBodyHtml = true;
+
+                mailMessage.Body = $@"
+                <html>
+                <head>
+                    <style>
+                        .container {{
+                            font-family: Arial, sans-serif;
+                            text-align: center;
+                            background-color: #f4f4f4;
+                            padding: 20px;
+                            border-radius: 10px;
+                            width: 80%;
+                            margin: auto;
+                        }}
+                        .button {{
+                            display: inline-block;
+                            padding: 10px 20px;
+                            font-size: 16px;
+                            color: #fff;
+                            background-color: #28a745;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            font-weight: bold;
+                            margin-top: 20px;
+                        }}
+                        .button:hover {{
+                            background-color: #218838;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <h2>Activate Your Profile</h2>
+                        <p>Please click the button below to activate your account:</p>
+                        <a href='{linkToClick}' class='button'>Activate</a>
+                    </div>
+                </body>
+                </html>";
                 try
                 {
                     smtpClient.Send(mailMessage);

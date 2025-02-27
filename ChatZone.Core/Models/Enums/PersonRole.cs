@@ -2,6 +2,8 @@
 
 public enum PersonRole
 {
+    Unknown,
+    Unconfirmed,
     User,
     Admin
 }

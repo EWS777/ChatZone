@@ -1,5 +1,4 @@
 ﻿using ChatZone.Core.DTO.Requests;
-using ChatZone.Core.DTO.Responses;
 using ChatZone.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,9 +13,14 @@ public class AuthController(
     [AllowAnonymous]
     [HttpPost]
     [Route("/register")]
-    public async Task<ActionResult<RegisterResponse>> Register(RegisterRequest request)
+    public async Task<IActionResult> Register(RegisterRequest request)
     {
         var result = await authService.RegisterPersonAsync(request);
-        return result;
+
+        return result.Final<IActionResult>(
+            ifSuccess: Ok("Completed!"),
+            ifFailure: (status, message, exception) => 
+                BadRequest(new { Status = status, Error = message })
+        );
     }
 }

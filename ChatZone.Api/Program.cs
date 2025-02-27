@@ -1,5 +1,6 @@
 using System.Text;
 using ChatZone.Context;
+using ChatZone.Core.Notifications;
 using ChatZone.Repositories;
 using ChatZone.Repositories.Interfaces;
 using ChatZone.Services;
@@ -70,6 +71,7 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+EmailSender.EmailSettings(app.Services.GetRequiredService<IConfiguration>());
 
 if (app.Environment.IsDevelopment())
 {
