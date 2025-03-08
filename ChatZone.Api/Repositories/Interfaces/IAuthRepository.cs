@@ -8,4 +8,6 @@ public interface IAuthRepository
     Task<Result<Person>> GetPersonByEmailAsync(string email);
     Task<Result<Person>> GetPersonByUsernameAsync(string username);
     Task<Result<Person>> AddPersonAsync(Person person);
+
+    Task<Result<Person>> UpdatePersonAsync(Person person);
 }

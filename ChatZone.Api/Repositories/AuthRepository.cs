@@ -38,4 +38,14 @@ public class AuthRepository(ChatZoneDbContext dbContext) : IAuthRepository
         await dbContext.SaveChangesAsync();
         return Result<Person>.Ok(person);
     }
+
+    public async Task<Result<Person>> UpdatePersonAsync(Person person)
+    {
+        var getPerson = GetPersonByUsernameAsync(person.Username);
+        if (!getPerson.Result.IsSuccess)
+            return Result<Person>.FailResultT(new NotFoundException("Username is not found!"));
+        // dbContext.Persons.Attach(person);
+
+
+    }
 }

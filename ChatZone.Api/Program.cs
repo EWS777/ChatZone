@@ -23,7 +23,7 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 builder.Services.AddDbContext<ChatZoneDbContext>(opt =>
 {
-    string connString = builder.Configuration.GetConnectionString("DeffaultConnection");
+    string connString = builder.Configuration.GetConnectionString("DefaultConnection");
     opt.UseSqlServer(connString);
 });
 
@@ -78,6 +78,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 app.MapControllers(); //with 'builder.Services.AddControllers();'

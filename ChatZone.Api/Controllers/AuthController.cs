@@ -1,4 +1,6 @@
-﻿using ChatZone.Core.DTO.Requests;
+﻿using ChatZone.Core.Extensions;
+using ChatZone.DTO.Requests;
+using ChatZone.DTO.Responses;
 using ChatZone.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +15,7 @@ public class AuthController(
     [AllowAnonymous]
     [HttpPost]
     [Route("/register")]
-    public async Task<IActionResult> Register(RegisterRequest request)
+    public async Task<IActionResult> Register([FromBody]RegisterRequest request)
     {
         var result = await authService.RegisterPersonAsync(request);
 
@@ -22,5 +24,13 @@ public class AuthController(
             ifFailure: (status, message, exception) => 
                 BadRequest(new { Status = status, Error = message })
         );
+    }
+    
+    [Authorize(Roles = "Unconfirmed")]
+    [HttpPost]
+    [Route("/confirm")]
+    public async Task<RegisterResponse> Confirm()
+    {
+        var result = await authService.ConfirmEmailAsync(User.Claims);
     }
 }

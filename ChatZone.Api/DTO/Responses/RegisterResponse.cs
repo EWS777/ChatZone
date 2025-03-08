@@ -1,4 +1,4 @@
-﻿namespace ChatZone.Core.DTO.Responses;
+﻿namespace ChatZone.DTO.Responses;
 
 public class RegisterResponse
 {
