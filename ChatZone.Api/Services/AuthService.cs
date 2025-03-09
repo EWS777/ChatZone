@@ -20,21 +20,19 @@ public class AuthService(
     IAuthRepository authRepository,
     IConfiguration configuration,
     ChatZoneDbContext dbContext) : IAuthService {
-    public async Task<Result> RegisterPersonAsync(RegisterRequest request)
+    public async Task<Result<bool>> RegisterPersonAsync(RegisterRequest request)
     {
         try
         { 
             using var transaction = await dbContext.Database.BeginTransactionAsync();
 
             var getEmailResult = await authRepository.GetPersonByEmailAsync(request.Email);
-            
-            if (getEmailResult is { IsSuccess: true, Exception: null })
-                return Result.FailResult(new ExistPersonException("The email is exist!"));
+
+            if (getEmailResult.IsSuccess) return Result<bool>.Failure(new ExistPersonException("The email is exist!"));
             
             var getUsernameResult = await authRepository.GetPersonByUsernameAsync(request.Username);
-
-            if (getUsernameResult is { IsSuccess: true, Exception: null })
-                return Result.FailResult(new ExistPersonException("The username is exist!"));
+            
+            if (getUsernameResult.IsSuccess) return Result<bool>.Failure(new ExistPersonException("The username is exist!"));
             
             var getHashedPasswordAndSalt = SecurityHelper.GetHashedPasswordAndSalt(request.Password);
 
@@ -46,76 +44,59 @@ public class AuthService(
                 Password = getHashedPasswordAndSalt.Item1,
                 Salt = getHashedPasswordAndSalt.Item2,
                 RefreshToken = SecurityHelper.GenerateRefreshToken(),
-                RefreshTokenExp = DateTime.Now.AddDays(1)
+                RefreshTokenExp = DateTime.Now.AddDays(7)
             };
 
             await authRepository.AddPersonAsync(person);
             
-            // var userClaim = new[]
-            // {
-            //     new Claim("Username", person.Username),
-            //     new Claim("Role", person.Role.ToString()),
-            //     new Claim("Status", "Register"), //only before to confirm the email
-            //     new Claim("Expires", DateTime.Now.AddDays(7).ToString(CultureInfo.InvariantCulture))
-            // };
-            
-            var userClaim = new[]
-            {
-                new Claim(ClaimTypes.Name, person.Username),
-                new Claim(ClaimTypes.Role, person.Role.ToString()),
-                // new Claim(ClaimTypes.Expired, DateTime.Now.AddDays(7).ToString(CultureInfo.InvariantCulture))
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:SecretKey"]));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: configuration["JWT:Issuer"],
-                audience: configuration["JWT:Audience"],
-                claims: userClaim,
-                expires: DateTime.Now.AddDays(10),
-                // expires: DateTime.Now.AddMinutes(10),
-                signingCredentials: creds
-            );
+            var token = GenerateJwtToken(person.Username, person.Role);
 
             EmailSender.SendCodeToEmail(person.Email, new JwtSecurityTokenHandler().WriteToken(token));
             
             await transaction.CommitAsync();
 
-            return Result.Ok();
+            return Result<bool>.Ok(true);
 
         }
         catch (Exception e)
         {
-            return Result.FailResult(e);
+            return Result<bool>.Failure(e);
         }
     }
 
-    public async Task<Result<RegisterResponse>> ConfirmEmailAsync(ClaimsPrincipal user)
+    public async Task<Result<RegisterResponse>> ConfirmEmailAsync(string username)
     {
-        var result = await authRepository.GetPersonByUsernameAsync(user.FindFirst(ClaimTypes.Name).ToString());
-        if (!result.IsSuccess) return Result<RegisterResponse>.FailResultT(result.Exception);
+        var result = await authRepository.GetPersonByUsernameAsync(username);
         
-        //username
-        //role
-        //access Token
-        //refresh Token
+        if (!result.IsSuccess) return Result<RegisterResponse>.Failure(result.Exception);
+        
+        var updatePerson = await authRepository.UpdatePersonAsync(username, PersonRole.User);
+        
+        var token = GenerateJwtToken(updatePerson.Value.Username, updatePerson.Value.Role);
 
-        var person = new Person
+        return Result<RegisterResponse>.Ok(new RegisterResponse{
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+            RefreshToken = updatePerson.Value.RefreshToken
+        });
+    }
+    
+    private JwtSecurityToken GenerateJwtToken(string username, PersonRole role)
+    {
+        var claims = new[]
         {
-            Role = PersonRole.User,
-            Username = result.Value.Username,
-            Email = result.Value.Email,
-            Password = result.Value.Password,
-            Salt = result.Value.Salt,
-            RefreshToken = null,
-            RefreshTokenExp = default
+            new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.Role, role.ToString())
         };
 
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:SecretKey"]));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-
-
-        var updatePerson = await authRepository.UpdatePersonAsync(person);
+        return new JwtSecurityToken(
+            issuer: configuration["JWT:Issuer"],
+            audience: configuration["JWT:Audience"],
+            claims: claims,
+            expires: DateTime.Now.AddDays(10),
+            signingCredentials: creds
+        );
     }
 }

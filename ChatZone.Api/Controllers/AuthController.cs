@@ -1,4 +1,4 @@
-﻿using ChatZone.Core.Extensions;
+﻿using System.Security.Claims;
 using ChatZone.DTO.Requests;
 using ChatZone.DTO.Responses;
 using ChatZone.Services.Interfaces;
@@ -19,11 +19,7 @@ public class AuthController(
     {
         var result = await authService.RegisterPersonAsync(request);
 
-        return result.Final<IActionResult>(
-            ifSuccess: Ok("Completed!"),
-            ifFailure: (status, message, exception) => 
-                BadRequest(new { Status = status, Error = message })
-        );
+        return result.Match<IActionResult>(e => Ok("Completed!"), x => throw x);
     }
     
     [Authorize(Roles = "Unconfirmed")]
@@ -31,6 +27,10 @@ public class AuthController(
     [Route("/confirm")]
     public async Task<RegisterResponse> Confirm()
     {
-        var result = await authService.ConfirmEmailAsync(User.Claims);
+        var username = User.FindFirst(ClaimTypes.Name).Value;
+        
+        var result = await authService.ConfirmEmailAsync(username);
+
+        return result.Match<RegisterResponse>(e => e, x => throw x);
     }
 }

@@ -1,62 +1,33 @@
-﻿using ChatZone.Core.Extensions.Exceptions;
+﻿namespace ChatZone.Core.Extensions;
 
-namespace ChatZone.Core.Extensions;
-
-public class Result
+public class Result<T>
 {
-    public bool IsSuccess { get; set; }
-    public string? ErrorMessage { get; set; }
-    public int? StatusCode { get; set; }
-    public Exception? Exception { get; set; }
-
-    protected Result(bool isSuccess, string? errorMessage, int? statusCode, Exception? exception)
+    private readonly T? _value;
+    private readonly Exception? _exception;
+    public bool IsSuccess { get; }
+    
+    public Exception Exception => _exception ?? throw new InvalidOperationException("Exception is not set!");
+    public T Value => _value ?? throw new InvalidOperationException("Value is not set!");
+    
+    private Result(bool isSuccess, Exception? exception, T? value)
     {
         IsSuccess = isSuccess;
-        ErrorMessage = errorMessage;
-        StatusCode = statusCode;
-        Exception = exception;
+        _exception = exception;
+        _value = value;
     }
 
-    public static Result Ok()
-    {
-        return new Result(true, null, null, null);
-    }
-
-    public static Result FailResult(Exception exception)
-    {
-        return new Result(false,exception.Message, (exception as CustomException)?.StatusCode,null);
-    }
-    
-    public TResult Final<TResult>(TResult ifSuccess, Func<int?, string?, Exception?, TResult> ifFailure)
-    {
-        return IsSuccess ? ifSuccess : ifFailure(StatusCode, ErrorMessage, Exception);
-    }
-
-    
-}
-
-
-public class Result<T> : Result
-{
-    public T? Value { get; set; }
-
-    private Result(bool isSuccess, string? errorMessage, int? statusCode, Exception? exception, T? value) : base(isSuccess, errorMessage, statusCode, exception)
-    {
-        Value = value;
-    }
-    
     public static Result<T> Ok(T value)
     {
-        return new Result<T>(true, null, null, null, value);
+        return new Result<T>(true, null, value);
     }
 
-    public static Result<T> FailResultT(Exception exception)
+    public static Result<T> Failure(Exception exception)
     {
-        return new Result<T>(false, exception.Message, (exception as CustomException)?.StatusCode, exception, default);
+        return new Result<T>(false, exception, default);
     }
 
-    public TResult Final<TResult>(Func<T?, TResult> ifSuccess, Func<int?, string?, Exception?, TResult> ifFailure)
+    public TResult Match<TResult>(Func<T, TResult> ifSuccessful, Func<Exception, TResult> ifFailure)
     {
-        return IsSuccess ? ifSuccess(Value) : ifFailure(StatusCode, ErrorMessage, Exception);
+        return IsSuccess ? ifSuccessful(Value) : ifFailure(Exception);
     }
 }
