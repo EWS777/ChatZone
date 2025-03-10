@@ -33,4 +33,13 @@ public class AuthController(
 
         return result.Match<RegisterResponse>(e => e, x => throw x);
     }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("/login")]
+    public async Task<RegisterResponse> Login([FromBody]LoginRequest request)
+    {
+        var result = await authService.LoginAsync(request.UsernameOrEmail, request.Password);
+        return result.Match<RegisterResponse>(e => e, x => throw x);
+    }
 }

@@ -79,7 +79,33 @@ public class AuthService(
             RefreshToken = updatePerson.Value.RefreshToken
         });
     }
-    
+
+    public async Task<Result<RegisterResponse>> LoginAsync(string usernameOrEmail, string password)
+    {
+        var user = usernameOrEmail.Contains("@")
+            ? await authRepository.GetPersonByEmailAsync(usernameOrEmail)
+            : await authRepository.GetPersonByUsernameAsync(usernameOrEmail);
+
+        if (!user.IsSuccess) return Result<RegisterResponse>.Failure(user.Exception);
+        
+        if(user.Value.Role != PersonRole.User) return Result<RegisterResponse>.Failure(new ForbiddenAccessException("The email is not confirmed"));
+
+        var currentHashedCode = SecurityHelper.GetHashedPasswordWithSalt(password, user.Value.Salt);
+
+        if (currentHashedCode != user.Value.Password)
+            return Result<RegisterResponse>.Failure(new ForbiddenAccessException("The password is not match"));
+
+        var token = GenerateJwtToken(user.Value.Username, user.Value.Role);
+
+        var person = await authRepository.UpdatePersonTokenAsync(user.Value.Username,
+            SecurityHelper.GenerateRefreshToken(), DateTime.Now.AddDays(7));
+        
+        return Result<RegisterResponse>.Ok(new RegisterResponse{
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+            RefreshToken = person.Value.RefreshToken
+        });
+    }
+
     private JwtSecurityToken GenerateJwtToken(string username, PersonRole role)
     {
         var claims = new[]

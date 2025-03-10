@@ -11,4 +11,5 @@ public interface IAuthRepository
     Task<Result<Person>> AddPersonAsync(Person person);
 
     Task<Result<Person>> UpdatePersonAsync(string username, PersonRole role);
+    Task<Result<Person>> UpdatePersonTokenAsync(string username, string refreshToken, DateTime tokenExp);
 }
