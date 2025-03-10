@@ -106,6 +106,25 @@ public class AuthService(
         });
     }
 
+    public async Task<Result<RegisterResponse>> RefreshTokenAsync(string username)
+    {
+        var user = await authRepository.GetPersonByUsernameAsync(username);
+        if (!user.IsSuccess) return Result<RegisterResponse>.Failure(user.Exception);
+
+        if (user.Value.RefreshTokenExp < DateTime.Now)
+            return Result<RegisterResponse>.Failure(new SecurityTokenException("Refresh token expired"));
+        
+        var token = GenerateJwtToken(user.Value.Username, user.Value.Role);
+        
+        var person = await authRepository.UpdatePersonTokenAsync(user.Value.Username,
+            SecurityHelper.GenerateRefreshToken(), DateTime.Now.AddDays(7));
+        
+        return Result<RegisterResponse>.Ok(new RegisterResponse{
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+            RefreshToken = person.Value.RefreshToken
+        });
+    }
+
     private JwtSecurityToken GenerateJwtToken(string username, PersonRole role)
     {
         var claims = new[]

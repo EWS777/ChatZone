@@ -42,4 +42,14 @@ public class AuthController(
         var result = await authService.LoginAsync(request.UsernameOrEmail, request.Password);
         return result.Match<RegisterResponse>(e => e, x => throw x);
     }
+
+    [Authorize(AuthenticationSchemes = "IgnoreTokenExpirationScheme", Roles = "User")]
+    [HttpPost]
+    [Route("/refresh")]
+    public async Task<RegisterResponse> Refresh()
+    {
+        var username = User.FindFirst(ClaimTypes.Name).Value;
+        var result = await authService.RefreshTokenAsync(username);
+        return result.Match<RegisterResponse>(e => e, x => throw x);
+    }
 }
