@@ -5,6 +5,9 @@ using ChatZone.Repositories;
 using ChatZone.Repositories.Interfaces;
 using ChatZone.Services;
 using ChatZone.Services.Interfaces;
+using ChatZone.Validation;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -15,6 +18,8 @@ builder.Services.AddEndpointsApiExplorer(); //to create Swagger
 builder.Services.AddSwaggerGen(); //to create Swagger
 builder.Services.AddControllers(); //find all classes derived from ControllerBase which can be used
 
+builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 
 
 builder.Services.AddScoped<IAuthService, AuthService>();
