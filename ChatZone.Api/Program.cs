@@ -6,6 +6,7 @@ using ChatZone.Repositories.Interfaces;
 using ChatZone.Services;
 using ChatZone.Services.Interfaces;
 using ChatZone.Validation;
+using ChatZone.Validation.Middleware;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -84,10 +85,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+
+app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseHttpsRedirection();
+
 app.MapControllers(); //with 'builder.Services.AddControllers();'
 
 app.Run();
