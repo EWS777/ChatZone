@@ -52,4 +52,13 @@ public class AuthController(
         var result = await authService.RefreshTokenAsync(username);
         return result.Match<RegisterResponse>(e => e, x => throw x);
     }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("/reset-password")]
+    public async Task<IActionResult> ResetPassword(string email)
+    {
+        var result = await authService.ResetPasswordAsync(email);
+        return result.Match<IActionResult>(e => Ok("The reset link was sent to your email"), x => throw x);
+    }
 }

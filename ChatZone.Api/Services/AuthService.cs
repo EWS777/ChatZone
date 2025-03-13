@@ -125,6 +125,17 @@ public class AuthService(
         });
     }
 
+    public async Task<Result<bool>> ResetPasswordAsync(string email)
+    {
+        var user = await authRepository.GetPersonByEmailAsync(email);
+        if (!user.IsSuccess) return Result<bool>.Failure(user.Exception);
+
+        var token = GenerateJwtToken(user.Value.Username, user.Value.Role);
+        EmailSender.SendCodeToEmail(user.Value.Email, new JwtSecurityTokenHandler().WriteToken(token));
+
+        return Result<bool>.Ok(true);
+    }
+
     private JwtSecurityToken GenerateJwtToken(string username, PersonRole role)
     {
         var claims = new[]
