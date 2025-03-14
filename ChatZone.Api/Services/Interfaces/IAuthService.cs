@@ -11,4 +11,5 @@ public interface IAuthService
     Task<Result<RegisterResponse>> LoginAsync(string usernameOrEmail, string password);
     Task<Result<RegisterResponse>> RefreshTokenAsync(string username);
     Task<Result<bool>> ResetPasswordAsync(string email);
+    Task<Result<RegisterResponse>> UpdatePasswordAsync(string username, string password);
 }

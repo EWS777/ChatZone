@@ -61,4 +61,15 @@ public class AuthController(
         var result = await authService.ResetPasswordAsync(email);
         return result.Match<IActionResult>(e => Ok("The reset link was sent to your email"), x => throw x);
     }
+
+    [Authorize(AuthenticationSchemes = "IgnoreTokenExpirationScheme", Roles = "User")]
+    [HttpPut]
+    [Route("/change-password")]
+    public async Task<RegisterResponse> UpdatePassword(string password)
+    {
+        var username = User.FindFirst(ClaimTypes.Name).Value;
+        
+        var result = await authService.UpdatePasswordAsync(username, password);
+        return result.Match<RegisterResponse>(e=>e, x=> throw x);
+    }
 }

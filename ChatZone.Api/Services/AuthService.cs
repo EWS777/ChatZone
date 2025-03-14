@@ -136,6 +136,26 @@ public class AuthService(
         return Result<bool>.Ok(true);
     }
 
+    public async Task<Result<RegisterResponse>> UpdatePasswordAsync(string username, string password)
+    {
+        var user = await authRepository.GetPersonByUsernameAsync(username);
+        if (!user.IsSuccess) return Result<RegisterResponse>.Failure(user.Exception);
+
+        var currentHashedPassword = SecurityHelper.GetHashedPasswordWithSalt(password, user.Value.Salt);
+
+        if (currentHashedPassword == user.Value.Password)
+            return Result<RegisterResponse>.Failure(new ForbiddenAccessException("You can't change, because the password is the same!"));
+
+        var updatePerson = await authRepository.UpdatePasswordAsync(username, currentHashedPassword);
+        
+        var token = GenerateJwtToken(user.Value.Username, user.Value.Role);
+        
+        return Result<RegisterResponse>.Ok(new RegisterResponse{
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+            RefreshToken = updatePerson.Value.RefreshToken
+        });
+    }
+
     private JwtSecurityToken GenerateJwtToken(string username, PersonRole role)
     {
         var claims = new[]

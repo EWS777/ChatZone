@@ -61,4 +61,15 @@ public class AuthRepository(ChatZoneDbContext dbContext) : IAuthRepository
         await dbContext.SaveChangesAsync();
         return Result<Person>.Ok(person.Value);
     }
+
+    public async Task<Result<Person>> UpdatePasswordAsync(string username, string password)
+    {
+        var person = await GetPersonByUsernameAsync(username);
+
+        person.Value.Password = password;
+
+        dbContext.Persons.Update(person.Value);
+        await dbContext.SaveChangesAsync();
+        return Result<Person>.Ok(person.Value);
+    }
 }
