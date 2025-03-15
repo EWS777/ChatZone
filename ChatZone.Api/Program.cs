@@ -26,6 +26,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>()
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
+builder.Services.AddScoped<IFilterService, FilterService>();
+builder.Services.AddScoped<IFilterRepository, FilterRepository>();
 
 builder.Services.AddDbContext<ChatZoneDbContext>(opt =>
 {

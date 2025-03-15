@@ -13,3 +13,4 @@ public class CustomException : Exception
 public class NotFoundException(string message) : CustomException(message, 404);
 public class ExistPersonException(string message) : CustomException(message, 400);
 public class ForbiddenAccessException(string message) : CustomException(message, 403);
+public class NotAnyDataException(string message) : CustomException(message, 204);
