@@ -4,23 +4,22 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ChatZone.Context.Configs;
 
-public class ChatMemberEfConfig : IEntityTypeConfiguration<ChatMember>
+public class GroupMemberEfConfig : IEntityTypeConfiguration<GroupMember>
 {
-    public void Configure(EntityTypeBuilder<ChatMember> builder)
+    public void Configure(EntityTypeBuilder<GroupMember> builder)
     {
-        builder
-            .HasKey(x=> new {x.PersonMemberId, x.GroupChatId});
+        builder.HasKey(x => x.IdChat);
 
         builder
             .HasOne(x => x.Person)
-            .WithOne(x => x.ChatMember)
-            .HasForeignKey<ChatMember>(x => x.PersonMemberId)
+            .WithOne(x => x.GroupMember)
+            .HasForeignKey<GroupMember>(x => x.IdGroupMember)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasOne(x => x.GroupChat)
             .WithMany(x => x.ChatMembers)
-            .HasForeignKey(x => x.GroupChatId)
+            .HasForeignKey(x => x.IdChat)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
@@ -33,6 +32,6 @@ public class ChatMemberEfConfig : IEntityTypeConfiguration<ChatMember>
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
         
-        builder.ToTable(nameof(ChatMember));
+        builder.ToTable(nameof(GroupMember));
     }
 }

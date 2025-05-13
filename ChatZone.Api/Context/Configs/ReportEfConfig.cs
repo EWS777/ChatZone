@@ -9,24 +9,42 @@ public class ReportEfConfig : IEntityTypeConfiguration<Report>
     public void Configure(EntityTypeBuilder<Report> builder)
     {
         builder
-            .HasKey(x => x.ReportId);
+            .HasKey(x => x.IdReport);
 
         builder
             .HasOne(x => x.PersonReporter)
             .WithMany(x => x.Reporter)
-            .HasForeignKey(x => x.ReporterId)
+            .HasForeignKey(x => x.IdReporter)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasOne(x => x.PersonReported)
             .WithMany(x => x.Reported)
-            .HasForeignKey(x => x.ReportedId)
+            .HasForeignKey(x => x.IdReported)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .Property(x => x.ReportTheme)
-            .HasMaxLength(250)
             .IsRequired();
+
+        builder
+            .Property(x => x.ReportMessage)
+            .IsRequired()
+            .HasMaxLength(250);
+
+        builder
+            .HasOne(x => x.SingleMessage)
+            .WithOne(x => x.Report)
+            .HasForeignKey<Report>(x => x.IdSingleMessageReport)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        builder
+            .HasOne(x => x.GroupMessage)
+            .WithOne(x => x.Report)
+            .HasForeignKey<Report>(x => x.IdGroupMessageReport)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
         
         builder.ToTable(nameof(Report));
     }

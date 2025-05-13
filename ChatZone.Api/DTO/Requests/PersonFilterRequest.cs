@@ -1,8 +1,8 @@
-﻿using ChatZone.Core.Models.Enums;
+using ChatZone.Core.Models.Enums;
 
-namespace ChatZone.Core.Models;
+namespace ChatZone.DTO.Requests;
 
-public class PersonData
+public class PersonFilterRequest
 {
     public CountryList? Country { get; set; }
     public CityList? City { get; set; }
@@ -10,6 +10,4 @@ public class PersonData
     public GenderList? Gender { get; set; }
     public LangList? NativeLang { get; set; }
     public LangList? LearnLang { get; set; }
-    public int PersonDataId { get; set; }
-    public Person Person { get; set; }
 }

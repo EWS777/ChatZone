@@ -8,6 +8,8 @@ public class GroupChatEfConfig : IEntityTypeConfiguration<GroupChat>
 {
     public void Configure(EntityTypeBuilder<GroupChat> builder)
     {
+        builder.HasKey(x => x.IdGroupChat);
+        
         builder
             .Property(x => x.Title)
             .HasMaxLength(25)

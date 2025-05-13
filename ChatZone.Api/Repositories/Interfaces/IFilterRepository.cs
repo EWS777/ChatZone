@@ -1,9 +1,11 @@
 using ChatZone.Core.Extensions;
-using ChatZone.Core.Models;
+using ChatZone.DTO.Requests;
+using ChatZone.DTO.Responses;
 
 namespace ChatZone.Repositories.Interfaces;
 
 public interface IFilterRepository
 {
-    public Task<Result<PersonData>> GetPersonFilterAsync(string username);
+    public Task<Result<PersonFilterResponse>> GetPersonFilterAsync(string username);
+    public Task<Result<PersonFilterResponse>> UpdatePersonFilterAsync(string username, PersonFilterRequest personFilterRequest);
 }

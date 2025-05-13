@@ -1,11 +1,11 @@
 ﻿namespace ChatZone.Core.Models;
 
-public class ChatMember
+public class GroupMember
 {
+    public int IdChat { get; set; }
+    public int IdGroupMember { get; set; }
     public bool IsAdmin { get; set; }
-    public DateTimeOffset JoinedAt { get; set; }
-    public int PersonMemberId { get; set; }
+    public DateTime JoinedAt { get; set; }
     public required Person Person { get; set; }
-    public int GroupChatId { get; set; }
     public required GroupChat GroupChat { get; set; }
 }

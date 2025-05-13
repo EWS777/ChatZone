@@ -25,9 +25,11 @@ builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>()
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
 
 builder.Services.AddScoped<IFilterService, FilterService>();
 builder.Services.AddScoped<IFilterRepository, FilterRepository>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 
 builder.Services.AddDbContext<ChatZoneDbContext>(opt =>
 {
@@ -77,6 +79,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization();
 var app = builder.Build();
 
 EmailSender.EmailSettings(app.Services.GetRequiredService<IConfiguration>());

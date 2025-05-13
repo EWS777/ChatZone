@@ -4,28 +4,27 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ChatZone.Context.Configs;
 
-public class MessageEfConfig : IEntityTypeConfiguration<Message>
+public class GroupMessageEfConfig : IEntityTypeConfiguration<GroupMessage>
 {
-    public void Configure(EntityTypeBuilder<Message> builder)
+    public void Configure(EntityTypeBuilder<GroupMessage> builder)
     {
-        builder
-            .HasKey(x => x.MessageId);
+        builder.HasKey(x => x.IdGroupMessage);
 
         builder
             .HasOne(x => x.Person)
-            .WithMany(x => x.Messages)
-            .HasForeignKey(x => x.PersonId)
+            .WithMany(x => x.GroupMessages)
+            .HasForeignKey(x => x.IdSender)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
-            .HasOne(x => x.Chat)
-            .WithMany(x => x.Messages)
-            .HasForeignKey(x => x.ChatId)
+            .HasOne(x => x.GroupChat)
+            .WithMany(x => x.GroupMessages)
+            .HasForeignKey(x => x.IdChat)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
-            .Property(x => x.Text)
-            .HasMaxLength(1000)
+            .Property(x => x.Message)
+            .HasMaxLength(250)
             .IsRequired();
 
         builder
@@ -33,6 +32,6 @@ public class MessageEfConfig : IEntityTypeConfiguration<Message>
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
         
-        builder.ToTable(nameof(Message));
+        builder.ToTable(nameof(GroupMessage));
     }
 }

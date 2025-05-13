@@ -4,10 +4,10 @@ namespace ChatZone.DTO.Responses;
 
 public class PersonFilterResponse
 {
-    public required CountryList? Country { get; set; }
-    public required CityList? City { get; set; }
-    public required AgeList? Age { get; set; }
-    public required GenderList? Gender { get; set; }
-    public required LangList? NativeLang { get; set; }
-    public required LangList? LearnLang { get; set; }
+    public CountryList? Country { get; set; }
+    public CityList? City { get; set; }
+    public AgeList? Age { get; set; }
+    public GenderList? Gender { get; set; }
+    public LangList? NativeLang { get; set; }
+    public LangList? LearnLang { get; set; }
 }

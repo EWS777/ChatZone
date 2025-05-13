@@ -5,7 +5,7 @@ namespace ChatZone.Core.Models;
 
 public class Person
 {
-    public int PersonId { get; set; }
+    public int IdPerson { get; set; }
     public required PersonRole Role { get; set; }
     public required string Username { get; set; }
     [EmailAddress]
@@ -14,16 +14,26 @@ public class Person
     public required string Salt { get; set; }
     public required string RefreshToken { get; set; }
     public required DateTime RefreshTokenExp { get; set; }
+    
+    public LangList LangMenu { get; set; }
+    public bool IsDarkTheme { get; set; }
+    public bool IsFindByProfile { get; set; }
+    
+    public CountryList? Country { get; set; }
+    public CityList? City { get; set; }
+    public AgeList? Age { get; set; }
+    public GenderList? Gender { get; set; }
+    public LangList? NativeLang { get; set; }
+    public LangList? LearnLang { get; set; }
+    
     public ICollection<QuickMessage> QuickMessages { get; set; } = new List<QuickMessage>();
-    public PersonData PersonData { get; set; }
-    public PersonSettings PersonSettings { get; set; }
-    public ICollection<BlockedPeople> BlockerPeoples { get; set; } = new List<BlockedPeople>();
-    public ICollection<BlockedPeople> BlockedPeoples { get; set; } = new List<BlockedPeople>();
+    public ICollection<BlockedPerson> BlockerPeoples { get; set; } = new List<BlockedPerson>();
+    public ICollection<BlockedPerson> BlockedPeoples { get; set; } = new List<BlockedPerson>();
+    public SingleChat FirstPerson { get; set; }
+    public SingleChat SecondPerson { get; set; }
+    public ICollection<SingleMessage> SingleMessages { get; set; } = new List<SingleMessage>();
     public ICollection<Report> Reporter { get; set; } = new List<Report>();
     public ICollection<Report> Reported { get; set; } = new List<Report>();
-    public ICollection<Message> Messages { get; set; } = new List<Message>();
-    public ChatMember ChatMember { get; set; }
-    public IndividualChat FirstPerson { get; set; }
-    public IndividualChat SecondPerson { get; set; }
-
+    public ICollection<GroupMessage> GroupMessages { get; set; } = new List<GroupMessage>();
+    public GroupMember GroupMember { get; set; }
 }

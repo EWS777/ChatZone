@@ -9,17 +9,18 @@ public class QuickMessageEfConfig : IEntityTypeConfiguration<QuickMessage>
     public void Configure(EntityTypeBuilder<QuickMessage> builder)
     {
         builder
-            .HasKey(x => x.PersonId);
+            .HasKey(x => x.IdQuickMessage);
 
         builder
             .HasOne(x => x.Person)
             .WithMany(x => x.QuickMessages)
-            .HasForeignKey(x => x.PersonId)
+            .HasForeignKey(x => x.IdPerson)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .Property(x => x.Message)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(250);
         
         builder.ToTable(nameof(QuickMessage));
     }
