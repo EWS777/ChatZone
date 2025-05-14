@@ -19,6 +19,7 @@ public class Person
     public bool IsDarkTheme { get; set; }
     public bool IsFindByProfile { get; set; }
     
+    public ThemeList? ThemeList { get; set; }
     public CountryList? Country { get; set; }
     public CityList? City { get; set; }
     public AgeList? Age { get; set; }

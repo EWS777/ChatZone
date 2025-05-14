@@ -20,6 +20,7 @@ public class FilterRepository(ChatZoneDbContext dbContext,
         
         return Result<PersonFilterResponse>.Ok(new PersonFilterResponse
         {
+            ThemeList = user.Value.ThemeList,
             Country = user.Value.Country,
             City = user.Value.City,
             Age = user.Value.Age,
@@ -33,6 +34,7 @@ public class FilterRepository(ChatZoneDbContext dbContext,
     {
         var person = await authRepository.GetPersonByUsernameAsync(username);
 
+        person.Value.ThemeList = personFilterRequest.ThemeList;
         person.Value.Country = personFilterRequest.Country;
         person.Value.City = personFilterRequest.City;
         person.Value.Age = personFilterRequest.Age;
@@ -44,6 +46,7 @@ public class FilterRepository(ChatZoneDbContext dbContext,
         await dbContext.SaveChangesAsync();
         return Result<PersonFilterResponse>.Ok(new PersonFilterResponse
         {
+            ThemeList = person.Value.ThemeList,
             Age = person.Value.Age,
             City = person.Value.City,
             Country = person.Value.Country,

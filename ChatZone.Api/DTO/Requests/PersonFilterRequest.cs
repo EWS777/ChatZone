@@ -4,6 +4,7 @@ namespace ChatZone.DTO.Requests;
 
 public class PersonFilterRequest
 {
+    public ThemeList? ThemeList { get; set; }
     public CountryList? Country { get; set; }
     public CityList? City { get; set; }
     public AgeList? Age { get; set; }

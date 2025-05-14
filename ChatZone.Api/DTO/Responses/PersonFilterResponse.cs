@@ -4,6 +4,7 @@ namespace ChatZone.DTO.Responses;
 
 public class PersonFilterResponse
 {
+    public ThemeList? ThemeList { get; set; }
     public CountryList? Country { get; set; }
     public CityList? City { get; set; }
     public AgeList? Age { get; set; }
