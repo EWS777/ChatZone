@@ -155,6 +155,33 @@ public class AuthService(
             RefreshToken = updatePerson.Value.RefreshToken
         });
     }
+    
+    public async Task<Result<UpdateProfileResponse>> UpdateProfileAsync(string username, ProfileRequest profileRequest)
+    {
+        var person = await authRepository.GetPersonByUsernameAsync(username);
+        if (!person.IsSuccess) return Result<UpdateProfileResponse>.Failure(person.Exception);
+
+        if (profileRequest.Username != username)
+        {
+            var isUsernameIsNotUsed = await authRepository.GetPersonByUsernameAsync(profileRequest.Username);
+            if (isUsernameIsNotUsed.IsSuccess) return Result<UpdateProfileResponse>.Failure(new IsExistsException("This username is exists!"));
+        }
+
+        var updatePerson = await authRepository.UpdateProfileAsync(username, profileRequest);
+
+        if (profileRequest.Username != username)
+        {
+            return Result<UpdateProfileResponse>.Ok(new UpdateProfileResponse
+            {
+                Username = updatePerson.Value.Username,
+                IsFindByProfile = updatePerson.Value.IsFindByProfile,
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(GenerateJwtToken(profileRequest.Username, person.Value.Role)),
+                RefreshToken = updatePerson.Value.RefreshToken
+            });
+        }
+
+        return Result<UpdateProfileResponse>.Ok(updatePerson.Value);
+    }
 
     private JwtSecurityToken GenerateJwtToken(string username, PersonRole role)
     {
@@ -171,7 +198,7 @@ public class AuthService(
             issuer: configuration["JWT:Issuer"],
             audience: configuration["JWT:Audience"],
             claims: claims,
-            expires: DateTime.Now.AddDays(10),
+            expires: DateTime.Now.AddDays(100),
             signingCredentials: creds
         );
     }

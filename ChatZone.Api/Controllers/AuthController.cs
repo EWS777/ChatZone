@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.DTO.Requests;
 using ChatZone.DTO.Responses;
 using ChatZone.Services.Interfaces;
@@ -71,5 +72,20 @@ public class AuthController(
         
         var result = await authService.UpdatePasswordAsync(username, password);
         return result.Match<RegisterResponse>(e=>e, x=> throw x);
+    }
+    
+    [Authorize(Roles = "User")]
+    [HttpPut]
+    [Route("/{username}")]
+    public async Task<UpdateProfileResponse> UpdateProfile(string username, [FromBody] ProfileRequest profileRequest)
+    {
+        var usernameFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
+
+        if (usernameFromToken is null) throw new Exception("Person is not exists!");
+        if (usernameFromToken != username) throw new ForbiddenAccessException("You are not an owner");
+
+        var person = await authService.UpdateProfileAsync(usernameFromToken, profileRequest);
+
+        return person.Match(x => x, x => throw x);
     }
 }

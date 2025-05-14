@@ -3,6 +3,8 @@ using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Core.Models;
 using ChatZone.Core.Models.Enums;
+using ChatZone.DTO.Requests;
+using ChatZone.DTO.Responses;
 using ChatZone.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,5 +73,22 @@ public class AuthRepository(ChatZoneDbContext dbContext) : IAuthRepository
         dbContext.Persons.Update(person.Value);
         await dbContext.SaveChangesAsync();
         return Result<Person>.Ok(person.Value);
+    }
+    
+    public async Task<Result<UpdateProfileResponse>> UpdateProfileAsync(string username, ProfileRequest profileRequest)
+    {
+        var person = await GetPersonByUsernameAsync(username);
+
+        person.Value.Username = profileRequest.Username;
+        person.Value.IsFindByProfile = profileRequest.IsFindByProfile;
+
+        dbContext.Persons.Update(person.Value);
+        await dbContext.SaveChangesAsync();
+
+        return Result<UpdateProfileResponse>.Ok(new UpdateProfileResponse
+        {
+            Username = person.Value.Username,
+            IsFindByProfile = person.Value.IsFindByProfile
+        });
     }
 }

@@ -2,8 +2,6 @@ using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Core.Models;
-using ChatZone.DTO.Requests;
-using ChatZone.DTO.Responses;
 using ChatZone.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,23 +11,6 @@ namespace ChatZone.Repositories;
 public class ProfileRepository(ChatZoneDbContext dbContext,
                             IAuthRepository authRepository) : IProfileRepository
 {
-    public async Task<Result<UpdateProfileResponse>> UpdateProfileAsync(string username, ProfileRequest profileRequest)
-    {
-        var person = await authRepository.GetPersonByUsernameAsync(username);
-
-        person.Value.Username = profileRequest.Username;
-        person.Value.IsFindByProfile = profileRequest.IsFindByProfile;
-
-        dbContext.Persons.Update(person.Value);
-        await dbContext.SaveChangesAsync();
-
-        return Result<UpdateProfileResponse>.Ok(new UpdateProfileResponse
-        {
-        Username = person.Value.Username,
-        IsFindByProfile = person.Value.IsFindByProfile
-        });
-    }
-
     public async Task<Result<BlockedPerson[]>> GetBlockedPersonsAsync(string username)
     {
         var person = await authRepository.GetPersonByUsernameAsync(username);

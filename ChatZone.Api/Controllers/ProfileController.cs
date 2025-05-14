@@ -14,30 +14,15 @@ public class ProfileController(IProfileService profileService) : ControllerBase
     [Authorize(Roles = "User")]
     [HttpGet]
     [Route("/{username}")]
-    public async Task<ProfileResponse> GetProfile(string username, [FromRoute] string usernames)
+    public async Task<ProfileResponse> GetProfile(string username)
     {
         var usernameFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
         if (usernameFromToken != username) throw new ForbiddenAccessException("You are not an owner");
         
-        var person = await profileService.GetProfileAsync(usernames);
+        var person = await profileService.GetProfileAsync(username);
         return person.Match(x => x, x => throw x);
     }
-
-    [Authorize(Roles = "User")]
-    [HttpPut]
-    [Route("/{username}")]
-    public async Task<UpdateProfileResponse> UpdateProfile(string username, [FromBody] ProfileRequest profileRequest)
-    {
-        var usernameFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
-
-        if (usernameFromToken is null) throw new Exception("Person is not exists!");
-        if (usernameFromToken != username) throw new ForbiddenAccessException("You are not an owner");
-
-        var person = await profileService.UpdateProfileAsync(usernameFromToken, profileRequest);
-
-        return person.Match(x => x, x => throw x);
-    }
-
+    
     [Authorize(Roles = "User")]
     [HttpGet]
     [Route("/{username}/blocked-users")]

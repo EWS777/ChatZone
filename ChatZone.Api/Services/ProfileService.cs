@@ -1,7 +1,5 @@
 using ChatZone.Core.Extensions;
-using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Core.Models;
-using ChatZone.DTO.Requests;
 using ChatZone.DTO.Responses;
 using ChatZone.Repositories.Interfaces;
 using ChatZone.Services.Interfaces;
@@ -20,22 +18,9 @@ public class ProfileService(IProfileRepository profileRepository,
         return Result<ProfileResponse>.Ok(new ProfileResponse
         {
             Username = person.Value.Username,
-            Email = person.Value.Email
+            Email = person.Value.Email,
+            IsFindByProfile = person.Value.IsFindByProfile
         });
-    }
-
-    public async Task<Result<UpdateProfileResponse>> UpdateProfileAsync(string username, ProfileRequest profileRequest)
-    {
-        var person = await authRepository.GetPersonByUsernameAsync(username);
-        if (!person.IsSuccess) return Result<UpdateProfileResponse>.Failure(person.Exception);
-
-
-        var isUsernameIsNotUsed = await authRepository.GetPersonByUsernameAsync(profileRequest.Username);
-        if (isUsernameIsNotUsed.IsSuccess) return Result<UpdateProfileResponse>.Failure(new IsExistsException("This username is exists!"));
-
-        var updatePerson = await profileRepository.UpdateProfileAsync(username, profileRequest);
-
-        return Result<UpdateProfileResponse>.Ok(updatePerson.Value);
     }
 
     public async Task<Result<BlockedPerson[]>> GetBlockedPersonsAsync(string username)
