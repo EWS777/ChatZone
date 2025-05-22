@@ -2,6 +2,7 @@ using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Core.Models;
+using ChatZone.DTO.Responses;
 using ChatZone.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,22 +12,27 @@ namespace ChatZone.Repositories;
 public class ProfileRepository(ChatZoneDbContext dbContext,
                             IAuthRepository authRepository) : IProfileRepository
 {
-    public async Task<Result<BlockedPerson[]>> GetBlockedPersonsAsync(string username)
+    public async Task<Result<BlockedPersonResponse[]>> GetBlockedPersonsAsync(string username)
     {
         var person = await authRepository.GetPersonByUsernameAsync(username);
 
-        var blockedPersons = dbContext.BlockedPeoples
-            .Where(x => x.IdBlockedPerson == person.Value.IdPerson)
-            .ToArray();
+        var blockedPersons = await dbContext.BlockedPeoples
+            .Where(x => x.IdBlockerPerson == person.Value.IdPerson)
+            .Select(x=>new BlockedPersonResponse
+            {
+                IdBlockedPerson = x.IdBlockedPerson,
+                BlockedUsername = x.Blocked.Username,
+                CreatedAt = x.CreatedAt
+            })
+            .ToArrayAsync();
 
-        return Result<BlockedPerson[]>.Ok(blockedPersons);
+        return Result<BlockedPersonResponse[]>.Ok(blockedPersons);
     }
 
     public async Task<Result<IActionResult>> DeleteBlockedPersonAsync(string username, int idBlockedPerson)
     {
         var person = await authRepository.GetPersonByUsernameAsync(username);
-
-        var deletePerson = dbContext.BlockedPeoples.SingleOrDefault(x => x.IdBlockedPerson == person.Value.IdPerson && x.IdBlockerPerson==idBlockedPerson);
+        var deletePerson = dbContext.BlockedPeoples.SingleOrDefault(x => x.IdBlockerPerson == person.Value.IdPerson && x.IdBlockedPerson == idBlockedPerson);
         if (deletePerson is null) return Result<IActionResult>.Failure(new NotFoundException("Person is not found!"));
 
         dbContext.BlockedPeoples.Remove(deletePerson);
@@ -34,13 +40,20 @@ public class ProfileRepository(ChatZoneDbContext dbContext,
         return Result<IActionResult>.Ok(new OkResult());
     }
 
-    public async Task<Result<QuickMessage[]>> GetQuickMessagesAsync(string username)
+    public async Task<Result<QuickMessageResponse[]>> GetQuickMessagesAsync(string username)
     {
         var person = await authRepository.GetPersonByUsernameAsync(username);
 
-        var quickMessageList = dbContext.QuickMessages.Where(x => x.IdPerson == person.Value.IdPerson).ToArray();
+        var quickMessageList = await dbContext.QuickMessages
+            .Where(x => x.IdPerson == person.Value.IdPerson)
+            .Select(x=>new QuickMessageResponse
+            {
+                IdQuickMessage = x.IdQuickMessage,
+                Message = x.Message
+            })
+            .ToArrayAsync();
 
-        return Result<QuickMessage[]>.Ok(quickMessageList);
+        return Result<QuickMessageResponse[]>.Ok(quickMessageList);
     }
 
     public async Task<Result<QuickMessage>> GetQuickMessageAsync(int idPerson, int idQuickMessage)
@@ -55,19 +68,23 @@ public class ProfileRepository(ChatZoneDbContext dbContext,
         return Result<QuickMessage>.Ok(quickMessage);
     }
 
-    public async Task<Result<QuickMessage>> CreateQuickMessagesAsync(string username, string message)
+    public async Task<Result<QuickMessageResponse>> CreateQuickMessagesAsync(string username, string message)
     {
         var person = await authRepository.GetPersonByUsernameAsync(username);
-        
-        var newQuickMessage = new QuickMessage
-        {
-            Message = message,
-            Person = person.Value
-        };
 
-        dbContext.QuickMessages.Add(newQuickMessage);
+        var quickMessage = new QuickMessage
+        {
+            IdPerson = person.Value.IdPerson,
+            Message = message
+        };
+        dbContext.QuickMessages.Add(quickMessage);
+
 
         await dbContext.SaveChangesAsync();
-        return Result<QuickMessage>.Ok(newQuickMessage);
+        return Result<QuickMessageResponse>.Ok(new QuickMessageResponse
+        {
+            IdQuickMessage = quickMessage.IdQuickMessage,
+            Message = message
+        });
     }
 }

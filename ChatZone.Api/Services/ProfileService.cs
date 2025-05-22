@@ -1,5 +1,4 @@
 using ChatZone.Core.Extensions;
-using ChatZone.Core.Models;
 using ChatZone.DTO.Responses;
 using ChatZone.Repositories.Interfaces;
 using ChatZone.Services.Interfaces;
@@ -23,10 +22,10 @@ public class ProfileService(IProfileRepository profileRepository,
         });
     }
 
-    public async Task<Result<BlockedPerson[]>> GetBlockedPersonsAsync(string username)
+    public async Task<Result<BlockedPersonResponse[]>> GetBlockedPersonsAsync(string username)
     {
         var person = await authRepository.GetPersonByUsernameAsync(username);
-        if (!person.IsSuccess) return Result<BlockedPerson[]>.Failure(person.Exception);
+        if (!person.IsSuccess) return Result<BlockedPersonResponse[]>.Failure(person.Exception);
 
         return await profileRepository.GetBlockedPersonsAsync(username);
     }
@@ -39,18 +38,18 @@ public class ProfileService(IProfileRepository profileRepository,
         return await profileRepository.DeleteBlockedPersonAsync(username, idBlockedPerson);
     }
 
-    public async Task<Result<QuickMessage[]>> GetQuickMessagesAsync(string username)
+    public async Task<Result<QuickMessageResponse[]>> GetQuickMessagesAsync(string username)
     {
         var person = await authRepository.GetPersonByUsernameAsync(username);
-        if (!person.IsSuccess) return Result<QuickMessage[]>.Failure(person.Exception);
+        if (!person.IsSuccess) return Result<QuickMessageResponse[]>.Failure(person.Exception);
 
         return await profileRepository.GetQuickMessagesAsync(username);
     }
 
-    public async Task<Result<QuickMessage>> CreateQuickMessagesAsync(string username, string message)
+    public async Task<Result<QuickMessageResponse>> CreateQuickMessagesAsync(string username, string message)
     {
         var person = await authRepository.GetPersonByUsernameAsync(username);
-        if (!person.IsSuccess) return Result<QuickMessage>.Failure(person.Exception);
+        if (!person.IsSuccess) return Result<QuickMessageResponse>.Failure(person.Exception);
 
         return await profileRepository.CreateQuickMessagesAsync(username, message);
     }
