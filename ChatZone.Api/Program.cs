@@ -15,6 +15,18 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args); //zwraca obiekt i sluzy dla konfiguracji webowej
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 builder.Services.AddEndpointsApiExplorer(); //to create Swagger
 builder.Services.AddSwaggerGen(); //to create Swagger
 builder.Services.AddControllers(); //find all classes derived from ControllerBase which can be used
@@ -89,6 +101,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowAngular");
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
