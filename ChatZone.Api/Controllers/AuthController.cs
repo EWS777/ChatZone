@@ -38,10 +38,21 @@ public class AuthController(
     [AllowAnonymous]
     [HttpPost]
     [Route("/login")]
-    public async Task<RegisterResponse> Login([FromBody]LoginRequest request)
+    public async Task<IActionResult> Login([FromBody]LoginRequest request)
     {
         var result = await authService.LoginAsync(request.UsernameOrEmail, request.Password);
-        return result.Match<RegisterResponse>(e => e, x => throw x);
+
+        if (!result.IsSuccess) return Unauthorized(result.Exception);
+        
+        Response.Cookies.Append("AccessToken", result.Value.AccessToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Expires = DateTimeOffset.Now.AddDays(7)
+        });
+
+        return Ok(new { result.Value.RefreshToken });
     }
 
     [Authorize(AuthenticationSchemes = "IgnoreTokenExpirationScheme", Roles = "User")]
