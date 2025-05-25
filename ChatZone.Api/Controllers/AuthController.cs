@@ -4,6 +4,7 @@ using ChatZone.DTO.Requests;
 using ChatZone.DTO.Responses;
 using ChatZone.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Controllers;
@@ -19,8 +20,7 @@ public class AuthController(
     public async Task<IActionResult> Register([FromBody]RegisterRequest request)
     {
         var result = await authService.RegisterPersonAsync(request);
-
-        return result.Match<IActionResult>(e => Ok("Completed!"), x => throw x);
+        return result.Match<IActionResult>(x=>Ok(new {message = "Completed!"}), x => throw x);
     }
     
     [Authorize(Roles = "Unconfirmed")]
@@ -48,8 +48,8 @@ public class AuthController(
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Lax,
-            Expires = DateTimeOffset.Now.AddDays(7)
+            SameSite = SameSiteMode.None,
+            Expires = DateTimeOffset.UtcNow.AddDays(7)
         });
 
         return Ok(new { result.Value.RefreshToken });
