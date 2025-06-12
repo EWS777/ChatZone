@@ -17,12 +17,13 @@ public class FilterController(IFilterService filterService) : ControllerBase
     [Route("/{username}/filter")]
     public async Task<PersonFilterResponse> GetPersonFilter([FromRoute] string username)
     {
-        var usernameFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
-        if (usernameFromToken is null) throw new Exception("Person is not exists!");
-        if (usernameFromToken != username) throw new ForbiddenAccessException("You are not an owner");
-        
-        var result = await filterService.GetPersonFilterAsync(username);
+        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
+
+        var result = await filterService.GetPersonFilterAsync(int.Parse(id));
         return result.Match<PersonFilterResponse>(e => e, x=> throw x);
     }
 
@@ -31,12 +32,13 @@ public class FilterController(IFilterService filterService) : ControllerBase
     [Route("/{username}/filter")]
     public async Task<PersonFilterResponse> UpdatePersonFilter(string username, [FromBody] PersonFilterRequest personFilterRequest)
     {
-        var usernameFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
-        if (usernameFromToken is null) throw new Exception("Person is not exists!");
-        if (usernameFromToken != username) throw new ForbiddenAccessException("You are not an owner");
+        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        var result = await filterService.UpdatePersonFilterAsync(username, personFilterRequest);
+        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
 
+        var result = await filterService.UpdatePersonFilterAsync(int.Parse(id), personFilterRequest);
         return result.Match<PersonFilterResponse>(e => e, e => throw e);
     }
 }

@@ -26,6 +26,18 @@ public class AuthRepository(ChatZoneDbContext dbContext) : IAuthRepository
         return Result<Person>.Ok(person);
     }
 
+    public async Task<Result<Person>> GetPersonByIdAsync(int id)
+    {
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == id);
+        return person is null ? Result<Person>.Failure(new NotFoundException("User is not found!")) : Result<Person>.Ok(person);
+    }
+
+    public async Task<Result<bool>> IsPersonExistsAsync(int id)
+    {
+        var person = await dbContext.Persons.AnyAsync(x => x.IdPerson == id);
+        return person ? Result<bool>.Ok(true) : Result<bool>.Failure(new NotFoundException("User is not found!"));
+    }
+
     public async Task<Result<Person>> AddPersonAsync(Person person)
     {
         var usernameResult =  await GetPersonByUsernameAsync(person.Username);
@@ -42,9 +54,9 @@ public class AuthRepository(ChatZoneDbContext dbContext) : IAuthRepository
         return Result<Person>.Ok(person);
     }
 
-    public async Task<Result<Person>> UpdatePersonAsync(string username, PersonRole role)
+    public async Task<Result<Person>> UpdatePersonAsync(int id, PersonRole role)
     {
-        var person = await GetPersonByUsernameAsync(username);
+        var person = await GetPersonByIdAsync(id);
         if (!person.IsSuccess) return Result<Person>.Failure(person.Exception);
 
         person.Value.Role = role;
@@ -53,9 +65,9 @@ public class AuthRepository(ChatZoneDbContext dbContext) : IAuthRepository
         return Result<Person>.Ok(person.Value);
     }
 
-    public async Task<Result<Person>> UpdatePersonTokenAsync(string username, string refreshToken, DateTime tokenExp)
+    public async Task<Result<Person>> UpdatePersonTokenAsync(int id, string refreshToken, DateTime tokenExp)
     {
-        var person = await GetPersonByUsernameAsync(username);
+        var person = await GetPersonByIdAsync(id);
 
         person.Value.RefreshToken = refreshToken;
         person.Value.RefreshTokenExp = tokenExp;
@@ -64,9 +76,9 @@ public class AuthRepository(ChatZoneDbContext dbContext) : IAuthRepository
         return Result<Person>.Ok(person.Value);
     }
 
-    public async Task<Result<Person>> UpdatePasswordAsync(string username, string password)
+    public async Task<Result<Person>> UpdatePasswordAsync(int id, string password)
     {
-        var person = await GetPersonByUsernameAsync(username);
+        var person = await GetPersonByIdAsync(id);
 
         person.Value.Password = password;
 
@@ -75,9 +87,9 @@ public class AuthRepository(ChatZoneDbContext dbContext) : IAuthRepository
         return Result<Person>.Ok(person.Value);
     }
     
-    public async Task<Result<UpdateProfileResponse>> UpdateProfileAsync(string username, ProfileRequest profileRequest)
+    public async Task<Result<UpdateProfileResponse>> UpdateProfileAsync(int id, ProfileRequest profileRequest)
     {
-        var person = await GetPersonByUsernameAsync(username);
+        var person = await GetPersonByIdAsync(id);
 
         person.Value.Username = profileRequest.Username;
         person.Value.IsFindByProfile = profileRequest.IsFindByProfile;

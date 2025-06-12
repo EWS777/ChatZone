@@ -49,7 +49,7 @@ public class AuthService(
 
             await authRepository.AddPersonAsync(person);
             
-            var token = GenerateJwtToken(person.Username, person.Role);
+            var token = GenerateJwtToken(person.Username, person.Role, person.IdPerson);
 
             EmailSender.SendCodeToEmail(person.Email, new JwtSecurityTokenHandler().WriteToken(token));
             
@@ -64,64 +64,64 @@ public class AuthService(
         }
     }
 
-    public async Task<Result<RegisterResponse>> ConfirmEmailAsync(string username)
+    public async Task<Result<RegisterResponse>> ConfirmEmailAsync(int id)
     {
-        var result = await authRepository.GetPersonByUsernameAsync(username);
+        var result = await authRepository.GetPersonByIdAsync(id);
         
         if (!result.IsSuccess) return Result<RegisterResponse>.Failure(result.Exception);
         
-        var updatePerson = await authRepository.UpdatePersonAsync(username, PersonRole.User);
+        var person = await authRepository.UpdatePersonAsync(result.Value.IdPerson, PersonRole.User);
         
-        var token = GenerateJwtToken(updatePerson.Value.Username, updatePerson.Value.Role);
+        var token = GenerateJwtToken(person.Value.Username, person.Value.Role, person.Value.IdPerson);
 
+        return Result<RegisterResponse>.Ok(new RegisterResponse{
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
+            RefreshToken = person.Value.RefreshToken
+        });
+    }
+
+    public async Task<Result<RegisterResponse>> LoginAsync(string usernameOrEmail, string password)
+    {
+        var person = usernameOrEmail.Contains("@")
+            ? await authRepository.GetPersonByEmailAsync(usernameOrEmail)
+            : await authRepository.GetPersonByUsernameAsync(usernameOrEmail);
+
+        if (!person.IsSuccess) return Result<RegisterResponse>.Failure(person.Exception);
+        
+        if(person.Value.Role != PersonRole.User) return Result<RegisterResponse>.Failure(new ForbiddenAccessException("The email is not confirmed"));
+
+        var currentHashedCode = SecurityHelper.GetHashedPasswordWithSalt(password, person.Value.Salt);
+
+        if (currentHashedCode != person.Value.Password)
+            return Result<RegisterResponse>.Failure(new ForbiddenAccessException("The password is not match"));
+
+        var token = GenerateJwtToken(person.Value.Username, person.Value.Role, person.Value.IdPerson);
+
+        var updatePerson = await authRepository.UpdatePersonTokenAsync(person.Value.IdPerson,
+            SecurityHelper.GenerateRefreshToken(), DateTime.Now.AddDays(7));
+        
         return Result<RegisterResponse>.Ok(new RegisterResponse{
             AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
             RefreshToken = updatePerson.Value.RefreshToken
         });
     }
 
-    public async Task<Result<RegisterResponse>> LoginAsync(string usernameOrEmail, string password)
+    public async Task<Result<RegisterResponse>> RefreshTokenAsync(int id)
     {
-        var user = usernameOrEmail.Contains("@")
-            ? await authRepository.GetPersonByEmailAsync(usernameOrEmail)
-            : await authRepository.GetPersonByUsernameAsync(usernameOrEmail);
+        var person = await authRepository.GetPersonByIdAsync(id);
+        if (!person.IsSuccess) return Result<RegisterResponse>.Failure(person.Exception);
 
-        if (!user.IsSuccess) return Result<RegisterResponse>.Failure(user.Exception);
-        
-        if(user.Value.Role != PersonRole.User) return Result<RegisterResponse>.Failure(new ForbiddenAccessException("The email is not confirmed"));
-
-        var currentHashedCode = SecurityHelper.GetHashedPasswordWithSalt(password, user.Value.Salt);
-
-        if (currentHashedCode != user.Value.Password)
-            return Result<RegisterResponse>.Failure(new ForbiddenAccessException("The password is not match"));
-
-        var token = GenerateJwtToken(user.Value.Username, user.Value.Role);
-
-        var person = await authRepository.UpdatePersonTokenAsync(user.Value.Username,
-            SecurityHelper.GenerateRefreshToken(), DateTime.Now.AddDays(7));
-        
-        return Result<RegisterResponse>.Ok(new RegisterResponse{
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
-            RefreshToken = person.Value.RefreshToken
-        });
-    }
-
-    public async Task<Result<RegisterResponse>> RefreshTokenAsync(string username)
-    {
-        var user = await authRepository.GetPersonByUsernameAsync(username);
-        if (!user.IsSuccess) return Result<RegisterResponse>.Failure(user.Exception);
-
-        if (user.Value.RefreshTokenExp < DateTime.Now)
+        if (person.Value.RefreshTokenExp < DateTime.Now)
             return Result<RegisterResponse>.Failure(new SecurityTokenException("Refresh token expired"));
         
-        var token = GenerateJwtToken(user.Value.Username, user.Value.Role);
+        var token = GenerateJwtToken(person.Value.Username, person.Value.Role, person.Value.IdPerson);
         
-        var person = await authRepository.UpdatePersonTokenAsync(user.Value.Username,
+        var personUpdate = await authRepository.UpdatePersonTokenAsync(person.Value.IdPerson,
             SecurityHelper.GenerateRefreshToken(), DateTime.Now.AddDays(7));
         
         return Result<RegisterResponse>.Ok(new RegisterResponse{
             AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
-            RefreshToken = person.Value.RefreshToken
+            RefreshToken = personUpdate.Value.RefreshToken
         });
     }
 
@@ -130,25 +130,25 @@ public class AuthService(
         var user = await authRepository.GetPersonByEmailAsync(email);
         if (!user.IsSuccess) return Result<bool>.Failure(user.Exception);
 
-        var token = GenerateJwtToken(user.Value.Username, user.Value.Role);
+        var token = GenerateJwtToken(user.Value.Username, user.Value.Role, user.Value.IdPerson);
         EmailSender.SendCodeToEmail(user.Value.Email, new JwtSecurityTokenHandler().WriteToken(token));
 
         return Result<bool>.Ok(true);
     }
 
-    public async Task<Result<RegisterResponse>> UpdatePasswordAsync(string username, string password)
+    public async Task<Result<RegisterResponse>> UpdatePasswordAsync(int id, string password)
     {
-        var user = await authRepository.GetPersonByUsernameAsync(username);
-        if (!user.IsSuccess) return Result<RegisterResponse>.Failure(user.Exception);
+        var person = await authRepository.GetPersonByIdAsync(id);
+        if (!person.IsSuccess) return Result<RegisterResponse>.Failure(person.Exception);
 
-        var currentHashedPassword = SecurityHelper.GetHashedPasswordWithSalt(password, user.Value.Salt);
+        var currentHashedPassword = SecurityHelper.GetHashedPasswordWithSalt(password, person.Value.Salt);
 
-        if (currentHashedPassword == user.Value.Password)
+        if (currentHashedPassword == person.Value.Password)
             return Result<RegisterResponse>.Failure(new ForbiddenAccessException("You can't change, because the password is the same!"));
 
-        var updatePerson = await authRepository.UpdatePasswordAsync(username, currentHashedPassword);
+        var updatePerson = await authRepository.UpdatePasswordAsync(id, currentHashedPassword);
         
-        var token = GenerateJwtToken(user.Value.Username, user.Value.Role);
+        var token = GenerateJwtToken(updatePerson.Value.Username, updatePerson.Value.Role, updatePerson.Value.IdPerson);
         
         return Result<RegisterResponse>.Ok(new RegisterResponse{
             AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
@@ -156,39 +156,43 @@ public class AuthService(
         });
     }
     
-    public async Task<Result<UpdateProfileResponse>> UpdateProfileAsync(string username, ProfileRequest profileRequest)
+    public async Task<Result<UpdateProfileResponse>> UpdateProfileAsync(int id, ProfileRequest profileRequest)
     {
-        var person = await authRepository.GetPersonByUsernameAsync(username);
+        var person = await authRepository.GetPersonByIdAsync(id);
         if (!person.IsSuccess) return Result<UpdateProfileResponse>.Failure(person.Exception);
-
-        if (profileRequest.Username != username)
+        
+        bool isUsernameChanged = profileRequest.Username != person.Value.Username;
+        
+        //is username changed and doesn't exist in database
+        if (isUsernameChanged)
         {
             var isUsernameIsNotUsed = await authRepository.GetPersonByUsernameAsync(profileRequest.Username);
             if (isUsernameIsNotUsed.IsSuccess) return Result<UpdateProfileResponse>.Failure(new IsExistsException("This username is exists!"));
         }
+        
+        var updatePerson = await authRepository.UpdateProfileAsync(id, profileRequest);
 
-        var updatePerson = await authRepository.UpdateProfileAsync(username, profileRequest);
-
-        if (profileRequest.Username != username)
+        if (isUsernameChanged)
         {
             return Result<UpdateProfileResponse>.Ok(new UpdateProfileResponse
             {
                 Username = updatePerson.Value.Username,
                 IsFindByProfile = updatePerson.Value.IsFindByProfile,
-                AccessToken = new JwtSecurityTokenHandler().WriteToken(GenerateJwtToken(profileRequest.Username, person.Value.Role)),
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(GenerateJwtToken(updatePerson.Value.Username, person.Value.Role, person.Value.IdPerson)),
                 RefreshToken = updatePerson.Value.RefreshToken
             });
         }
 
         return Result<UpdateProfileResponse>.Ok(updatePerson.Value);
     }
-
-    private JwtSecurityToken GenerateJwtToken(string username, PersonRole role)
+    
+    private JwtSecurityToken GenerateJwtToken(string username, PersonRole role, int idPerson)
     {
         var claims = new[]
         {
             new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.Role, role.ToString())
+            new Claim(ClaimTypes.Role, role.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, idPerson.ToString())
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:SecretKey"]));

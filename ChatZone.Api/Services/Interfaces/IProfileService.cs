@@ -6,9 +6,9 @@ namespace ChatZone.Services.Interfaces;
 
 public interface IProfileService
 {
-    public Task<Result<ProfileResponse>> GetProfileAsync(string username);
-    public Task<Result<BlockedPersonResponse[]>> GetBlockedPersonsAsync(string username);
-    public Task<Result<IActionResult>> DeleteBlockedPersonAsync(string username, int idBlockedPerson);
-    public Task<Result<QuickMessageResponse[]>> GetQuickMessagesAsync(string username);
-    public Task<Result<QuickMessageResponse>> CreateQuickMessagesAsync(string username, string message);
+    public Task<Result<ProfileResponse>> GetProfileAsync(int id);
+    public Task<Result<List<BlockedPersonResponse>>> GetBlockedPersonsAsync(int id);
+    public Task<Result<List<QuickMessageResponse>>> GetQuickMessagesAsync(int id);
+    public Task<Result<QuickMessageResponse>> AddQuickMessageAsync(int id, string message);
+    public Task<Result<IActionResult>> DeleteBlockedPersonAsync(int id, int idBlockedPerson);
 }

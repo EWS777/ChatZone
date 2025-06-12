@@ -6,6 +6,6 @@ namespace ChatZone.Services.Interfaces;
 
 public interface IFilterService
 {
-    public Task<Result<PersonFilterResponse>> GetPersonFilterAsync(string username);
-    public Task<Result<PersonFilterResponse>> UpdatePersonFilterAsync(string username, PersonFilterRequest personFilterRequest);
+    public Task<Result<PersonFilterResponse>> GetPersonFilterAsync(int id);
+    public Task<Result<PersonFilterResponse>> UpdatePersonFilterAsync(int id, PersonFilterRequest personFilterRequest);
 }

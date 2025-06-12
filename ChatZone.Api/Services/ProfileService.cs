@@ -9,9 +9,9 @@ namespace ChatZone.Services;
 public class ProfileService(IProfileRepository profileRepository,
                             IAuthRepository authRepository) : IProfileService
 {
-    public async Task<Result<ProfileResponse>> GetProfileAsync(string username)
+    public async Task<Result<ProfileResponse>> GetProfileAsync(int id)
     {
-        var person = await authRepository.GetPersonByUsernameAsync(username);
+        var person = await authRepository.GetPersonByIdAsync(id);
         if (!person.IsSuccess) return Result<ProfileResponse>.Failure(person.Exception);
 
         return Result<ProfileResponse>.Ok(new ProfileResponse
@@ -22,35 +22,35 @@ public class ProfileService(IProfileRepository profileRepository,
         });
     }
 
-    public async Task<Result<BlockedPersonResponse[]>> GetBlockedPersonsAsync(string username)
+    public async Task<Result<List<BlockedPersonResponse>>> GetBlockedPersonsAsync(int id)
     {
-        var person = await authRepository.GetPersonByUsernameAsync(username);
-        if (!person.IsSuccess) return Result<BlockedPersonResponse[]>.Failure(person.Exception);
+        var person = await authRepository.IsPersonExistsAsync(id);
+        if (!person.IsSuccess) return Result<List<BlockedPersonResponse>>.Failure(person.Exception);
 
-        return await profileRepository.GetBlockedPersonsAsync(username);
+        return await profileRepository.GetBlockedPersonsAsync(id);
     }
 
-    public async Task<Result<IActionResult>> DeleteBlockedPersonAsync(string username, int idBlockedPerson)
+    public async Task<Result<List<QuickMessageResponse>>> GetQuickMessagesAsync(int id)
     {
-        var person = await authRepository.GetPersonByUsernameAsync(username);
-        if (!person.IsSuccess) return Result<IActionResult>.Failure(person.Exception);
+        var person = await authRepository.IsPersonExistsAsync(id);
+        if (!person.IsSuccess) return Result<List<QuickMessageResponse>>.Failure(person.Exception);
 
-        return await profileRepository.DeleteBlockedPersonAsync(username, idBlockedPerson);
+        return await profileRepository.GetQuickMessagesAsync(id);
     }
 
-    public async Task<Result<QuickMessageResponse[]>> GetQuickMessagesAsync(string username)
+    public async Task<Result<QuickMessageResponse>> AddQuickMessageAsync(int id, string message)
     {
-        var person = await authRepository.GetPersonByUsernameAsync(username);
-        if (!person.IsSuccess) return Result<QuickMessageResponse[]>.Failure(person.Exception);
-
-        return await profileRepository.GetQuickMessagesAsync(username);
-    }
-
-    public async Task<Result<QuickMessageResponse>> CreateQuickMessagesAsync(string username, string message)
-    {
-        var person = await authRepository.GetPersonByUsernameAsync(username);
+        var person = await authRepository.IsPersonExistsAsync(id);
         if (!person.IsSuccess) return Result<QuickMessageResponse>.Failure(person.Exception);
 
-        return await profileRepository.CreateQuickMessagesAsync(username, message);
+        return await profileRepository.AddQuickMessageAsync(id, message);
+    }
+
+    public async Task<Result<IActionResult>> DeleteBlockedPersonAsync(int id, int idBlockedPerson)
+    {
+        var person = await authRepository.IsPersonExistsAsync(id);
+        if (!person.IsSuccess) return Result<IActionResult>.Failure(person.Exception);
+
+        return await profileRepository.DeleteBlockedPersonAsync(id, idBlockedPerson);
     }
 }

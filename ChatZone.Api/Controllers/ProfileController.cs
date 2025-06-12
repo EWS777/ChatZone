@@ -17,69 +17,73 @@ public class ProfileController(IProfileService profileService) : ControllerBase
     [Route("/{username}")]
     public async Task<ProfileResponse> GetProfile(string username)
     {
-        var usernameFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
-        if (usernameFromToken != username) throw new ForbiddenAccessException("You are not an owner");
-        
-        var person = await profileService.GetProfileAsync(username);
-        return person.Match(x => x, x => throw x);
+        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
+
+        var result = await profileService.GetProfileAsync(int.Parse(id));
+        return result.Match(x => x, x => throw x);
     }
     
     [Authorize(Roles = "User")]
     [HttpGet]
     [Route("/{username}/blocked-users")]
-    public async Task<ActionResult<BlockedPersonResponse[]>> GetBlockedPersons(string username)
+    public async Task<List<BlockedPersonResponse>> GetBlockedPersons(string username)
     {
-        var usernameFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
+        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (usernameFromToken is null) throw new Exception("Person is not exists!");
-        if (usernameFromToken != username) throw new ForbiddenAccessException("You are not an owner");
+        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
 
-        var result = await profileService.GetBlockedPersonsAsync(username);
-
+        var result = await profileService.GetBlockedPersonsAsync(int.Parse(id));
         return result.Match(x => x, x=>throw x);
-    }
-    
-    [Authorize(Roles = "User")]
-    [HttpDelete]
-    [Route("/{username}/blocked-users/{idBlockedPerson}")]
-    public async Task<IActionResult> DeleteBlockedPerson(string username, [FromRoute] int idBlockedPerson)
-    {
-        var usernameFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
-
-        if (usernameFromToken is null) throw new Exception("Person is not exists!");
-        if (usernameFromToken != username) throw new ForbiddenAccessException("You are not an owner");
-
-        var result = await profileService.DeleteBlockedPersonAsync(username, idBlockedPerson);
-        return result.Match<IActionResult>(x=>Ok("Person was deleted successfully!"), x => throw x);
     }
 
     [Authorize(Roles = "User")]
     [HttpGet]
     [Route("/{username}/quick-messages")]
-    public async Task<QuickMessageResponse[]> GetQuickMessages(string username)
+    public async Task<List<QuickMessageResponse>> GetQuickMessages(string username)
     {
-        var usernameFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
+        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (usernameFromToken is null) throw new Exception("Person is not exists!");
-        if (usernameFromToken != username) throw new ForbiddenAccessException("You are not an owner");
+        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
 
-        var result = await profileService.GetQuickMessagesAsync(username);
-
-        return result.Match<QuickMessageResponse[]>(x => x, x => throw x);
+        var result = await profileService.GetQuickMessagesAsync(int.Parse(id));
+        return result.Match(x => x, x => throw x);
     }
 
     [Authorize(Roles = "User")]
     [HttpPost]
     [Route("/{username}/quick-message")]
-    public async Task<QuickMessageResponse> CreateQuickMessage(string username,
-        [FromBody] QuickMessageRequest quickMessageRequest)
+    public async Task<QuickMessageResponse> AddQuickMessage(string username, [FromBody] QuickMessageRequest quickMessageRequest)
     {
-        var usernameFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
+        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (usernameFromToken is null) throw new Exception("Person is not exists!");
-        if (usernameFromToken != username) throw new ForbiddenAccessException("You are not an owner");
+        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
 
-        var result = await profileService.CreateQuickMessagesAsync(username, quickMessageRequest.Message);
+        var result = await profileService.AddQuickMessageAsync(int.Parse(id), quickMessageRequest.Message);
         return result.Match<QuickMessageResponse>(x => x, x => throw x);
+    }
+
+    [Authorize(Roles = "User")]
+    [HttpDelete]
+    [Route("/{username}/blocked-users/{idBlockedPerson}")]
+    public async Task<IActionResult> DeleteBlockedPerson(string username, [FromRoute] int idBlockedPerson)
+    {
+        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
+
+        var result = await profileService.DeleteBlockedPersonAsync(int.Parse(id), idBlockedPerson);
+        return result.Match<IActionResult>(x=>Ok("Person was deleted successfully!"), x => throw x);
     }
 }

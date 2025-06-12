@@ -9,22 +9,19 @@ namespace ChatZone.Services;
 public class FilterService(IFilterRepository filterRepository,
                             IAuthRepository authRepository) : IFilterService
 {
-    public async Task<Result<PersonFilterResponse>> GetPersonFilterAsync(string username)
+    public async Task<Result<PersonFilterResponse>> GetPersonFilterAsync(int id)
     {
-        var user = await authRepository.GetPersonByUsernameAsync(username);
+        var user = await authRepository.IsPersonExistsAsync(id);
         if (!user.IsSuccess) return Result<PersonFilterResponse>.Failure(user.Exception);
-
-        var userResult = await filterRepository.GetPersonFilterAsync(user.Value.Username);
-        if (!userResult.IsSuccess) return Result<PersonFilterResponse>.Failure(userResult.Exception);
-
-        return userResult;
+        
+        return await filterRepository.GetPersonFilterAsync(id);
     }
 
-    public async Task<Result<PersonFilterResponse>> UpdatePersonFilterAsync(string username, PersonFilterRequest personFilterRequest)
+    public async Task<Result<PersonFilterResponse>> UpdatePersonFilterAsync(int id, PersonFilterRequest personFilterRequest)
     {
-        var person = await authRepository.GetPersonByUsernameAsync(username);
+        var person = await authRepository.IsPersonExistsAsync(id);
         if (!person.IsSuccess) return Result<PersonFilterResponse>.Failure(person.Exception);
 
-        return await filterRepository.UpdatePersonFilterAsync(username, personFilterRequest);
+        return await filterRepository.UpdatePersonFilterAsync(id, personFilterRequest);
     }
 }

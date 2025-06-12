@@ -4,15 +4,13 @@ using ChatZone.DTO.Requests;
 using ChatZone.DTO.Responses;
 using ChatZone.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthController(
-    IAuthService authService) : ControllerBase
+public class AuthController(IAuthService authService) : ControllerBase
 {
     [AllowAnonymous]
     [HttpPost]
@@ -28,10 +26,10 @@ public class AuthController(
     [Route("/confirm")]
     public async Task<RegisterResponse> Confirm()
     {
-        var username = User.FindFirst(ClaimTypes.Name).Value;
-        
-        var result = await authService.ConfirmEmailAsync(username);
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (id is null) throw new Exception("User does not exist!");
 
+        var result = await authService.ConfirmEmailAsync(int.Parse(id));
         return result.Match<RegisterResponse>(e => e, x => throw x);
     }
 
@@ -60,8 +58,10 @@ public class AuthController(
     [Route("/refresh")]
     public async Task<RegisterResponse> Refresh()
     {
-        var username = User.FindFirst(ClaimTypes.Name).Value;
-        var result = await authService.RefreshTokenAsync(username);
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (id is null) throw new Exception("User does not exist!");
+        
+        var result = await authService.RefreshTokenAsync(int.Parse(id));
         return result.Match<RegisterResponse>(e => e, x => throw x);
     }
 
@@ -77,11 +77,15 @@ public class AuthController(
     [Authorize(AuthenticationSchemes = "IgnoreTokenExpirationScheme", Roles = "User")]
     [HttpPut]
     [Route("/change-password")]
-    public async Task<RegisterResponse> UpdatePassword(string password)
+    public async Task<RegisterResponse> UpdatePassword(string username, string password)
     {
-        var username = User.FindFirst(ClaimTypes.Name).Value;
+        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
         
-        var result = await authService.UpdatePasswordAsync(username, password);
+        var result = await authService.UpdatePasswordAsync(int.Parse(id), password);
         return result.Match<RegisterResponse>(e=>e, x=> throw x);
     }
     
@@ -90,13 +94,13 @@ public class AuthController(
     [Route("/{username}")]
     public async Task<UpdateProfileResponse> UpdateProfile(string username, [FromBody] ProfileRequest profileRequest)
     {
-        var usernameFromToken = User.FindFirst(ClaimTypes.Name)?.Value;
+        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (usernameFromToken is null) throw new Exception("Person is not exists!");
-        if (usernameFromToken != username) throw new ForbiddenAccessException("You are not an owner");
+        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
 
-        var person = await authService.UpdateProfileAsync(usernameFromToken, profileRequest);
-
-        return person.Match(x => x, x => throw x);
+        var result = await authService.UpdateProfileAsync(int.Parse(id), profileRequest);
+        return result.Match(x => x, x => throw x);
     }
 }

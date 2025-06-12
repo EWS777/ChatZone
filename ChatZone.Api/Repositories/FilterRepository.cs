@@ -1,6 +1,5 @@
 using ChatZone.Context;
 using ChatZone.Core.Extensions;
-using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.DTO.Requests;
 using ChatZone.DTO.Responses;
 using ChatZone.Repositories.Interfaces;
@@ -8,51 +7,47 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Repositories;
 
-public class FilterRepository(ChatZoneDbContext dbContext,
-                                IAuthRepository authRepository) : IFilterRepository
+public class FilterRepository(ChatZoneDbContext dbContext) : IFilterRepository
 {
-    public async Task<Result<PersonFilterResponse>> GetPersonFilterAsync(string username)
+    public async Task<Result<PersonFilterResponse>> GetPersonFilterAsync(int id)
     {
-        var user = await authRepository.GetPersonByUsernameAsync(username);
-        var personFilter = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == user.Value.IdPerson);
-        if (personFilter is null)
-            return Result<PersonFilterResponse>.Failure(new NotAnyDataException("The filters data aren't exist"));
-        
+        var personFilter = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == id);
         return Result<PersonFilterResponse>.Ok(new PersonFilterResponse
         {
-            ThemeList = user.Value.ThemeList,
-            Country = user.Value.Country,
-            City = user.Value.City,
-            Age = user.Value.Age,
-            Gender = user.Value.Gender,
-            NativeLang = user.Value.NativeLang,
-            LearnLang = user.Value.LearnLang
+            ThemeList = personFilter!.ThemeList,
+            Country = personFilter.Country,
+            City = personFilter.City,
+            Age = personFilter.Age,
+            Gender = personFilter.Gender,
+            NativeLang = personFilter.NativeLang,
+            LearnLang = personFilter.LearnLang
         });
     }
 
-    public async Task<Result<PersonFilterResponse>> UpdatePersonFilterAsync(string username, PersonFilterRequest personFilterRequest)
+    public async Task<Result<PersonFilterResponse>> UpdatePersonFilterAsync(int id, PersonFilterRequest personFilterRequest)
     {
-        var person = await authRepository.GetPersonByUsernameAsync(username);
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == id);
 
-        person.Value.ThemeList = personFilterRequest.ThemeList;
-        person.Value.Country = personFilterRequest.Country;
-        person.Value.City = personFilterRequest.City;
-        person.Value.Age = personFilterRequest.Age;
-        person.Value.Gender = personFilterRequest.Gender;
-        person.Value.NativeLang = personFilterRequest.NativeLang;
-        person.Value.LearnLang = personFilterRequest.LearnLang;
+        person!.ThemeList = personFilterRequest.ThemeList;
+        person.Country = personFilterRequest.Country;
+        person.City = personFilterRequest.City;
+        person.Age = personFilterRequest.Age;
+        person.Gender = personFilterRequest.Gender;
+        person.NativeLang = personFilterRequest.NativeLang;
+        person.LearnLang = personFilterRequest.LearnLang;
 
-        dbContext.Persons.Update(person.Value);
+        dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync();
+        
         return Result<PersonFilterResponse>.Ok(new PersonFilterResponse
         {
-            ThemeList = person.Value.ThemeList,
-            Age = person.Value.Age,
-            City = person.Value.City,
-            Country = person.Value.Country,
-            Gender = person.Value.Gender,
-            LearnLang = person.Value.LearnLang,
-            NativeLang = person.Value.NativeLang
+            ThemeList = person.ThemeList,
+            Age = person.Age,
+            City = person.City,
+            Country = person.Country,
+            Gender = person.Gender,
+            LearnLang = person.LearnLang,
+            NativeLang = person.NativeLang
         });
     }
 }
