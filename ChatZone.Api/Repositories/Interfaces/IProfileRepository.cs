@@ -6,8 +6,8 @@ namespace ChatZone.Repositories.Interfaces;
 
 public interface IProfileRepository
 {
-    Task<Result<List<BlockedPersonResponse>>> GetBlockedPersonsAsync(int id);
-    Task<Result<List<QuickMessageResponse>>> GetQuickMessagesAsync(int id);
-    Task<Result<QuickMessageResponse>> AddQuickMessageAsync(int id, string message);
-    Task<Result<IActionResult>> DeleteBlockedPersonAsync(int id, int idBlockedPerson);
+    Task<Result<List<BlockedPersonResponse>>> GetBlockedPersonsAsync(int id, CancellationToken cancellationToken);
+    Task<Result<List<QuickMessageResponse>>> GetQuickMessagesAsync(int id, CancellationToken cancellationToken);
+    Task<Result<QuickMessageResponse>> AddQuickMessageAsync(int id, string message, CancellationToken cancellationToken);
+    Task<Result<IActionResult>> DeleteBlockedPersonAsync(int id, int idBlockedPerson, CancellationToken cancellationToken);
 }

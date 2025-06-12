@@ -6,6 +6,6 @@ namespace ChatZone.Repositories.Interfaces;
 
 public interface IFilterRepository
 {
-    public Task<Result<PersonFilterResponse>> GetPersonFilterAsync(int id);
-    public Task<Result<PersonFilterResponse>> UpdatePersonFilterAsync(int id, PersonFilterRequest personFilterRequest);
+    public Task<Result<PersonFilterResponse>> GetPersonFilterAsync(int id, CancellationToken cancellationToken);
+    public Task<Result<PersonFilterResponse>> UpdatePersonFilterAsync(int id, PersonFilterRequest personFilterRequest, CancellationToken cancellationToken);
 }

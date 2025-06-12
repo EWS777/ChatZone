@@ -9,9 +9,9 @@ namespace ChatZone.Repositories;
 
 public class FilterRepository(ChatZoneDbContext dbContext) : IFilterRepository
 {
-    public async Task<Result<PersonFilterResponse>> GetPersonFilterAsync(int id)
+    public async Task<Result<PersonFilterResponse>> GetPersonFilterAsync(int id, CancellationToken cancellationToken)
     {
-        var personFilter = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == id);
+        var personFilter = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == id, cancellationToken);
         return Result<PersonFilterResponse>.Ok(new PersonFilterResponse
         {
             ThemeList = personFilter!.ThemeList,
@@ -24,9 +24,9 @@ public class FilterRepository(ChatZoneDbContext dbContext) : IFilterRepository
         });
     }
 
-    public async Task<Result<PersonFilterResponse>> UpdatePersonFilterAsync(int id, PersonFilterRequest personFilterRequest)
+    public async Task<Result<PersonFilterResponse>> UpdatePersonFilterAsync(int id, PersonFilterRequest personFilterRequest, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == id);
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == id, cancellationToken);
 
         person!.ThemeList = personFilterRequest.ThemeList;
         person.Country = personFilterRequest.Country;
@@ -37,7 +37,7 @@ public class FilterRepository(ChatZoneDbContext dbContext) : IFilterRepository
         person.LearnLang = personFilterRequest.LearnLang;
 
         dbContext.Persons.Update(person);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<PersonFilterResponse>.Ok(new PersonFilterResponse
         {

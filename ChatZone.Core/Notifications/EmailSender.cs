@@ -13,9 +13,9 @@ public class EmailSender()
         _configuration = configuration;
     }
 
-    public static void SendCodeToEmail(string email, string link)
+    public static async Task SendCodeToEmail(string email, string token, CancellationToken cancellationToken)
     {
-        string linkToClick = _configuration["Gmail:LinkToClick"] + link;
+        string linkToClick = _configuration["Gmail:LinkToClick"] + token;
         
         using (var smtpClient = new SmtpClient(_configuration["Gmail:SMTPServer"], Convert.ToInt32(_configuration["Gmail:SMTPPort"])))
         {
@@ -69,8 +69,7 @@ public class EmailSender()
                 </html>";
                 try
                 {
-                    smtpClient.Send(mailMessage);
-                    
+                    await smtpClient.SendMailAsync(mailMessage, cancellationToken);
                 }
                 catch (Exception e)
                 {

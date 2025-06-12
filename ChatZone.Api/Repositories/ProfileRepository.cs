@@ -11,7 +11,7 @@ namespace ChatZone.Repositories;
 
 public class ProfileRepository(ChatZoneDbContext dbContext) : IProfileRepository
 { 
-    public async Task<Result<List<BlockedPersonResponse>>> GetBlockedPersonsAsync(int id)
+    public async Task<Result<List<BlockedPersonResponse>>> GetBlockedPersonsAsync(int id, CancellationToken cancellationToken)
     {
         var blockedPersons = await dbContext.BlockedPeoples
             .Where(x => x.IdBlockerPerson == id)
@@ -21,11 +21,11 @@ public class ProfileRepository(ChatZoneDbContext dbContext) : IProfileRepository
                 BlockedUsername = x.Blocked.Username,
                 CreatedAt = x.CreatedAt
             })
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
         return Result<List<BlockedPersonResponse>>.Ok(blockedPersons);
     }
     
-    public async Task<Result<List<QuickMessageResponse>>> GetQuickMessagesAsync(int id)
+    public async Task<Result<List<QuickMessageResponse>>> GetQuickMessagesAsync(int id, CancellationToken cancellationToken)
     {
         var quickMessageList = await dbContext.QuickMessages
             .Where(x => x.IdPerson == id)
@@ -34,12 +34,12 @@ public class ProfileRepository(ChatZoneDbContext dbContext) : IProfileRepository
                 IdQuickMessage = x.IdQuickMessage,
                 Message = x.Message
             })
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return Result<List<QuickMessageResponse>>.Ok(quickMessageList);
     }
 
-    public async Task<Result<QuickMessageResponse>> AddQuickMessageAsync(int id, string message)
+    public async Task<Result<QuickMessageResponse>> AddQuickMessageAsync(int id, string message, CancellationToken cancellationToken)
     {
         var quickMessage = new QuickMessage
         {
@@ -47,8 +47,8 @@ public class ProfileRepository(ChatZoneDbContext dbContext) : IProfileRepository
             Message = message
         };
      
-        await dbContext.QuickMessages.AddAsync(quickMessage);
-        await dbContext.SaveChangesAsync();
+        await dbContext.QuickMessages.AddAsync(quickMessage, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<QuickMessageResponse>.Ok(new QuickMessageResponse
         {
@@ -57,13 +57,13 @@ public class ProfileRepository(ChatZoneDbContext dbContext) : IProfileRepository
         });
     }
 
-    public async Task<Result<IActionResult>> DeleteBlockedPersonAsync(int id, int idBlockedPerson)
+    public async Task<Result<IActionResult>> DeleteBlockedPersonAsync(int id, int idBlockedPerson, CancellationToken cancellationToken)
     {
-        var deletePerson = await dbContext.BlockedPeoples.SingleOrDefaultAsync(x => x.IdBlockerPerson == id && x.IdBlockedPerson == idBlockedPerson);
+        var deletePerson = await dbContext.BlockedPeoples.SingleOrDefaultAsync(x => x.IdBlockerPerson == id && x.IdBlockedPerson == idBlockedPerson, cancellationToken);
         if (deletePerson is null) return Result<IActionResult>.Failure(new NotFoundException("Person is not found!"));
 
         dbContext.BlockedPeoples.Remove(deletePerson);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<IActionResult>.Ok(new OkObjectResult("User was deleted successfully!"));
     }

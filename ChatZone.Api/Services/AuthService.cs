@@ -20,17 +20,17 @@ public class AuthService(
     IAuthRepository authRepository,
     IConfiguration configuration,
     ChatZoneDbContext dbContext) : IAuthService {
-    public async Task<Result<bool>> RegisterPersonAsync(RegisterRequest request)
+    public async Task<Result<bool>> RegisterPersonAsync(RegisterRequest request, CancellationToken cancellationToken)
     {
         try
         { 
-            using var transaction = await dbContext.Database.BeginTransactionAsync();
+            using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
-            var getEmailResult = await authRepository.GetPersonByEmailAsync(request.Email);
+            var getEmailResult = await authRepository.GetPersonByEmailAsync(request.Email, cancellationToken);
 
             if (getEmailResult.IsSuccess) return Result<bool>.Failure(new ExistPersonException("The email is exist!"));
             
-            var getUsernameResult = await authRepository.GetPersonByUsernameAsync(request.Username);
+            var getUsernameResult = await authRepository.GetPersonByUsernameAsync(request.Username, cancellationToken);
             
             if (getUsernameResult.IsSuccess) return Result<bool>.Failure(new ExistPersonException("The username is exist!"));
             
@@ -47,13 +47,13 @@ public class AuthService(
                 RefreshTokenExp = DateTime.Now.AddDays(7)
             };
 
-            await authRepository.AddPersonAsync(person);
+            await authRepository.AddPersonAsync(person, cancellationToken);
             
             var token = GenerateJwtToken(person.Username, person.Role, person.IdPerson);
 
-            EmailSender.SendCodeToEmail(person.Email, new JwtSecurityTokenHandler().WriteToken(token));
+            await EmailSender.SendCodeToEmail(person.Email, new JwtSecurityTokenHandler().WriteToken(token), cancellationToken);
             
-            await transaction.CommitAsync();
+            await transaction.CommitAsync(cancellationToken);
 
             return Result<bool>.Ok(true);
 
@@ -64,13 +64,13 @@ public class AuthService(
         }
     }
 
-    public async Task<Result<RegisterResponse>> ConfirmEmailAsync(int id)
+    public async Task<Result<RegisterResponse>> ConfirmEmailAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await authRepository.GetPersonByIdAsync(id);
+        var result = await authRepository.GetPersonByIdAsync(id, cancellationToken);
         
         if (!result.IsSuccess) return Result<RegisterResponse>.Failure(result.Exception);
         
-        var person = await authRepository.UpdatePersonAsync(result.Value.IdPerson, PersonRole.User);
+        var person = await authRepository.UpdatePersonAsync(result.Value.IdPerson, PersonRole.User, cancellationToken);
         
         var token = GenerateJwtToken(person.Value.Username, person.Value.Role, person.Value.IdPerson);
 
@@ -80,11 +80,11 @@ public class AuthService(
         });
     }
 
-    public async Task<Result<RegisterResponse>> LoginAsync(string usernameOrEmail, string password)
+    public async Task<Result<RegisterResponse>> LoginAsync(string usernameOrEmail, string password, CancellationToken cancellationToken)
     {
         var person = usernameOrEmail.Contains("@")
-            ? await authRepository.GetPersonByEmailAsync(usernameOrEmail)
-            : await authRepository.GetPersonByUsernameAsync(usernameOrEmail);
+            ? await authRepository.GetPersonByEmailAsync(usernameOrEmail, cancellationToken)
+            : await authRepository.GetPersonByUsernameAsync(usernameOrEmail, cancellationToken);
 
         if (!person.IsSuccess) return Result<RegisterResponse>.Failure(person.Exception);
         
@@ -98,7 +98,7 @@ public class AuthService(
         var token = GenerateJwtToken(person.Value.Username, person.Value.Role, person.Value.IdPerson);
 
         var updatePerson = await authRepository.UpdatePersonTokenAsync(person.Value.IdPerson,
-            SecurityHelper.GenerateRefreshToken(), DateTime.Now.AddDays(7));
+            SecurityHelper.GenerateRefreshToken(), DateTime.Now.AddDays(7), cancellationToken);
         
         return Result<RegisterResponse>.Ok(new RegisterResponse{
             AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
@@ -106,9 +106,9 @@ public class AuthService(
         });
     }
 
-    public async Task<Result<RegisterResponse>> RefreshTokenAsync(int id)
+    public async Task<Result<RegisterResponse>> RefreshTokenAsync(int id, CancellationToken cancellationToken)
     {
-        var person = await authRepository.GetPersonByIdAsync(id);
+        var person = await authRepository.GetPersonByIdAsync(id, cancellationToken);
         if (!person.IsSuccess) return Result<RegisterResponse>.Failure(person.Exception);
 
         if (person.Value.RefreshTokenExp < DateTime.Now)
@@ -117,7 +117,7 @@ public class AuthService(
         var token = GenerateJwtToken(person.Value.Username, person.Value.Role, person.Value.IdPerson);
         
         var personUpdate = await authRepository.UpdatePersonTokenAsync(person.Value.IdPerson,
-            SecurityHelper.GenerateRefreshToken(), DateTime.Now.AddDays(7));
+            SecurityHelper.GenerateRefreshToken(), DateTime.Now.AddDays(7), cancellationToken);
         
         return Result<RegisterResponse>.Ok(new RegisterResponse{
             AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
@@ -125,20 +125,20 @@ public class AuthService(
         });
     }
 
-    public async Task<Result<bool>> ResetPasswordAsync(string email)
+    public async Task<Result<bool>> ResetPasswordAsync(string email, CancellationToken cancellationToken)
     {
-        var user = await authRepository.GetPersonByEmailAsync(email);
+        var user = await authRepository.GetPersonByEmailAsync(email, cancellationToken);
         if (!user.IsSuccess) return Result<bool>.Failure(user.Exception);
 
         var token = GenerateJwtToken(user.Value.Username, user.Value.Role, user.Value.IdPerson);
-        EmailSender.SendCodeToEmail(user.Value.Email, new JwtSecurityTokenHandler().WriteToken(token));
+        await EmailSender.SendCodeToEmail(user.Value.Email, new JwtSecurityTokenHandler().WriteToken(token), cancellationToken);
 
         return Result<bool>.Ok(true);
     }
 
-    public async Task<Result<RegisterResponse>> UpdatePasswordAsync(int id, string password)
+    public async Task<Result<RegisterResponse>> UpdatePasswordAsync(int id, string password, CancellationToken cancellationToken)
     {
-        var person = await authRepository.GetPersonByIdAsync(id);
+        var person = await authRepository.GetPersonByIdAsync(id, cancellationToken);
         if (!person.IsSuccess) return Result<RegisterResponse>.Failure(person.Exception);
 
         var currentHashedPassword = SecurityHelper.GetHashedPasswordWithSalt(password, person.Value.Salt);
@@ -146,7 +146,7 @@ public class AuthService(
         if (currentHashedPassword == person.Value.Password)
             return Result<RegisterResponse>.Failure(new ForbiddenAccessException("You can't change, because the password is the same!"));
 
-        var updatePerson = await authRepository.UpdatePasswordAsync(id, currentHashedPassword);
+        var updatePerson = await authRepository.UpdatePasswordAsync(id, currentHashedPassword, cancellationToken);
         
         var token = GenerateJwtToken(updatePerson.Value.Username, updatePerson.Value.Role, updatePerson.Value.IdPerson);
         
@@ -156,9 +156,9 @@ public class AuthService(
         });
     }
     
-    public async Task<Result<UpdateProfileResponse>> UpdateProfileAsync(int id, ProfileRequest profileRequest)
+    public async Task<Result<UpdateProfileResponse>> UpdateProfileAsync(int id, ProfileRequest profileRequest, CancellationToken cancellationToken)
     {
-        var person = await authRepository.GetPersonByIdAsync(id);
+        var person = await authRepository.GetPersonByIdAsync(id, cancellationToken);
         if (!person.IsSuccess) return Result<UpdateProfileResponse>.Failure(person.Exception);
         
         bool isUsernameChanged = profileRequest.Username != person.Value.Username;
@@ -166,11 +166,11 @@ public class AuthService(
         //is username changed and doesn't exist in database
         if (isUsernameChanged)
         {
-            var isUsernameIsNotUsed = await authRepository.GetPersonByUsernameAsync(profileRequest.Username);
+            var isUsernameIsNotUsed = await authRepository.GetPersonByUsernameAsync(profileRequest.Username, cancellationToken);
             if (isUsernameIsNotUsed.IsSuccess) return Result<UpdateProfileResponse>.Failure(new IsExistsException("This username is exists!"));
         }
         
-        var updatePerson = await authRepository.UpdateProfileAsync(id, profileRequest);
+        var updatePerson = await authRepository.UpdateProfileAsync(id, profileRequest, cancellationToken);
 
         if (isUsernameChanged)
         {
