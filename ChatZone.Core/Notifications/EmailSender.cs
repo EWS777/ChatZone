@@ -6,7 +6,7 @@ namespace ChatZone.Core.Notifications;
 
 public class EmailSender()
 {
-    private static  IConfiguration _configuration;
+    private static IConfiguration _configuration;
 
     public static void EmailSettings(IConfiguration configuration)
     {

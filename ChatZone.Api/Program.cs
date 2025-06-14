@@ -1,11 +1,9 @@
 using System.Text;
 using ChatZone.Context;
 using ChatZone.Core.Notifications;
-using ChatZone.Repositories;
-using ChatZone.Repositories.Interfaces;
-using ChatZone.Services;
-using ChatZone.Services.Interfaces;
-using ChatZone.Validation;
+using ChatZone.Features.Identity.Authentication.Login;
+using ChatZone.Features.QuickMessages.Create;
+using ChatZone.Security;
 using ChatZone.Validation.Middleware;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -27,21 +25,17 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer(); //to create Swagger
 builder.Services.AddSwaggerGen(); //to create Swagger
 builder.Services.AddControllers(); //find all classes derived from ControllerBase which can be used
 
-builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
-builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
 
+builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblies(typeof(CreateQuickMessageHandler).Assembly));
 
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-builder.Services.AddScoped<IProfileRepository, ProfileRepository>();
-
-builder.Services.AddScoped<IFilterService, FilterService>();
-builder.Services.AddScoped<IFilterRepository, FilterRepository>();
-builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IToken, Token>();
 
 builder.Services.AddDbContext<ChatZoneDbContext>(opt =>
 {
