@@ -2,6 +2,8 @@ using System.Security.Claims;
 using ChatZone.Features.Identity.Authentication.Login;
 using ChatZone.Features.Identity.Authentication.Refresh;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,5 +43,14 @@ public class AuthenticationController(IMediator mediator) : ControllerBase
         
         var result = await mediator.Send(new RefreshRequest{Id = int.Parse(id)}, cancellationToken);
         return result.Match<RefreshResponse>(e => e, x => throw x);
+    }
+
+    [Authorize(Roles = "User")]
+    [HttpPost]
+    [Route("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return Ok("Logout was successful!");
     }
 }
