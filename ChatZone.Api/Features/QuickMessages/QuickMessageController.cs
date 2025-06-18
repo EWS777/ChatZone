@@ -3,6 +3,7 @@ using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Features.QuickMessages.Create;
 using ChatZone.Features.QuickMessages.Delete;
 using ChatZone.Features.QuickMessages.GetList;
+using ChatZone.Features.QuickMessages.Update;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,6 +42,23 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
 
         var result = await mediator.Send(quickMessageRequest, cancellationToken);
         return result.Match<CreateQuickMessageResponse>(x => x, x => throw x);
+    }
+
+    [Authorize(Roles = "User")]
+    [HttpPut]
+    [Route("{username}/quick-message/{id}/update")]
+    public async Task<UpdateQuickMessageResponse> UpdateQuickMessage(string username, int id,
+        [FromBody] UpdateQuickMessageRequest request, CancellationToken cancellationToken)
+    {
+        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+        if (tokenUsername is null || idPerson is null) throw new NotFoundException("User does not exist!");
+        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
+        
+        request.IdPerson = int.Parse(idPerson);
+        var result = await mediator.Send(request, cancellationToken);
+        return result.Match<UpdateQuickMessageResponse>(x => x, x => throw x);
     }
 
     [Authorize(Roles = "User")]
