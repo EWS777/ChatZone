@@ -39,6 +39,6 @@ public class BlockPersonController(IMediator mediator) : ControllerBase
         if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
         
         var result = await mediator.Send(new DeleteBlockedPersonRequest{Id = int.Parse(id), IdBlockedPerson = idBlockedPerson}, cancellationToken);
-        return result.Match<IActionResult>(x=>Ok("Person was deleted successfully!"), x => throw x);
+        return result.Match<IActionResult>(x=>x, x => throw x);
     }
 }
