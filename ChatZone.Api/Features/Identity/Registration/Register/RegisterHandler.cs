@@ -6,7 +6,6 @@ using ChatZone.Core.Models;
 using ChatZone.Core.Models.Enums;
 using ChatZone.Core.Notifications;
 using ChatZone.Security;
-using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,14 +14,10 @@ namespace ChatZone.Features.Identity.Registration.Register;
 
 public class RegisterHandler(
     ChatZoneDbContext dbContext,
-    IValidator<RegisterRequest> validator,
     IToken token) : IRequestHandler<RegisterRequest, Result<IActionResult>>
 {
     public async Task<Result<IActionResult>> Handle(RegisterRequest request, CancellationToken cancellationToken)
     {
-        var validation = await validator.ValidateAsync(request, cancellationToken);
-        if (!validation.IsValid) return Result<IActionResult>.Failure(validation.Errors.ToList());
-
         Person person;
         try
         {
