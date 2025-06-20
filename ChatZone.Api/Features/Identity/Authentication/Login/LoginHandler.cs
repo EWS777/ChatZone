@@ -28,7 +28,7 @@ public class LoginHandler(
         
         if(person.Role != PersonRole.User) return Result<LoginResponse>.Failure(new ForbiddenAccessException("The email is not confirmed"));
 
-        var currentHashedCode = SecurityHelper.GetHashedPasswordWithSalt(person.Password, person.Salt);
+        var currentHashedCode = SecurityHelper.GetHashedPasswordWithSalt(request.Password, person.Salt);
 
         if (currentHashedCode != person.Password)
             return Result<LoginResponse>.Failure(new ForbiddenAccessException("The password is not match"));
