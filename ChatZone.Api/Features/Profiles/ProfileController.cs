@@ -14,14 +14,11 @@ public class ProfileController(IMediator mediator) : ControllerBase
 {
     [Authorize(Roles = "User")]
     [HttpGet]
-    [Route("{username}")]
-    public async Task<GetProfileResponse> GetProfile(string username, CancellationToken cancellationToken)
+    [Route("")]
+    public async Task<GetProfileResponse> GetProfile(CancellationToken cancellationToken)
     {
-        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
         var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
-        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
+        if (id is null) throw new Exception("User does not exist!");
 
         var result = await mediator.Send(new GetProfileRequest{Id = int.Parse(id)}, cancellationToken);
         return result.Match(x => x, x => throw x);
