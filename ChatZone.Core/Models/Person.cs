@@ -27,7 +27,7 @@ public class Person
     public LangList? NativeLang { get; set; }
     public LangList? LearnLang { get; set; }
     public string? EmailConfirmToken { get; set; }
-    public DateTimeOffset EmailConfirmTokenExp { get; set; }
+    public DateTimeOffset? EmailConfirmTokenExp { get; set; }
     
     public ICollection<QuickMessage> QuickMessages { get; set; } = new List<QuickMessage>();
     public ICollection<BlockedPerson> BlockerPeoples { get; set; } = new List<BlockedPerson>();

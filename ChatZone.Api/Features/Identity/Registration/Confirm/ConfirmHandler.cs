@@ -21,6 +21,8 @@ public class ConfirmHandler(
         if (person.EmailConfirmTokenExp < DateTimeOffset.UtcNow) return Result<ConfirmResponse>.Failure(new ExpiredTokenException("Token was expired!"));
         
         person.Role = PersonRole.User;
+        person.EmailConfirmToken = null;
+        person.EmailConfirmTokenExp = null;
         dbContext.Persons.Update(person);
         
         await dbContext.SaveChangesAsync(cancellationToken);
