@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using ChatZone.Features.Identity.Registration.Confirm;
 using ChatZone.Features.Identity.Registration.Register;
 using MediatR;
@@ -20,15 +19,12 @@ public class RegistrationController(IMediator mediator) : ControllerBase
         return result.Match<IActionResult>(x=>Ok(new {message = "Completed!"}), x => throw x);
     }
     
-    [Authorize(Roles = "Unconfirmed")]
+    [AllowAnonymous]
     [HttpPost]
     [Route("confirm")]
-    public async Task<ConfirmResponse> Confirm(CancellationToken cancellationToken)
+    public async Task<ConfirmResponse> Confirm([FromQuery]string token, CancellationToken cancellationToken)
     {
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (id is null) throw new Exception("User does not exist!");
-
-        var result = await mediator.Send(new ConfirmRequest{Id = int.Parse(id)}, cancellationToken);
+        var result = await mediator.Send(new ConfirmRequest{Token = token}, cancellationToken);
 
         if (result.IsSuccess)
         {

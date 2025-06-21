@@ -15,12 +15,14 @@ public class ConfirmHandler(
 {
     public async Task<Result<ConfirmResponse>> Handle(ConfirmRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.IdPerson == request.Id, cancellationToken);
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.EmailConfirmToken == request.Token, cancellationToken);
         
-        if (person is null) return Result<ConfirmResponse>.Failure(new NotFoundException("User is not found!"));
-
+        if (person is null) return Result<ConfirmResponse>.Failure(new NotFoundException("Token is not exists!"));
+        if (person.EmailConfirmTokenExp < DateTimeOffset.UtcNow) return Result<ConfirmResponse>.Failure(new ExpiredTokenException("Token was expired!"));
+        
         person.Role = PersonRole.User;
         dbContext.Persons.Update(person);
+        
         await dbContext.SaveChangesAsync(cancellationToken);
         
         var generatedToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
