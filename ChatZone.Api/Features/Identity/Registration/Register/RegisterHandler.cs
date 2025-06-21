@@ -1,4 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
@@ -33,6 +33,18 @@ public class RegisterHandler(
             
             var getHashedPasswordAndSalt = SecurityHelper.GetHashedPasswordAndSalt(request.Password);
             
+            const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+            const int length = 70;
+            using var rng = RandomNumberGenerator.Create();
+            var bytes = new byte[length];
+            rng.GetBytes(bytes);
+            var result = new char[length];
+            for (int i = 0; i < length; i++)
+            {
+                result[i] = chars[bytes[i] % chars.Length];
+            }
+            string randomString = new string(result);
+            
             person = new Person
             {
                 Role = PersonRole.Unconfirmed,
@@ -41,7 +53,9 @@ public class RegisterHandler(
                 Password = getHashedPasswordAndSalt.Item1,
                 Salt = getHashedPasswordAndSalt.Item2,
                 RefreshToken = SecurityHelper.GenerateRefreshToken(),
-                RefreshTokenExp = DateTime.Now.AddDays(7)
+                RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7),
+                EmailConfirmToken = randomString,
+                EmailConfirmTokenExp = DateTimeOffset.UtcNow.AddMinutes(15)
             };
             
             await dbContext.Persons.AddAsync(person, cancellationToken);
@@ -54,9 +68,7 @@ public class RegisterHandler(
             return Result<IActionResult>.Failure(e);
         }
         
-        var generatedToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
-        
-        await EmailSender.SendCodeToEmail(person.Email, new JwtSecurityTokenHandler().WriteToken(generatedToken), cancellationToken);
+        await EmailSender.SendCodeToEmail(person.Email, person.EmailConfirmToken, cancellationToken);
         
         return Result<IActionResult>.Ok(new OkResult());
     }

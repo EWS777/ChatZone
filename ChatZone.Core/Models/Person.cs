@@ -13,7 +13,7 @@ public class Person
     public required string Password { get; set; }
     public required string Salt { get; set; }
     public required string RefreshToken { get; set; }
-    public required DateTime RefreshTokenExp { get; set; }
+    public required DateTimeOffset RefreshTokenExp { get; set; }
     
     public LangList LangMenu { get; set; }
     public bool IsDarkTheme { get; set; }
@@ -26,6 +26,8 @@ public class Person
     public GenderList? Gender { get; set; }
     public LangList? NativeLang { get; set; }
     public LangList? LearnLang { get; set; }
+    public string? EmailConfirmToken { get; set; }
+    public DateTimeOffset EmailConfirmTokenExp { get; set; }
     
     public ICollection<QuickMessage> QuickMessages { get; set; } = new List<QuickMessage>();
     public ICollection<BlockedPerson> BlockerPeoples { get; set; } = new List<BlockedPerson>();
