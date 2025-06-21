@@ -26,11 +26,10 @@ public class SingleMessageEfConfig : IEntityTypeConfiguration<SingleMessage>
             .Property(x => x.Message)
             .IsRequired()
             .HasMaxLength(250);
-        
+
         builder
-            .Property(x=>x.CreatedAt)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .Property(x => x.CreatedAt)
+            .IsRequired();
             
         builder.ToTable(nameof(SingleMessage));
     }

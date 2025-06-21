@@ -1,10 +1,8 @@
 ﻿using ChatZone.Context;
 using ChatZone.Core.Extensions;
-using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Core.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.BlockedPersons.Create;
 
@@ -17,7 +15,7 @@ public class CreateBlockedPersonHandler(
         {
             IdBlockerPerson = request.IdPerson,
             IdBlockedPerson = request.IdBlockedPerson,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTimeOffset.UtcNow
         }, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);

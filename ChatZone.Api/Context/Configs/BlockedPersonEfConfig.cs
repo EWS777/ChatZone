@@ -25,8 +25,7 @@ public class BlockedPersonEfConfig : IEntityTypeConfiguration<BlockedPerson>
 
         builder
             .Property(x => x.CreatedAt)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .IsRequired();
         
         builder.ToTable(nameof(BlockedPerson));
     }

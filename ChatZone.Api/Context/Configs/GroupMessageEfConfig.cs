@@ -29,8 +29,7 @@ public class GroupMessageEfConfig : IEntityTypeConfiguration<GroupMessage>
 
         builder
             .Property(x => x.CreatedAt)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .IsRequired();
         
         builder.ToTable(nameof(GroupMessage));
     }

@@ -18,13 +18,13 @@ public class RefreshHandler(
         var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.IdPerson == request.Id, cancellationToken);
         if (person is null) return Result<RefreshResponse>.Failure(new NotFoundException("User is not found!"));
 
-        if (person.RefreshTokenExp < DateTime.Now)
+        if (person.RefreshTokenExp < DateTimeOffset.UtcNow)
             return Result<RefreshResponse>.Failure(new SecurityTokenException("Refresh token expired"));
         
         var generatedToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
 
         person.RefreshToken = SecurityHelper.GenerateRefreshToken();
-        person.RefreshTokenExp = DateTime.Now.AddDays(7);
+        person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7);
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         

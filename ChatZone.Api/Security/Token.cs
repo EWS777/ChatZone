@@ -24,7 +24,7 @@ public class Token(IConfiguration configuration) : IToken
             issuer: configuration["JWT:Issuer"],
             audience: configuration["JWT:Audience"],
             claims: claims,
-            expires: DateTime.Now.AddDays(100),
+            expires: DateTime.UtcNow.AddDays(100),
             signingCredentials: creds
         );
     }

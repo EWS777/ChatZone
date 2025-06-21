@@ -49,8 +49,7 @@ public class PersonEfConfig : IEntityTypeConfiguration<Person>
 
         builder
             .Property(x => x.RefreshTokenExp)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .IsRequired();
 
         builder
             .Property(x => x.LangMenu)
@@ -66,7 +65,6 @@ public class PersonEfConfig : IEntityTypeConfiguration<Person>
             .Property(x => x.IsFindByProfile)
             .IsRequired()
             .HasDefaultValue(true);
-        
 
         builder.ToTable(nameof(Person));
     }

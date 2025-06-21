@@ -13,8 +13,7 @@ public class StatisticEfConfig : IEntityTypeConfiguration<Statistic>
 
         builder
             .Property(x => x.Day)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .IsRequired();
 
         builder
             .Property(x => x.AllMember)

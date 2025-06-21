@@ -29,8 +29,7 @@ public class GroupMemberEfConfig : IEntityTypeConfiguration<GroupMember>
 
         builder
             .Property(x => x.JoinedAt)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .IsRequired();
         
         builder.ToTable(nameof(GroupMember));
     }

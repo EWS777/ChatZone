@@ -36,7 +36,7 @@ public class LoginHandler(
         var generatedToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
         
         person.RefreshToken = SecurityHelper.GenerateRefreshToken();
-        person.RefreshTokenExp = DateTime.Now.AddDays(7);
+        person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7);
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
