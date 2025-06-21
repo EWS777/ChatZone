@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using ChatZone.Core.Models.Enums;
 using Microsoft.IdentityModel.Tokens;
@@ -27,5 +28,20 @@ public class Token(IConfiguration configuration) : IToken
             expires: DateTime.UtcNow.AddDays(100),
             signingCredentials: creds
         );
+    }
+
+    public string GenerateAuthorizationToken()
+    {
+        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        const int length = 70;
+        using var rng = RandomNumberGenerator.Create();
+        var bytes = new byte[length];
+        rng.GetBytes(bytes);
+        var result = new char[length];
+        for (int i = 0; i < length; i++)
+        {
+            result[i] = chars[bytes[i] % chars.Length];
+        }
+        return new string(result);
     }
 }

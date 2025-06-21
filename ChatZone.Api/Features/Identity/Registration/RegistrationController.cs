@@ -1,4 +1,5 @@
 using ChatZone.Features.Identity.Registration.Confirm;
+using ChatZone.Features.Identity.Registration.Reconfirm;
 using ChatZone.Features.Identity.Registration.Register;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -38,5 +39,15 @@ public class RegistrationController(IMediator mediator) : ControllerBase
         }
         
         return result.Match<ConfirmResponse>(e => e, x => throw x);
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("reconfirm")]
+    public async Task<IActionResult> Reconfirm([FromBody] ReconfirmRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken);
+        return result.Match<IActionResult>(e => e, x => throw x);
     }
 }

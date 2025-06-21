@@ -6,4 +6,5 @@ namespace ChatZone.Security;
 public interface IToken
 {
     JwtSecurityToken GenerateJwtToken(string username, PersonRole role, int idPerson);
+    string GenerateAuthorizationToken();
 }
