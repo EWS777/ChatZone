@@ -11,9 +11,6 @@ public class UpdateQuickMessageHandler
 {
     public async Task<Result<UpdateQuickMessageResponse>> Handle(UpdateQuickMessageRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.AnyAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
-        if(!person) return Result<UpdateQuickMessageResponse>.Failure(new NotFoundException("User is not found!"));
-
         var quickMessage = await dbContext.QuickMessages.SingleOrDefaultAsync(x => x.IdQuickMessage == request.IdQuickMessage,
                 cancellationToken);
         if(quickMessage is null) return Result<UpdateQuickMessageResponse>.Failure(new NotFoundException("Quick message is not found!"));

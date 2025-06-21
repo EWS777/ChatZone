@@ -11,9 +11,6 @@ public class GetQuickMessageListHandler(
 {
     public async Task<Result<List<GetQuickMessageListResponse>>> Handle(GetQuickMessageListRequest request, CancellationToken cancellationToken)
     {
-        var isPersonExists = await dbContext.Persons.AnyAsync(x => x.IdPerson == request.Id, cancellationToken);
-        if (!isPersonExists) return Result<List<GetQuickMessageListResponse>>.Failure(new NotFoundException("User is not found!"));
-        
         var quickMessageList = await dbContext.QuickMessages
             .Where(x => x.IdPerson == request.Id)
             .Select(x => new GetQuickMessageListResponse

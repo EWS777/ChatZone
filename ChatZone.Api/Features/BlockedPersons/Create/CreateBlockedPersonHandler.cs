@@ -13,9 +13,6 @@ public class CreateBlockedPersonHandler(
 {
     public async Task<Result<IActionResult>> Handle(CreateBlockedPersonRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.AnyAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
-        if(!person) return Result<IActionResult>.Failure(new NotFoundException("User is not found!"));
-
         await dbContext.BlockedPeoples.AddAsync(new BlockedPerson
         {
             IdBlockerPerson = request.IdPerson,

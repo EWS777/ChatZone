@@ -17,11 +17,7 @@ public class CreateQuickMessageHandler(
     {
         //delete http and add id in controller to DTO?
         var id = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-
         var userId = int.Parse(id!);
-        
-        var isPersonExists = await dbContext.Persons.AnyAsync(x=>x.IdPerson==userId, cancellationToken);
-        if (!isPersonExists) return Result<CreateQuickMessageResponse>.Failure(new NotFoundException("User is not found!"));
         
         var quickMessage = new QuickMessage
         {

@@ -12,9 +12,6 @@ public class DeleteQuickMessageHandler(
 {
     public async Task<Result<IActionResult>> Handle(DeleteQuickMessageRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.AnyAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
-        if (!person) return Result<IActionResult>.Failure(new NotFoundException("User is not found!"));
-        
         var message = await dbContext.QuickMessages.SingleOrDefaultAsync(x => x.IdQuickMessage == request.IdMessage,
                 cancellationToken);
         if(message is null) return Result<IActionResult>.Failure(new NotFoundException("Quick message is not found!"));
