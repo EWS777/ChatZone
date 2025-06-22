@@ -38,6 +38,7 @@ public class UpdateProfileHandler(
             return Result<UpdateProfileResponse>.Ok(new UpdateProfileResponse
             {
                 Username = person.Username,
+                Email = person.Email,
                 IsFindByProfile = person.IsFindByProfile,
                 AccessToken = new JwtSecurityTokenHandler().WriteToken(token.GenerateJwtToken(person.Username, person.Role, person.IdPerson)),
                 RefreshToken = person.RefreshToken
@@ -47,6 +48,7 @@ public class UpdateProfileHandler(
         return Result<UpdateProfileResponse>.Ok(new UpdateProfileResponse
         {
             Username = person.Username,
+            Email = person.Email,
             IsFindByProfile = person.IsFindByProfile
         });
     }

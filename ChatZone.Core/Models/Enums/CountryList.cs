@@ -2,5 +2,6 @@
 
 public enum CountryList
 {
-    
+    Ukraine,
+    Poland
 }

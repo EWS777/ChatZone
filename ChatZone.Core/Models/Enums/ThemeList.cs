@@ -2,5 +2,7 @@
 
 public enum ThemeList
 {
-    
+    Sport,
+    It,
+    Traveling
 }
