@@ -80,17 +80,30 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         }
     };
-}).AddJwtBearer("IgnoreTokenExpirationScheme",opt =>
+}).AddJwtBearer("IgnoreTokenExpirationScheme", opt =>
 {
     opt.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,   //by who
-        ValidateAudience = true, //for whom
+        ValidateIssuer = true,
+        ValidateAudience = true,
         ValidateLifetime = false,
         ClockSkew = TimeSpan.FromMinutes(2),
         ValidIssuer = builder.Configuration["JWT:Issuer"],
         ValidAudience = builder.Configuration["JWT:Audience"], 
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]))
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]))
+    };
+    opt.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var refreshTokenFromCookie = context.Request.Cookies["RefreshToken"];
+            if (!string.IsNullOrEmpty(refreshTokenFromCookie))
+            {
+                context.Token = refreshTokenFromCookie;
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
