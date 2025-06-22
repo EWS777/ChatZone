@@ -38,6 +38,25 @@ public class ProfileController(IMediator mediator) : ControllerBase
         profileRequest.Id = int.Parse(id);
         
         var result = await mediator.Send(profileRequest, cancellationToken);
+        
+        if (result.IsSuccess && username != result.Value.Username)
+        {
+            Response.Cookies.Append("AccessToken", result.Value.AccessToken!, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+            Response.Cookies.Append("RefreshToken", result.Value.RefreshToken!, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+        }
+        
         return result.Match(x => x, x => throw x);
     }
 }

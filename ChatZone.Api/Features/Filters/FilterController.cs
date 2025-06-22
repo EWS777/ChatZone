@@ -14,29 +14,24 @@ public class FilterController(IMediator mediator) : ControllerBase
 {
     [Authorize(Roles = "User")]
     [HttpGet]
-    [Route("{username}/filter")]
-    public async Task<GetFilterResponse> GetFilter([FromRoute] string username, CancellationToken cancellationToken)
+    [Route("")]
+    public async Task<GetFilterResponse> GetFilter(CancellationToken cancellationToken)
     {
-        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
         var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
-        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
-
+        if (id is null) throw new Exception("User does not exist!");
         var result = await mediator.Send(new GetFilterRequest{Id = int.Parse(id)}, cancellationToken);
         return result.Match<GetFilterResponse>(e => e, x=> throw x);
     }
 
     [Authorize(Roles = "User")]
     [HttpPut]
-    [Route("{username}/filter")]
-    public async Task<UpdateFilterResponse> UpdateFilter(string username, [FromBody] UpdateFilterRequest filterRequest, CancellationToken cancellationToken)
+    [Route("")]
+    public async Task<UpdateFilterResponse> UpdateFilter([FromBody] UpdateFilterRequest filterRequest, CancellationToken cancellationToken)
     {
-        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
         var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
-        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
+        if (id is null) throw new Exception("User does not exist!");
         filterRequest.Id = int.Parse(id);
         
         var result = await mediator.Send(filterRequest, cancellationToken);

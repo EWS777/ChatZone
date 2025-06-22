@@ -16,7 +16,7 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
 {
     [Authorize(Roles = "User")]
     [HttpGet]
-    [Route("{username}/quick-messages")]
+    [Route("{username}")]
     public async Task<List<GetQuickMessageListResponse>> GetQuickMessages(string username, CancellationToken cancellationToken)
     {
         var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
@@ -31,7 +31,7 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
     
     [Authorize(Roles = "User")]
     [HttpPost]
-    [Route("{username}/quick-message")]
+    [Route("{username}/add")]
     public async Task<CreateQuickMessageResponse> CreateQuickMessage(string username, [FromBody] CreateQuickMessageRequest quickMessageRequest, CancellationToken cancellationToken)
     { 
         var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
@@ -46,8 +46,8 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
 
     [Authorize(Roles = "User")]
     [HttpPut]
-    [Route("{username}/quick-message/{id}/update")]
-    public async Task<UpdateQuickMessageResponse> UpdateQuickMessage(string username, int id,
+    [Route("{username}/{id}/update")]
+    public async Task<UpdateQuickMessageResponse> UpdateQuickMessage(string username, [FromRoute] int id,
         [FromBody] UpdateQuickMessageRequest request, CancellationToken cancellationToken)
     {
         var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
@@ -63,8 +63,8 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
 
     [Authorize(Roles = "User")]
     [HttpDelete]
-    [Route("{username}/quick-message")]
-    public async Task<IActionResult> DeleteQuickMessage(string username, [FromQuery] int idQuickMessage, CancellationToken cancellationToken)
+    [Route("{username}/delete/{idQuickMessage:int}")]
+    public async Task<IActionResult> DeleteQuickMessage(string username, [FromRoute] int idQuickMessage, CancellationToken cancellationToken)
     {
         var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
         var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

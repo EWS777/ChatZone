@@ -10,12 +10,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace ChatZone.Features.BlockedPersons;
 
 [ApiController]
-[Route("[controller]")]
+[Route("{username}/[controller]")]
 public class BlockPersonController(IMediator mediator) : ControllerBase
 {
     [Authorize(Roles = "User")]
     [HttpGet]
-    [Route("{username}/blocked-users")]
+    [Route("")]
     public async Task<List<GetBlockedPersonsResponse>> GetBlockedPersons(string username, CancellationToken cancellationToken)
     {
         var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
@@ -30,7 +30,7 @@ public class BlockPersonController(IMediator mediator) : ControllerBase
 
     [Authorize]
     [HttpPost]
-    [Route("{username}/blocked-users/add")]
+    [Route("add/{idBlockedPerson:int}")]
     public async Task<IActionResult> CreateBlockedPerson(string username, [FromRoute] int idBlockedPerson, CancellationToken cancellationToken)
     {
         var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
@@ -45,7 +45,7 @@ public class BlockPersonController(IMediator mediator) : ControllerBase
     
     [Authorize(Roles = "User")]
     [HttpDelete]
-    [Route("{username}/blocked-users/{idBlockedPerson}")]
+    [Route("delete/{idBlockedPerson}")]
     public async Task<IActionResult> DeleteBlockedPerson(string username, [FromRoute] int idBlockedPerson, CancellationToken cancellationToken)
     {
         var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
