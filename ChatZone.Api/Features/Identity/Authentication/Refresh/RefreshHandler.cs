@@ -21,15 +21,14 @@ public class RefreshHandler(
         if (person.RefreshTokenExp < DateTimeOffset.UtcNow)
             return Result<RefreshResponse>.Failure(new SecurityTokenException("Refresh token expired"));
         
-        var generatedToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
+        var generatedAccessToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
 
-        person.RefreshToken = SecurityHelper.GenerateRefreshToken();
         person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7);
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<RefreshResponse>.Ok(new RefreshResponse{
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(generatedToken),
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(generatedAccessToken),
             RefreshToken = person.RefreshToken
         });
     }

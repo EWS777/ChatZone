@@ -20,18 +20,21 @@ public class ConfirmHandler(
         if (person is null) return Result<ConfirmResponse>.Failure(new NotFoundException("Token is not exists!"));
         if (person.EmailConfirmTokenExp < DateTimeOffset.UtcNow) return Result<ConfirmResponse>.Failure(new ExpiredTokenException("Token was expired!"));
         
+        var generatedRefreshToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
+        var generatedAccessToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
+        
         person.Role = PersonRole.User;
         person.EmailConfirmToken = null;
         person.EmailConfirmTokenExp = null;
+        person.RefreshToken = generatedRefreshToken.ToString();
+        person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7);
+        
         dbContext.Persons.Update(person);
-        
         await dbContext.SaveChangesAsync(cancellationToken);
-        
-        var generatedToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
 
         return Result<ConfirmResponse>.Ok(new ConfirmResponse{
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(generatedToken),
-            RefreshToken = person.RefreshToken
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(generatedAccessToken),
+            RefreshToken = new JwtSecurityTokenHandler().WriteToken(generatedRefreshToken)
         });
     }
 }

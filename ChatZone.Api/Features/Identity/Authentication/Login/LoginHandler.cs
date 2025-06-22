@@ -33,16 +33,18 @@ public class LoginHandler(
         if (currentHashedCode != person.Password)
             return Result<LoginResponse>.Failure(new ForbiddenAccessException("The password is not match"));
 
-        var generatedToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
+        var generatedAccessToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
+        var generatedRefreshToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
         
-        person.RefreshToken = SecurityHelper.GenerateRefreshToken();
         person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7);
+        person.RefreshToken = generatedRefreshToken.ToString();
+        
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<LoginResponse>.Ok(new LoginResponse{
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(generatedToken),
-            RefreshToken = person.RefreshToken
+            AccessToken = new JwtSecurityTokenHandler().WriteToken(generatedAccessToken),
+            RefreshToken = new JwtSecurityTokenHandler().WriteToken(generatedRefreshToken)
         });
     }
 }
