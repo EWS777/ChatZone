@@ -18,6 +18,6 @@ public class DeleteQuickMessageHandler(
         
         dbContext.QuickMessages.Remove(message);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return Result<IActionResult>.Ok(new OkObjectResult("Quick message was deleted successfully!"));
+        return Result<IActionResult>.Ok(new ObjectResult(new {message = "Quick message was deleted successfully!"}));
     }
 }
