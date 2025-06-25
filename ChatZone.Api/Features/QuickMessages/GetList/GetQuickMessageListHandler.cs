@@ -12,6 +12,7 @@ public class GetQuickMessageListHandler(
     public async Task<Result<List<GetQuickMessageListResponse>>> Handle(GetQuickMessageListRequest request, CancellationToken cancellationToken)
     {
         var quickMessageList = await dbContext.QuickMessages
+            .AsNoTracking()
             .Where(x => x.IdPerson == request.Id)
             .Select(x => new GetQuickMessageListResponse
             {

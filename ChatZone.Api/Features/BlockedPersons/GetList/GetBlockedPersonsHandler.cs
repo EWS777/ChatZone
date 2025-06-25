@@ -12,6 +12,7 @@ public class GetBlockedPersonsHandler(
     public async Task<Result<List<GetBlockedPersonsResponse>>> Handle(GetBlockedPersonsRequest request, CancellationToken cancellationToken)
     {
         var blockedPersons = await dbContext.BlockedPeoples
+            .AsNoTracking()
             .Where(x => x.IdBlockerPerson == request.Id)
             .Select(x => new GetBlockedPersonsResponse
             {

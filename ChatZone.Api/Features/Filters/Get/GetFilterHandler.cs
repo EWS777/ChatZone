@@ -10,18 +10,21 @@ public class GetFilterHandler(ChatZoneDbContext dbContext) : IRequestHandler<Get
 {
     public async Task<Result<GetFilterResponse>> Handle(GetFilterRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.IdPerson==request.Id, cancellationToken);
-        if(person is null) return Result<GetFilterResponse>.Failure(new NotFoundException("User is not found!"));
-
-        return Result<GetFilterResponse>.Ok(new GetFilterResponse
-        {
-            ThemeList = person!.ThemeList,
-            Country = person.Country,
-            City = person.City,
-            Age = person.Age,
-            Gender = person.Gender,
-            NativeLang = person.NativeLang,
-            LearnLang = person.LearnLang
-        });
+        var person = await dbContext.Persons
+            .AsNoTracking()
+            .Where(x => x.IdPerson == request.Id)
+            .Select(x => new GetFilterResponse
+            {
+                ThemeList = x.ThemeList,
+                Country = x.Country,
+                City = x.City,
+                Age = x.Age,
+                Gender = x.Gender,
+                NativeLang = x.NativeLang,
+                LearnLang = x.LearnLang
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+        
+        return person is null ? Result<GetFilterResponse>.Failure(new NotFoundException("User is not found!")) : Result<GetFilterResponse>.Ok(person);
     }
 }

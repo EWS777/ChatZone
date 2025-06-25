@@ -10,14 +10,17 @@ public class GetProfileHandler(ChatZoneDbContext dbContext) : IRequestHandler<Ge
 {
     public async Task<Result<GetProfileResponse>> Handle(GetProfileRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.IdPerson==request.Id, cancellationToken);
-        if (person is null) return Result<GetProfileResponse>.Failure(new NotFoundException("User is not found!"));
-
-        return Result<GetProfileResponse>.Ok(new GetProfileResponse
-        {
-            Username = person.Username,
-            Email = person.Email,
-            IsFindByProfile = person.IsFindByProfile
-        });
+        var person = await dbContext.Persons
+            .AsNoTracking()
+            .Where(x => x.IdPerson == request.Id)
+            .Select(x => new GetProfileResponse
+            {
+                Username = x.Username,
+                Email = x.Email,
+                IsFindByProfile = x.IsFindByProfile
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+        
+        return person is null ? Result<GetProfileResponse>.Failure(new NotFoundException("User is not found!")) : Result<GetProfileResponse>.Ok(person);
     }
 }
