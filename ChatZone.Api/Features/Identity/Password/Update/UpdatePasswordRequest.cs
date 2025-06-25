@@ -1,10 +1,17 @@
+using System.ComponentModel.DataAnnotations;
 using ChatZone.Core.Extensions;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Identity.Password.Update;
 
-public class UpdatePasswordRequest : IRequest<Result<UpdatePasswordResponse>>
+public class UpdatePasswordRequest : IRequest<Result<IActionResult>>
 {
-    public int Id { get; init; }
-    public required string Password { get; init; }
+    public int Id { get; set; }
+    [MinLength(8, ErrorMessage = "Password can not be less than 8")]
+    [MaxLength(50, ErrorMessage = "Password can not be more than 50")] 
+    public required string OldPassword { get; init; }
+    [MinLength(8, ErrorMessage = "Password can not be less than 8")]
+    [MaxLength(50, ErrorMessage = "Password can not be more than 50")] 
+    public required string NewPassword { get; init; }
 }

@@ -1,36 +1,31 @@
-using System.IdentityModel.Tokens.Jwt;
 using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Security;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Identity.Password.Update;
 
-public class UpdatePasswordHandler(
-    ChatZoneDbContext dbContext,
-    IToken token) : IRequestHandler<UpdatePasswordRequest, Result<UpdatePasswordResponse>>
+public class UpdatePasswordHandler(ChatZoneDbContext dbContext) : IRequestHandler<UpdatePasswordRequest, Result<IActionResult>>
 {
-    public async Task<Result<UpdatePasswordResponse>> Handle(UpdatePasswordRequest request, CancellationToken cancellationToken)
+    public async Task<Result<IActionResult>> Handle(UpdatePasswordRequest request, CancellationToken cancellationToken)
     {
         var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.IdPerson == request.Id, cancellationToken);
-        if (person is null) return Result<UpdatePasswordResponse>.Failure(new NotFoundException("User is not found!"));
-
-        var currentHashedPassword = SecurityHelper.GetHashedPasswordWithSalt(request.Password, person.Salt);
-
-        if (currentHashedPassword == person.Password)
-            return Result<UpdatePasswordResponse>.Failure(new ForbiddenAccessException("You can't change, because the password is the same!"));
-
-        person.Password = request.Password;
+        if (person is null) return Result<IActionResult>.Failure(new NotFoundException("User is not found!"));
+        
+        var oldHashedPassword = SecurityHelper.GetHashedPasswordWithSalt(request.OldPassword, person.Salt);
+        if (oldHashedPassword != person.Password)
+            return Result<IActionResult>.Failure(new ForbiddenAccessException("Password is not correct!"));
+        
+        var newHashedPassword = SecurityHelper.GetHashedPasswordWithSalt(request.NewPassword, person.Salt);
+        if (newHashedPassword == person.Password) return Result<IActionResult>.Failure(new ForbiddenAccessException("Password can not be the same"));
+        
+        person.Password = newHashedPassword;
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        var generatedToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
-        
-        return Result<UpdatePasswordResponse>.Ok(new UpdatePasswordResponse{
-            AccessToken = new JwtSecurityTokenHandler().WriteToken(generatedToken),
-            RefreshToken = person.RefreshToken
-        });
+        return Result<IActionResult>.Ok(new OkObjectResult(new {message = "Update has completed successfully!"}));
     }
 }

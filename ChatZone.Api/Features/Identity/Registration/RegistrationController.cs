@@ -36,6 +36,13 @@ public class RegistrationController(IMediator mediator) : ControllerBase
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
+            Response.Cookies.Append("RefreshToken", result.Value.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
         }
         
         return result.Match<ConfirmResponse>(e => e, x => throw x);
@@ -44,10 +51,9 @@ public class RegistrationController(IMediator mediator) : ControllerBase
     [AllowAnonymous]
     [HttpPost]
     [Route("reconfirm")]
-    public async Task<IActionResult> Reconfirm([FromBody] ReconfirmRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Reconfirm([FromQuery] string email, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(request, cancellationToken);
+        var result = await mediator.Send(new ReconfirmRequest{Email = email}, cancellationToken);
         return result.Match<IActionResult>(e => e, x => throw x);
     }
 }
