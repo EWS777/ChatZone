@@ -1,6 +1,5 @@
 using ChatZone.Context;
 using ChatZone.Core.Extensions;
-using ChatZone.Core.Extensions.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +13,7 @@ public class GetBlockedPersonsHandler(
         var blockedPersons = await dbContext.BlockedPeoples
             .AsNoTracking()
             .Where(x => x.IdBlockerPerson == request.Id)
+            .OrderByDescending(x=>x.CreatedAt)
             .Select(x => new GetBlockedPersonsResponse
             {
                 IdBlockedPerson = x.IdBlockedPerson,

@@ -17,6 +17,6 @@ public class DeleteBlockedPersonHandler(ChatZoneDbContext dbContext) : IRequestH
         dbContext.BlockedPeoples.Remove(deletePerson);
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        return Result<IActionResult>.Ok(new OkObjectResult("User was deleted successfully!"));
+        return Result<IActionResult>.Ok(new OkObjectResult(new {message = "User was deleted successfully!"}));
     }
 }
