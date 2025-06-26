@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ChatZone.Features.Identity.Password.Reset;
+using ChatZone.Features.Identity.Password.Set;
 using ChatZone.Features.Identity.Password.Update;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -14,10 +15,10 @@ public class PasswordController(IMediator mediator) : ControllerBase
     [AllowAnonymous]
     [HttpPost]
     [Route("reset-password")]
-    public async Task<IActionResult> ResetPassword(string email, CancellationToken cancellationToken)
+    public async Task<IActionResult> ResetPassword([FromQuery]string email, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new ResetPasswordRequest{Email = email}, cancellationToken);
-        return result.Match<IActionResult>(e => Ok("The reset link was sent to your email"), x => throw x);
+        return result.Match<IActionResult>(x => x, x => throw x);
     }
 
     [Authorize(Roles = "User")]

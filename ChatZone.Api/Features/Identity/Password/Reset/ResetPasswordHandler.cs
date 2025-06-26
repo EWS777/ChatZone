@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
@@ -19,9 +18,11 @@ public class ResetPasswordHandler(
         var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.Email==request.Email, cancellationToken);
         if (person is null) return Result<IActionResult>.Failure(new NotFoundException("User is not found!"));
 
-        var generatedToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
-        await EmailSender.SendCodeToEmail(person.Email, new JwtSecurityTokenHandler().WriteToken(generatedToken), cancellationToken);
-
-        return Result<IActionResult>.Ok(new OkResult());
+        person.EmailConfirmToken = token.GenerateAuthorizationToken();
+        dbContext.Persons.Update(person);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        
+        await EmailSender.ResetPassword(person.Email, person.EmailConfirmToken, cancellationToken);
+        return Result<IActionResult>.Ok(new OkObjectResult(new {message = "The reset link was sent to your email!"}));
     }
 }
