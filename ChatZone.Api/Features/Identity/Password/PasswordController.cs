@@ -34,4 +34,14 @@ public class PasswordController(IMediator mediator) : ControllerBase
         var result = await mediator.Send(request, cancellationToken);
         return result.Match<IActionResult>(x=> x, x=> throw x);
     }
+
+    [AllowAnonymous]
+    [HttpPut]
+    [Route("set-password")]
+    public async Task<IActionResult> SetNewPassword([FromBody] SetNewPasswordRequest request, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken);
+        
+        return result.Match<IActionResult>(x => x, x => throw x);
+    }
 }
