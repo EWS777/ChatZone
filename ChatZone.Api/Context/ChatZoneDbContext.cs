@@ -16,6 +16,7 @@ public class ChatZoneDbContext : DbContext
     public DbSet<QuickMessage> QuickMessages { get; set; }
     public DbSet<Report> Reports { get; set; }
     public DbSet<Statistic> Statistics { get; set; }
+    public DbSet<MatchQueue> MatchQueues { get; set; }
 
     public ChatZoneDbContext(DbContextOptions<ChatZoneDbContext> options) : base(options)
     {
