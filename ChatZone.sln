@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatZone.Api", "ChatZone.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatZone.Core", "ChatZone.Core\ChatZone.Core.csproj", "{40F4F59F-0C41-4C39-82D8-5A6506453702}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatZone.Chat", "ChatZone.Chat\ChatZone.Chat.csproj", "{B6CB305A-98DB-4F13-BD6D-650A151959F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{40F4F59F-0C41-4C39-82D8-5A6506453702}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40F4F59F-0C41-4C39-82D8-5A6506453702}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40F4F59F-0C41-4C39-82D8-5A6506453702}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6CB305A-98DB-4F13-BD6D-650A151959F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6CB305A-98DB-4F13-BD6D-650A151959F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6CB305A-98DB-4F13-BD6D-650A151959F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6CB305A-98DB-4F13-BD6D-650A151959F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

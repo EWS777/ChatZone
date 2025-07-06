@@ -1,4 +1,5 @@
 using System.Text;
+using ChatZone.Chat.Individual;
 using ChatZone.Context;
 using ChatZone.Core.Notifications;
 using ChatZone.Features.Identity.Authentication.Login;
@@ -29,6 +30,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer(); //to create Swagger
 builder.Services.AddSwaggerGen(); //to create Swagger
 builder.Services.AddControllers(); //find all classes derived from ControllerBase which can be used
+builder.Services.AddSignalR();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
@@ -126,7 +128,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapHub<ChatHub>("/chat");
 
 app.MapControllers(); //with 'builder.Services.AddControllers();'
 
