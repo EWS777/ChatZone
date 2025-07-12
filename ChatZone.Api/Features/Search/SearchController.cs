@@ -27,7 +27,7 @@ public class SearchController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Cancel(CancellationToken cancellationToken)
     {
         var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var result = await mediator.Send(new CancelRequest{IdPerson = int.Parse(personId!)}, cancellationToken);
+        var result = await mediator.Send(new CancelPersonRequest{IdPerson = int.Parse(personId!)}, cancellationToken);
         return result.Match(x => x, x=> throw x);
     }
 }

@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Search.Cancel;
 
-public class CancelHandler(ChatZoneDbContext dbContext) : IRequestHandler<CancelRequest, Result<IActionResult>>
+public class CancelPersonHandler(ChatZoneDbContext dbContext) : IRequestHandler<CancelPersonRequest, Result<IActionResult>>
 {
-    public async Task<Result<IActionResult>> Handle(CancelRequest request, CancellationToken cancellationToken)
+    public async Task<Result<IActionResult>> Handle(CancelPersonRequest personRequest, CancellationToken cancellationToken)
     {
         var person = await dbContext.MatchQueues
-            .SingleOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
+            .SingleOrDefaultAsync(x => x.IdPerson == personRequest.IdPerson, cancellationToken);
         if(person is null) return Result<IActionResult>.Failure(new NotFoundException("Person is not found!"));
         
         dbContext.Remove(person);
