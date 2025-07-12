@@ -9,6 +9,10 @@ public class MatchQueueEfConfig : IEntityTypeConfiguration<MatchQueue>
     public void Configure(EntityTypeBuilder<MatchQueue> builder)
     {
         builder.HasKey(x => x.IdPerson);
+
+        builder
+            .Property(x => x.IdPerson)
+            .ValueGeneratedNever();
         
         builder.ToTable(nameof(MatchQueue));
     }

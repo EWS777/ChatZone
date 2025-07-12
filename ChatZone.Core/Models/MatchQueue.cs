@@ -11,4 +11,5 @@ public class MatchQueue
     public AgeList? Age { get; set; }
     public GenderList? Gender { get; set; }
     public LangList? Lang { get; set; }
+    public required string ConnectionId { get; set; }
 }
