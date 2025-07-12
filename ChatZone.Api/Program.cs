@@ -4,6 +4,7 @@ using ChatZone.Context;
 using ChatZone.Core.Notifications;
 using ChatZone.Features.Identity.Authentication.Login;
 using ChatZone.Features.QuickMessages.Create;
+using ChatZone.Matchmaking;
 using ChatZone.Security;
 using ChatZone.Validation.Middleware;
 using FluentValidation;
@@ -38,6 +39,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
 builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblies(typeof(CreateQuickMessageHandler).Assembly));
 
 builder.Services.AddScoped<IToken, Token>();
+builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
 
 builder.Services.AddDbContext<ChatZoneDbContext>(opt =>
 {
