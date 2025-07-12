@@ -8,6 +8,7 @@ namespace ChatZone.Features.Search.Find;
 public class FindPersonRequest : IRequest<Result<IActionResult>>
 {
     public int IdPerson { get; set; }
+    public string ConnectionId { get; set; } = string.Empty;
     public ThemeList? ThemeList { get; set; }
     public CountryList? Country { get; set; }
     public CityList? City { get; set; }
