@@ -1,9 +1,10 @@
-﻿using ChatZone.Features.Search.Find;
+﻿using ChatZone.Core.Models;
+using ChatZone.Features.Search.Find;
 
 namespace ChatZone.Matchmaking;
 
 public interface IMatchmakingService
 {
-    Task<(string connectionPersonId1, string connectionPersonId2, string groupName)?> FindMatch(
+    Task<(MatchQueue person1, MatchQueue person2, string groupName)?> FindMatch(
         FindPersonRequest request, CancellationToken cancellationToken);
 }
