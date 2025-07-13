@@ -22,10 +22,11 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
             Lang = request.Lang
         };
         
-        var secondPerson = await dbContext.MatchQueues.FirstOrDefaultAsync(cancellationToken);
+        var secondPerson = await dbContext.MatchQueues.FirstOrDefaultAsync(x=> x.IdPerson != firstPerson.IdPerson, cancellationToken);
         if (secondPerson == null)
         {
-            await dbContext.MatchQueues.AddAsync(firstPerson, cancellationToken);
+            var isExists = await dbContext.MatchQueues.AnyAsync(x => x.IdPerson == firstPerson.IdPerson, cancellationToken);
+            if(!isExists) await dbContext.MatchQueues.AddAsync(firstPerson, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
             return null;
         }
