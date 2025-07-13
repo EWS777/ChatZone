@@ -1,10 +1,12 @@
-﻿using System.Security.Claims;
+﻿using System.Collections.Concurrent;
+using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatZone.Chat;
 
 public class ChatHub : Hub
 {
+    public static ConcurrentDictionary<string, string> UsersGroups = new();
     public async Task SendMessage(string groupName, string message)
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
@@ -15,16 +17,24 @@ public class ChatHub : Hub
     public override async Task OnConnectedAsync()
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
-        if (!string.IsNullOrEmpty(username))
+        if (!string.IsNullOrEmpty(username) && UsersGroups.TryGetValue(username, out var groupName))
         {
-            await Clients.Caller.SendAsync("GetUsername", username);
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
         }
         
         await base.OnConnectedAsync();
     }
-
+    
+    //get connectionId and add to database while matching 
     public string GetConnectionId()
     {
         return Context.ConnectionId;
+    }
+    public object GetPersonGroupAndUsername()
+    {
+        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
+        var groupName = UsersGroups.GetValueOrDefault(username!);
+
+        return new { username, groupName };
     }
 }
