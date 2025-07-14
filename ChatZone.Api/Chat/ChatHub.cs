@@ -37,4 +37,17 @@ public class ChatHub : Hub
 
         return new { username, groupName };
     }
+    
+    public async Task LeaveChat(string groupName)
+    {
+        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
+        if (!string.IsNullOrEmpty(username))
+        {
+            UsersGroups.TryRemove(username, out _);
+            var otherPerson = UsersGroups.FirstOrDefault(x => x.Value == groupName && x.Key != username).Key;
+            UsersGroups.TryRemove(otherPerson, out _);
+            
+            await Clients.OthersInGroup(groupName).SendAsync("LeftChat");
+        }
+    }
 }
