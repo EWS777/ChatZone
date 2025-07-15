@@ -34,8 +34,9 @@ public class ChatHub : Hub
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
         var groupName = UsersGroups.GetValueOrDefault(username!);
+        var otherUsername = UsersGroups.FirstOrDefault(x => x.Value == groupName && x.Key != username).Key;
 
-        return new { username, groupName };
+        return new { username, groupName, otherUsername};
     }
     
     public async Task LeaveChat(string groupName)

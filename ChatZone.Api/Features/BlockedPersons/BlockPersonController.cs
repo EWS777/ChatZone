@@ -28,15 +28,15 @@ public class BlockPersonController(IMediator mediator) : ControllerBase
 
     [Authorize]
     [HttpPost]
-    [Route("add/{idBlockedPerson:int}")]
-    public async Task<IActionResult> CreateBlockedPerson([FromRoute] int idBlockedPerson, CancellationToken cancellationToken)
+    [Route("add/{usernameBlockedPerson}")]
+    public async Task<IActionResult> CreateBlockedPerson([FromRoute] string usernameBlockedPerson, CancellationToken cancellationToken)
     {
         var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
         var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
 
-        var result = await mediator.Send(new CreateBlockedPersonRequest { IdPerson = int.Parse(id), IdBlockedPerson = idBlockedPerson }, cancellationToken);
+        var result = await mediator.Send(new CreateBlockedPersonRequest { IdPerson = int.Parse(id), UsernameBlockedPerson = usernameBlockedPerson }, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     

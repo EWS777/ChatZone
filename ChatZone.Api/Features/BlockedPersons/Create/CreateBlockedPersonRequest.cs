@@ -7,5 +7,5 @@ namespace ChatZone.Features.BlockedPersons.Create;
 public class CreateBlockedPersonRequest : IRequest<Result<IActionResult>>
 {
     public int IdPerson { get; init; }
-    public int IdBlockedPerson { get; init; }
+    public required string UsernameBlockedPerson { get; init; }
 }
