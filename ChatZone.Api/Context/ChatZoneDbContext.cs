@@ -17,7 +17,7 @@ public class ChatZoneDbContext : DbContext
     public DbSet<Report> Reports { get; set; }
     public DbSet<Statistic> Statistics { get; set; }
     public DbSet<MatchQueue> MatchQueues { get; set; }
-
+    public DbSet<PersonFilterProperty> PersonFilterProperties { get; set; }
     public ChatZoneDbContext(DbContextOptions<ChatZoneDbContext> options) : base(options)
     {
         
