@@ -10,6 +10,9 @@ public class PersonFilterPropertyEfConfig : IEntityTypeConfiguration<PersonFilte
     {
         builder.HasKey(x => x.IdPerson);
 
+        builder.Property(x => x.IdPerson)
+            .ValueGeneratedNever();
+
         builder.ToTable(nameof(PersonFilterProperty));
     }
 }
