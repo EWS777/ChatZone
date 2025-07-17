@@ -15,13 +15,13 @@ public class GetFilterHandler(ChatZoneDbContext dbContext) : IRequestHandler<Get
             .Where(x => x.IdPerson == request.Id)
             .Select(x => new GetFilterResponse
             {
-                ThemeList = x.ThemeList,
+                Theme = x.Theme,
                 Country = x.Country,
                 City = x.City,
                 Age = x.Age,
-                Gender = x.Gender,
-                NativeLang = x.NativeLang,
-                LearnLang = x.LearnLang
+                YourGender = x.YourGender,
+                PartnerGender = x.PartnerGender,
+                Language = x.Language,
             })
             .SingleOrDefaultAsync(cancellationToken);
         

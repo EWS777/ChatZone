@@ -9,10 +9,12 @@ public class FindPersonRequest : IRequest<Result<IActionResult>>
 {
     public int IdPerson { get; set; }
     public string ConnectionId { get; set; } = string.Empty;
-    public ThemeList? ThemeList { get; set; }
+    public ThemeList? Theme { get; set; }
     public CountryList? Country { get; set; }
     public CityList? City { get; set; }
     public AgeList? Age { get; set; }
-    public GenderList? Gender { get; set; }
-    public LangList? Lang { get; set; }
+    public GenderList? YourGender { get; set; }
+    public GenderList? PartnerGender { get; set; }
+    public LangList? Language { get; set; }
+    public bool IsSearchAgain { get; set; } = false;
 }

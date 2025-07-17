@@ -19,13 +19,13 @@ public class Person
     public bool IsDarkTheme { get; set; }
     public bool IsFindByProfile { get; set; }
     
-    public ThemeList? ThemeList { get; set; }
+    public ThemeList? Theme { get; set; }
     public CountryList? Country { get; set; }
     public CityList? City { get; set; }
     public AgeList? Age { get; set; }
-    public GenderList? Gender { get; set; }
-    public LangList? NativeLang { get; set; }
-    public LangList? LearnLang { get; set; }
+    public GenderList? YourGender { get; set; }
+    public GenderList? PartnerGender { get; set; }
+    public LangList? Language { get; set; }
     public string? EmailConfirmToken { get; set; }
     public DateTimeOffset? EmailConfirmTokenExp { get; set; }
     

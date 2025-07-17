@@ -13,26 +13,26 @@ public class UpdateFilterHandler(ChatZoneDbContext dbContext) : IRequestHandler<
         var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == request.Id, cancellationToken);
         if (person is null) return Result<UpdateFilterResponse>.Failure(new NotFoundException("User is not found!"));
         
-        person.ThemeList = request.ThemeList;
+        person.Theme = request.Theme;
         person.Country = request.Country;
         person.City = request.City;
         person.Age = request.Age;
-        person.Gender = request.Gender;
-        person.NativeLang = request.NativeLang;
-        person.LearnLang = request.LearnLang;
+        person.YourGender = request.YourGender;
+        person.PartnerGender = request.PartnerGender;
+        person.Language = request.Language;
 
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<UpdateFilterResponse>.Ok(new UpdateFilterResponse
         {
-            ThemeList = person.ThemeList,
+            Theme = person.Theme,
             Age = person.Age,
             City = person.City,
             Country = person.Country,
-            Gender = person.Gender,
-            LearnLang = person.LearnLang,
-            NativeLang = person.NativeLang
+            YourGender = person.YourGender,
+            PartnerGender = person.PartnerGender,
+            Language = person.Language
         });
     }
 }

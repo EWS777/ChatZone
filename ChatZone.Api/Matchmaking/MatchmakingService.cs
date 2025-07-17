@@ -14,12 +14,13 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
         {
             IdPerson = request.IdPerson,
             ConnectionId = request.ConnectionId,
-            ThemeList = request.ThemeList,
+            Theme = request.Theme,
             Country = request.Country,
             City = request.City,
             Age = request.Age,
-            Gender = request.Gender,
-            Lang = request.Lang
+            YourGender = request.YourGender,
+            PartnerGender = request.PartnerGender,
+            Language = request.Language
         };
         
         var secondPerson = await dbContext.MatchQueues.FirstOrDefaultAsync(x=> x.IdPerson != firstPerson.IdPerson, cancellationToken);
