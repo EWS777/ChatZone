@@ -6,6 +6,6 @@ public class GroupMember
     public int IdGroupMember { get; set; }
     public bool IsAdmin { get; set; }
     public DateTimeOffset JoinedAt { get; set; }
-    public required Person Person { get; set; }
-    public required GroupChat GroupChat { get; set; }
+    public Person Person { get; set; }
+    public GroupChat GroupChat { get; set; }
 }
