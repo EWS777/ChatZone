@@ -22,7 +22,7 @@ public class GroupController(IMediator mediator) : ControllerBase
     
     [HttpPost]
     [Route("create")]
-    public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request, CancellationToken cancellationToken)
+    public async Task<int> CreateGroup([FromBody] CreateGroupRequest request, CancellationToken cancellationToken)
     {
         var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (personId is null) throw new Exception("User does not exist!");
