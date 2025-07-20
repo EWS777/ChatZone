@@ -35,21 +35,35 @@ public class ChatHub : Hub
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
         var groupName = UsersGroups.GetValueOrDefault(username!);
-        var otherUsername = UsersGroups.FirstOrDefault(x => x.Value == groupName && x.Key != username).Key;
-
-        return new { username, groupName, otherUsername};
+        var isSingleChat = IsTypeOfChatSingle.FirstOrDefault(x => x.Key == groupName).Value;
+        
+        return new { username, groupName, isSingleChat};
     }
     
-    public async Task LeaveChat(string groupName)
+    public async Task LeaveChat(string groupName, bool isSingleChat)
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
-        if (!string.IsNullOrEmpty(username))
+        UsersGroups.TryRemove(username!, out _);
+        IsTypeOfChatSingle.TryRemove(groupName, out _);
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+
+        if (isSingleChat)
         {
-            UsersGroups.TryRemove(username, out _);
             var otherPerson = UsersGroups.FirstOrDefault(x => x.Value == groupName && x.Key != username).Key;
             UsersGroups.TryRemove(otherPerson, out _);
             
             await Clients.OthersInGroup(groupName).SendAsync("LeftChat");
         }
+    }
+
+    public async Task AddToGroup(int groupName)
+    {
+        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
+        
+        UsersGroups.TryAdd(username!, groupName.ToString());
+        await Groups.AddToGroupAsync(Context.ConnectionId, groupName.ToString());
+        IsTypeOfChatSingle[username!] = false;
+        
+        await Clients.Caller.SendAsync("ChatCreated");
     }
 }
