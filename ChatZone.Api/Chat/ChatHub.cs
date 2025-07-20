@@ -7,6 +7,7 @@ namespace ChatZone.Chat;
 public class ChatHub : Hub
 {
     public static ConcurrentDictionary<string, string> UsersGroups = new();
+    public static ConcurrentDictionary<string, bool> IsTypeOfChatSingle = new();
     public async Task SendMessage(string groupName, string message)
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;

@@ -36,6 +36,7 @@ public class FindPersonHandler(
         
         ChatHub.UsersGroups[username1!] = match.Value.groupName;
         ChatHub.UsersGroups[username2!] = match.Value.groupName;
+        ChatHub.IsTypeOfChatSingle[match.Value.groupName] = true;
 
         await hubContext.Clients.Group(match.Value.groupName)
             .SendAsync("ChatCreated", cancellationToken);
