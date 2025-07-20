@@ -12,7 +12,7 @@ public class CreateGroupHandler(
 {
     public async Task<Result<int>> Handle(CreateGroupRequest request, CancellationToken cancellationToken)
     {
-        var exists = await dbContext.ChatMembers.AnyAsync(x => x.IdGroupMember == request.IdPerson, cancellationToken);
+        var exists = await dbContext.GroupMembers.AnyAsync(x => x.IdGroupMember == request.IdPerson, cancellationToken);
         if (exists) return Result<int>.Failure(new ExistPersonException("You already have a group!"));
         var chat = new GroupChat
         {

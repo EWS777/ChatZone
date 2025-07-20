@@ -8,7 +8,7 @@ public class ChatZoneDbContext : DbContext
 {
     public DbSet<BlockedPerson> BlockedPeoples { get; set; }
     public DbSet<GroupMessage> GroupMessages { get; set; }
-    public DbSet<GroupMember> ChatMembers { get; set; }
+    public DbSet<GroupMember> GroupMembers { get; set; }
     public DbSet<SingleChat> SingleChats { get; set; }
     public DbSet<SingleMessage> SingleMessages { get; set; }
     public DbSet<GroupChat> GroupChats { get; set; }
