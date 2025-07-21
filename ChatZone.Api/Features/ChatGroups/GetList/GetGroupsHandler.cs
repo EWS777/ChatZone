@@ -3,7 +3,7 @@ using ChatZone.Core.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatZone.Features.ChatGroups.Get;
+namespace ChatZone.Features.ChatGroups.GetList;
 
 public class GetGroupsHandler(
     ChatZoneDbContext dbContext) : IRequestHandler<GetGroupsRequest, Result<List<GetGroupsResponse>>>

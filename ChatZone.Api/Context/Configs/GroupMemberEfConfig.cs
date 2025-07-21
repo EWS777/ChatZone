@@ -18,7 +18,7 @@ public class GroupMemberEfConfig : IEntityTypeConfiguration<GroupMember>
 
         builder
             .HasOne(x => x.GroupChat)
-            .WithMany(x => x.ChatMembers)
+            .WithMany(x => x.GroupMembers)
             .HasForeignKey(x => x.IdChat)
             .OnDelete(DeleteBehavior.Cascade);
 

@@ -21,7 +21,7 @@ public class CreateGroupHandler(
             City = request.City,
             Age = request.Age,
             Lang = request.Lang,
-            ChatMembers = new List<GroupMember>
+            GroupMembers = new List<GroupMember>
             {
                 new GroupMember
                 {

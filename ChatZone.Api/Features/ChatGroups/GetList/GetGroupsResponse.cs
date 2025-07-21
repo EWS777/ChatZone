@@ -1,6 +1,6 @@
 ﻿using ChatZone.Core.Models.Enums;
 
-namespace ChatZone.Features.ChatGroups.Get;
+namespace ChatZone.Features.ChatGroups.GetList;
 
 public class GetGroupsResponse
 {
