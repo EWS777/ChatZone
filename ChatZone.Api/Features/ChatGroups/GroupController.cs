@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 using ChatZone.Features.ChatGroups.Create;
 using ChatZone.Features.ChatGroups.Get;
+using ChatZone.Features.ChatGroups.GetList;
+using ChatZone.Features.ChatGroups.Update;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +36,19 @@ public class GroupController(IMediator mediator) : ControllerBase
     [HttpPost]
     [Route("create")]
     public async Task<int> CreateGroup([FromBody] CreateGroupRequest request, CancellationToken cancellationToken)
+    {
+        var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (personId is null) throw new Exception("User does not exist!");
+
+        request.IdPerson = int.Parse(personId);
+        
+        var result = await mediator.Send(request, cancellationToken);
+        return result.Match(x => x, x => throw x);
+    }
+    
+    [HttpPut]
+    [Route("update")]
+    public async Task<UpdateGroupResponse> UpdateGroup([FromBody] UpdateGroupRequest request, CancellationToken cancellationToken)
     {
         var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (personId is null) throw new Exception("User does not exist!");
