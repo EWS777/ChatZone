@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using ChatZone.Features.ChatGroups.ChangeAdmin;
 using ChatZone.Features.ChatGroups.Create;
 using ChatZone.Features.ChatGroups.Get;
 using ChatZone.Features.ChatGroups.GetList;
@@ -49,6 +50,19 @@ public class GroupController(IMediator mediator) : ControllerBase
     [HttpPut]
     [Route("update")]
     public async Task<UpdateGroupResponse> UpdateGroup([FromBody] UpdateGroupRequest request, CancellationToken cancellationToken)
+    {
+        var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (personId is null) throw new Exception("User does not exist!");
+
+        request.IdPerson = int.Parse(personId);
+        
+        var result = await mediator.Send(request, cancellationToken);
+        return result.Match(x => x, x => throw x);
+    }
+    
+    [HttpPut]
+    [Route("change-admin")]
+    public async Task<IActionResult> ChangeAdmin([FromBody] ChangeAdminRequest request, CancellationToken cancellationToken)
     {
         var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (personId is null) throw new Exception("User does not exist!");
