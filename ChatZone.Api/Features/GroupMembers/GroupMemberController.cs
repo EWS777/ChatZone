@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using ChatZone.Features.GroupMembers.Add;
 using ChatZone.Features.GroupMembers.Delete;
+using ChatZone.Features.GroupMembers.GetList;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,21 @@ namespace ChatZone.Features.GroupMembers;
 [Route("[controller]")]
 public class GroupMemberController(IMediator mediator) : ControllerBase
 {
+    [HttpGet]
+    [Route("get-list")]
+    public async Task<List<GetGroupMemberResponse>> GetGroupMember([FromQuery] int idGroup, CancellationToken cancellationToken)
+    {
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var groupMember = new GetGroupMemberRequest
+        {
+            IdPerson = int.Parse(idPerson!),
+            IdGroup = idGroup
+        };
+
+        var result = await mediator.Send(groupMember, cancellationToken);
+        return result.Match(x => x, x => throw x);
+    }
+    
     [HttpPost]
     [Route("add")]
     public async Task<IActionResult> AddGroupMember([FromQuery] int groupName, CancellationToken cancellationToken)
