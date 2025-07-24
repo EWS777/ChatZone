@@ -1,13 +1,11 @@
-﻿using System.Collections.Concurrent;
-using System.Security.Claims;
+﻿using System.Security.Claims;
+using ChatZone.Core.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatZone.Chat;
 
 public class ChatHub : Hub
 {
-    public static ConcurrentDictionary<string, string> UsersGroups = new();
-    public static ConcurrentDictionary<string, bool> IsTypeOfChatSingle = new();
     public async Task SendMessage(string groupName, string message)
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
@@ -18,9 +16,10 @@ public class ChatHub : Hub
     public override async Task OnConnectedAsync()
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
-        if (!string.IsNullOrEmpty(username) && UsersGroups.TryGetValue(username, out var groupName))
+        if (!string.IsNullOrEmpty(username))
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            var groupName = ChatGroupStore.GetPersonGroup(username);
+            if(groupName is not null) await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
         }
         
         await base.OnConnectedAsync();
@@ -34,8 +33,12 @@ public class ChatHub : Hub
     public object GetPersonGroupAndUsername()
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
-        var groupName = UsersGroups.GetValueOrDefault(username!);
-        var isSingleChat = IsTypeOfChatSingle.FirstOrDefault(x => x.Key == groupName).Value;
+        if (username is null) throw new Exception("User does not exist!");
+        
+        var groupName = ChatGroupStore.GetPersonGroup(username);
+        if (groupName is null) throw new Exception("User does not has any group!");
+        
+        var isSingleChat = ChatGroupStore.IsSingleChat(groupName);
         
         return new { username, groupName, isSingleChat};
     }
@@ -43,14 +46,14 @@ public class ChatHub : Hub
     public async Task LeaveChat(string groupName, bool isSingleChat)
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
-        UsersGroups.TryRemove(username!, out _);
-        IsTypeOfChatSingle.TryRemove(groupName, out _);
+        ChatGroupStore.RemovePersonFromGroup(username!);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
 
         if (isSingleChat)
         {
-            var otherPerson = UsersGroups.FirstOrDefault(x => x.Value == groupName && x.Key != username).Key;
-            UsersGroups.TryRemove(otherPerson, out _);
+            var otherPerson = ChatGroupStore.GetSecondPersonInSingleChat(groupName, username!);
+            
+            ChatGroupStore.RemovePersonFromGroup(otherPerson);
             
             await Clients.OthersInGroup(groupName).SendAsync("LeftChat");
         }
@@ -60,9 +63,9 @@ public class ChatHub : Hub
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
         
-        UsersGroups.TryAdd(username!, groupName.ToString());
+        ChatGroupStore.AddPersonToGroup(username!, groupName.ToString());
+        ChatGroupStore.AddTypeOfGroup(groupName.ToString(), false);
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName.ToString());
-        IsTypeOfChatSingle[username!] = false;
         
         await Clients.Caller.SendAsync("ChatCreated");
     }

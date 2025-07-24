@@ -1,6 +1,7 @@
 using ChatZone.Chat;
 using ChatZone.Context;
 using ChatZone.Core.Extensions;
+using ChatZone.Core.Services;
 using ChatZone.Matchmaking;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -34,9 +35,9 @@ public class FindPersonHandler(
             .Select(x => x.Username)
             .SingleOrDefaultAsync(cancellationToken);
         
-        ChatHub.UsersGroups[username1!] = match.Value.groupName;
-        ChatHub.UsersGroups[username2!] = match.Value.groupName;
-        ChatHub.IsTypeOfChatSingle[match.Value.groupName] = true;
+        ChatGroupStore.AddPersonToGroup(username1!, match.Value.groupName);
+        ChatGroupStore.AddPersonToGroup(username2!, match.Value.groupName);
+        ChatGroupStore.AddTypeOfGroup(match.Value.groupName, true);
 
         await hubContext.Clients.Group(match.Value.groupName)
             .SendAsync("ChatCreated", cancellationToken);
