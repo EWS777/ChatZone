@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using ChatZone.Features.GroupMembers.Add;
-using ChatZone.Features.GroupMembers.Delete;
+using ChatZone.Features.GroupMembers.LeaveGroup;
 using ChatZone.Features.GroupMembers.GetList;
 using ChatZone.Features.GroupMembers.ChangeAdmin;
 using MediatR;
@@ -45,11 +45,11 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
     }
 
     [HttpDelete]
-    [Route("delete")]
-    public async Task<IActionResult> DeleteGroupMember(CancellationToken cancellationToken)
+    [Route("leave")]
+    public async Task<IActionResult> LeaveGroup(CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var groupMember = new DeleteGroupMemberRequest
+        var groupMember = new LeaveGroupRequest
         {
             IdPerson = int.Parse(idPerson!)
         };

@@ -2,9 +2,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatZone.Features.GroupMembers.Delete;
+namespace ChatZone.Features.GroupMembers.LeaveGroup;
 
-public class DeleteGroupMemberRequest : IRequest<Result<IActionResult>>
+public class LeaveGroupRequest : IRequest<Result<IActionResult>>
 {
     public int IdPerson { get; set; }
 }
