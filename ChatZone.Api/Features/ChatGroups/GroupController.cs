@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using ChatZone.Features.ChatGroups.Create;
+using ChatZone.Features.ChatGroups.Delete;
 using ChatZone.Features.ChatGroups.Get;
 using ChatZone.Features.ChatGroups.GetList;
 using ChatZone.Features.ChatGroups.Update;
@@ -54,6 +55,23 @@ public class GroupController(IMediator mediator) : ControllerBase
         if (personId is null) throw new Exception("User does not exist!");
 
         request.IdPerson = int.Parse(personId);
+        
+        var result = await mediator.Send(request, cancellationToken);
+        return result.Match(x => x, x => throw x);
+    }
+    
+    [HttpDelete]
+    [Route("delete")]
+    public async Task<IActionResult> DeleteGroup([FromQuery] int idGroup, CancellationToken cancellationToken)
+    {
+        var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (personId is null) throw new Exception("User does not exist!");
+
+        var request = new DeleteGroupRequest
+        {
+            IdPerson = int.Parse(personId),
+            IdGroup = idGroup
+        };
         
         var result = await mediator.Send(request, cancellationToken);
         return result.Match(x => x, x => throw x);
