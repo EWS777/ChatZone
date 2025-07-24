@@ -2,6 +2,7 @@
 using ChatZone.Features.GroupMembers.Add;
 using ChatZone.Features.GroupMembers.Delete;
 using ChatZone.Features.GroupMembers.GetList;
+using ChatZone.Features.GroupMembers.ChangeAdmin;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +55,19 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
         };
 
         var result = await mediator.Send(groupMember, cancellationToken);
+        return result.Match(x => x, x => throw x);
+    }
+    
+    [HttpPut]
+    [Route("change-admin")]
+    public async Task<IActionResult> ChangeAdmin([FromBody] ChangeAdminRequest request, CancellationToken cancellationToken)
+    {
+        var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (personId is null) throw new Exception("User does not exist!");
+
+        request.IdPerson = int.Parse(personId);
+        
+        var result = await mediator.Send(request, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
 }

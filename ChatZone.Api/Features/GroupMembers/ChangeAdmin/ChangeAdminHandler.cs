@@ -5,7 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatZone.Features.ChatGroups.ChangeAdmin;
+namespace ChatZone.Features.GroupMembers.ChangeAdmin;
 
 public class ChangeAdminHandler(
     ChatZoneDbContext dbContext) : IRequestHandler<ChangeAdminRequest, Result<IActionResult>>

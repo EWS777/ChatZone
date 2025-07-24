@@ -2,7 +2,7 @@ using ChatZone.Core.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatZone.Features.ChatGroups.ChangeAdmin;
+namespace ChatZone.Features.GroupMembers.ChangeAdmin;
 
 public class ChangeAdminRequest : IRequest<Result<IActionResult>>
 {
