@@ -20,7 +20,7 @@ public class GetGroupMemberHandler(
 
         var groupList = await dbContext.GroupMembers
             .AsNoTracking()
-            .Where(x => x.IdChat == request.IdGroup)
+            .Where(x => x.IdChat == request.IdGroup && x.IdGroupMember != request.IdPerson)
             .Include(x => x.Person)
             .Select(x => new GetGroupMemberResponse
             {

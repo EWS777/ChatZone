@@ -16,13 +16,13 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
     [Route("get-list")]
-    public async Task<List<GetGroupMemberResponse>> GetGroupMember([FromQuery] int idGroup, CancellationToken cancellationToken)
+    public async Task<List<GetGroupMemberResponse>> GetGroupMember([FromQuery] string groupName, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var groupMember = new GetGroupMemberRequest
         {
             IdPerson = int.Parse(idPerson!),
-            IdGroup = idGroup
+            IdGroup = int.Parse(groupName)
         };
 
         var result = await mediator.Send(groupMember, cancellationToken);
