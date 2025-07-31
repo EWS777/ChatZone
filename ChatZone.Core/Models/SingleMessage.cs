@@ -7,8 +7,8 @@ public class SingleMessage
     public required string Message { get; set; }
     public int IdSender { get; set; }
     public int IdChat { get; set; }
-    public required SingleChat SingleChat { get; set; }
-    public required Person Sender { get; set; }
+    public SingleChat SingleChat { get; set; }
+    public Person Sender { get; set; }
 
-    public required Report Report { get; set; }
+    public Report Report { get; set; }
 }

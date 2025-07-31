@@ -1,15 +1,27 @@
 ﻿using System.Security.Claims;
 using ChatZone.Core.Services;
+using ChatZone.Features.SingleMessages.Add;
+using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatZone.Chat;
 
-public class ChatHub : Hub
+public class ChatHub(IMediator mediator) : Hub
 {
-    public async Task SendMessage(string groupName, string message)
+    public async Task SendMessage(string groupName, string message, bool isSingleChat)
     {
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
-        
+        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (isSingleChat)
+        {
+            await mediator.Send(new AddSingleMessageRequest
+            {
+                Message = message,
+                IdSender = int.Parse(idPerson!),
+                IdChat = int.Parse(groupName)
+            });
+        }
         await Clients.Group(groupName).SendAsync("Receive", username, message);
     }
     
