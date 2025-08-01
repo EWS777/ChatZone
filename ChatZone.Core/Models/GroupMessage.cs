@@ -7,7 +7,7 @@ public class GroupMessage
     public DateTimeOffset CreatedAt { get; set; }
     public int IdSender { get; set; }
     public int IdChat { get; set; }
-    public required Person Person { get; set; }
-    public required GroupChat GroupChat { get; set; }
-    public required Report Report { get; set; }
+    public Person Person { get; set; }
+    public GroupChat GroupChat { get; set; }
+    public Report Report { get; set; }
 }
