@@ -1,14 +1,17 @@
+using ChatZone.Chat;
 using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.GroupMembers.ChangeAdmin;
 
 public class ChangeAdminHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<ChangeAdminRequest, Result<IActionResult>>
+    ChatZoneDbContext dbContext,
+    IHubContext<ChatHub> hubContext) : IRequestHandler<ChangeAdminRequest, Result<IActionResult>>
 {
     public async Task<Result<IActionResult>> Handle(ChangeAdminRequest request, CancellationToken cancellationToken)
     {
@@ -28,6 +31,9 @@ public class ChangeAdminHandler(
         dbContext.GroupMembers.Update(isAdmin);
         dbContext.GroupMembers.Update(newAdmin);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        await hubContext.Clients.User(request.IdPerson.ToString()).SendAsync("AdminChanged", false, cancellationToken);
+        await hubContext.Clients.User(request.IdNewAdminPerson.ToString()).SendAsync("AdminChanged", true, cancellationToken);
         
         return Result<IActionResult>.Ok(new OkResult());
     }
