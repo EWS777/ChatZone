@@ -7,7 +7,7 @@ namespace ChatZone.Matchmaking;
 
 public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingService
 {
-    public async Task<(MatchQueue person1, MatchQueue person2, string groupName)?> FindMatch(
+    public async Task<(MatchQueue person1, MatchQueue person2, int idGroup)?> FindMatch(
         FindPersonRequest request, CancellationToken cancellationToken)
     {
         var firstPerson = new MatchQueue
@@ -66,7 +66,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
         await dbContext.SingleChats.AddAsync(chat, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        return (firstPerson, secondPerson, chat.IdSingleChat.ToString());
+        return (firstPerson, secondPerson, chat.IdSingleChat);
     }
 
     private async Task AddFilterPropertiesAsync(MatchQueue person, CancellationToken cancellationToken)

@@ -4,36 +4,36 @@ namespace ChatZone.Core.Services;
 
 public class ChatGroupStore
 {
-    private static readonly ConcurrentDictionary<string, string> UsersGroups = new();
-    private static readonly ConcurrentDictionary<string, bool> IsTypeOfChatSingle = new();
+    private static readonly ConcurrentDictionary<int, int> UsersGroups = new();
+    private static readonly ConcurrentDictionary<int, bool> IsTypeOfChatSingle = new();
 
-    public static string? GetPersonGroup(string username)
+    public static int? GetPersonGroup(int idPerson)
     {
-        return UsersGroups.GetValueOrDefault(username);
+        return UsersGroups.GetValueOrDefault(idPerson);
     }
 
-    public static bool IsSingleChat(string groupName)
+    public static bool IsSingleChat(int? idGroup)
     {
-        return IsTypeOfChatSingle.FirstOrDefault(x => x.Key == groupName).Value;
+        return IsTypeOfChatSingle.FirstOrDefault(x => x.Key == idGroup).Value;
     }
 
-    public static void RemovePersonFromGroup(string username)
+    public static void RemovePersonFromGroup(int idPerson)
     {
-        UsersGroups.TryGetValue(username, out var groupName);
+        UsersGroups.TryGetValue(idPerson, out _);
     }
 
-    public static string GetSecondPersonInSingleChat(string groupName, string firstUsername)
+    public static int GetSecondPersonInSingleChat(int idGroup, int firstIdPerson)
     {
-        return UsersGroups.FirstOrDefault(x => x.Value == groupName && x.Key != firstUsername).Key;
+        return UsersGroups.FirstOrDefault(x => x.Value == idGroup && x.Key != firstIdPerson).Key;
     }
 
-    public static void AddPersonToGroup(string username, string groupName)
+    public static void AddPersonToGroup(int idPerson, int idGroup)
     {
-        UsersGroups.TryAdd(username, groupName);
+        UsersGroups.TryAdd(idPerson, idGroup);
     }
 
-    public static void AddTypeOfGroup(string groupName, bool isSingleChat)
+    public static void AddTypeOfGroup(int idGroup, bool isSingleChat)
     {
-        IsTypeOfChatSingle.TryAdd(groupName, isSingleChat);
+        IsTypeOfChatSingle.TryAdd(idGroup, isSingleChat);
     }
 }

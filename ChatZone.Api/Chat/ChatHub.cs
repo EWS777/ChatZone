@@ -26,11 +26,11 @@ public class ChatHub(IMediator mediator) : Hub
     
     public override async Task OnConnectedAsync()
     {
-        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
-        if (!string.IsNullOrEmpty(username))
+        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(idPerson))
         {
-            var groupName = ChatGroupStore.GetPersonGroup(username);
-            if(groupName is not null) await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            var groupName = ChatGroupStore.GetPersonGroup(int.Parse(idPerson));
+            if(groupName is not null) await Groups.AddToGroupAsync(Context.ConnectionId, groupName.ToString()!);
         }
         
         await base.OnConnectedAsync();
@@ -43,40 +43,41 @@ public class ChatHub(IMediator mediator) : Hub
     }
     public object GetPersonGroupAndUsername()
     {
-        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
-        if (username is null) throw new Exception("User does not exist!");
+        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) throw new Exception("User does not exist!");
         
-        var groupName = ChatGroupStore.GetPersonGroup(username);
-        if (groupName is null) throw new Exception("User does not has any group!");
+        var idGroup = ChatGroupStore.GetPersonGroup(int.Parse(idPerson));
+        if (idGroup is null) throw new Exception("User does not has any group!");
+
+        //ToDo IsSingleChat(int? idGroup) добавил ? может быть можно как то обойти?
+        var isSingleChat = ChatGroupStore.IsSingleChat(idGroup);
         
-        var isSingleChat = ChatGroupStore.IsSingleChat(groupName);
-        
-        return new { username, groupName, isSingleChat};
+        return new { idPerson, idGroup, isSingleChat};
     }
     
-    public async Task LeaveChat(string groupName, bool isSingleChat)
+    public async Task LeaveChat(int idGroup, bool isSingleChat)
     {
-        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
-        ChatGroupStore.RemovePersonFromGroup(username!);
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        ChatGroupStore.RemovePersonFromGroup(int.Parse(idPerson!));
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, idGroup.ToString());
 
         if (isSingleChat)
         {
-            var otherPerson = ChatGroupStore.GetSecondPersonInSingleChat(groupName, username!);
+            var otherPerson = ChatGroupStore.GetSecondPersonInSingleChat(idGroup, int.Parse(idPerson!));
             
             ChatGroupStore.RemovePersonFromGroup(otherPerson);
             
-            await Clients.OthersInGroup(groupName).SendAsync("LeftChat");
+            await Clients.OthersInGroup(idGroup.ToString()).SendAsync("LeftChat");
         }
     }
 
-    public async Task AddToGroup(int groupName)
+    public async Task AddToGroup(int idGroup)
     {
-        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
+        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        ChatGroupStore.AddPersonToGroup(username!, groupName.ToString());
-        ChatGroupStore.AddTypeOfGroup(groupName.ToString(), false);
-        await Groups.AddToGroupAsync(Context.ConnectionId, groupName.ToString());
+        ChatGroupStore.AddPersonToGroup(int.Parse(idPerson!), idGroup);
+        ChatGroupStore.AddTypeOfGroup(idGroup, false);
+        await Groups.AddToGroupAsync(Context.ConnectionId, idGroup.ToString());
         
         await Clients.Caller.SendAsync("ChatCreated");
     }

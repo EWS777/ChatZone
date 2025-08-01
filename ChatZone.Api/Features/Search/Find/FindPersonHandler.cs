@@ -1,17 +1,14 @@
 using ChatZone.Chat;
-using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Services;
 using ChatZone.Matchmaking;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Search.Find;
 
 public class FindPersonHandler(
-    ChatZoneDbContext dbContext,
     IMatchmakingService matchmakingService,
     IHubContext<ChatHub> hubContext)
     : IRequestHandler<FindPersonRequest, Result<IActionResult>>
@@ -22,24 +19,14 @@ public class FindPersonHandler(
         
         if(match==null) return Result<IActionResult>.Ok(new ObjectResult(new { message = "Waiting for match...", chatCreated=false}));
         
-        await hubContext.Groups.AddToGroupAsync(match.Value.person1.ConnectionId, match.Value.groupName, cancellationToken);
-        await hubContext.Groups.AddToGroupAsync(match.Value.person2.ConnectionId, match.Value.groupName, cancellationToken);
-
-        var username1 = await dbContext.Persons
-            .Where(x => x.IdPerson == match.Value.person1.IdPerson)
-            .Select(x => x.Username)
-            .SingleOrDefaultAsync(cancellationToken);
+        await hubContext.Groups.AddToGroupAsync(match.Value.person1.ConnectionId, match.Value.idGroup.ToString(), cancellationToken);
+        await hubContext.Groups.AddToGroupAsync(match.Value.person2.ConnectionId, match.Value.idGroup.ToString(), cancellationToken);
         
-        var username2 = await dbContext.Persons
-            .Where(x => x.IdPerson == match.Value.person2.IdPerson)
-            .Select(x => x.Username)
-            .SingleOrDefaultAsync(cancellationToken);
-        
-        ChatGroupStore.AddPersonToGroup(username1!, match.Value.groupName);
-        ChatGroupStore.AddPersonToGroup(username2!, match.Value.groupName);
-        ChatGroupStore.AddTypeOfGroup(match.Value.groupName, true);
+        ChatGroupStore.AddPersonToGroup(match.Value.person1.IdPerson, match.Value.idGroup);
+        ChatGroupStore.AddPersonToGroup(match.Value.person2.IdPerson, match.Value.idGroup);
+        ChatGroupStore.AddTypeOfGroup(match.Value.idGroup, true);
 
-        await hubContext.Clients.Group(match.Value.groupName)
+        await hubContext.Clients.Group(match.Value.idGroup.ToString())
             .SendAsync("ChatCreated", cancellationToken);
         
         return Result<IActionResult>.Ok(new ObjectResult(new {message = "Chat was created!"}));

@@ -5,6 +5,6 @@ namespace ChatZone.Matchmaking;
 
 public interface IMatchmakingService
 {
-    Task<(MatchQueue person1, MatchQueue person2, string groupName)?> FindMatch(
+    Task<(MatchQueue person1, MatchQueue person2, int idGroup)?> FindMatch(
         FindPersonRequest request, CancellationToken cancellationToken);
 }
