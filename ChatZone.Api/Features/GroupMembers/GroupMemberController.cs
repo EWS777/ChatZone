@@ -16,13 +16,13 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
     [Route("get-list")]
-    public async Task<List<GetGroupMemberResponse>> GetGroupMember([FromQuery] string groupName, CancellationToken cancellationToken)
+    public async Task<List<GetGroupMemberResponse>> GetGroupMember([FromQuery] int idGroup, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var groupMember = new GetGroupMemberRequest
         {
             IdPerson = int.Parse(idPerson!),
-            IdGroup = int.Parse(groupName)
+            IdGroup = idGroup
         };
 
         var result = await mediator.Send(groupMember, cancellationToken);
@@ -31,13 +31,13 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
     
     [HttpPost]
     [Route("add")]
-    public async Task<IActionResult> AddGroupMember([FromQuery] int groupName, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddGroupMember([FromQuery] int idGroup, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var groupMember = new AddGroupMemberRequest
         {
             IdPerson = int.Parse(idPerson!),
-            IdGroup = groupName
+            IdGroup = idGroup
         };
 
         var result = await mediator.Send(groupMember, cancellationToken);

@@ -17,12 +17,12 @@ public class GroupController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
     [Route("get-group")]
-    public async Task<GetGroupResponse> GetGroup([FromQuery] string groupName, CancellationToken cancellationToken)
+    public async Task<GetGroupResponse> GetGroup([FromQuery] int idGroup, CancellationToken cancellationToken)
     {
         var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (personId is null) throw new Exception("User does not exist!");
         
-        var result = await mediator.Send(new GetGroupRequest{GroupName = groupName, IdPerson = int.Parse(personId)}, cancellationToken);
+        var result = await mediator.Send(new GetGroupRequest{IdGroup = idGroup, IdPerson = int.Parse(personId)}, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     

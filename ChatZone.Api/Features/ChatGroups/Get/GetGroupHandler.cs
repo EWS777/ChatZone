@@ -13,7 +13,7 @@ public class GetGroupHandler(
     {
         var group = await dbContext.GroupChats
             .AsNoTracking()
-            .Where(x => x.IdGroupChat == int.Parse(request.GroupName))
+            .Where(x => x.IdGroupChat == request.IdGroup)
             .Select(x => new GetGroupResponse
             {
                 IdGroup = x.IdGroupChat,
@@ -22,7 +22,6 @@ public class GetGroupHandler(
                 City = x.City,
                 Age = x.Age,
                 Lang = x.Lang,
-                // IsAdmin 
                 IsAdmin = x.GroupMembers
                     .Where(q=>q.IdGroupMember == request.IdPerson)
                     .Select(q=>q.IsAdmin)
