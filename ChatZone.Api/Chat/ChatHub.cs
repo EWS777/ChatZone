@@ -43,16 +43,22 @@ public class ChatHub(IMediator mediator) : Hub
     }
     public object GetPersonGroupAndUsername()
     {
-        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) throw new Exception("User does not exist!");
+        var personId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (personId is null) throw new Exception("User does not exist!");
         
-        var idGroup = ChatGroupStore.GetPersonGroup(int.Parse(idPerson));
+        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
+        if (username is null) throw new Exception("Username does not exist!");
+        
+        var idGroup = ChatGroupStore.GetPersonGroup(int.Parse(personId));
         if (idGroup is null) throw new Exception("User does not has any group!");
 
         //ToDo IsSingleChat(int? idGroup) добавил ? может быть можно как то обойти?
         var isSingleChat = ChatGroupStore.IsSingleChat(idGroup);
         
-        return new { idPerson, idGroup, isSingleChat};
+        var idPerson = int.Parse(personId);
+        var idPartnerPerson = ChatGroupStore.GetSecondPersonInSingleChat(idGroup, int.Parse(personId));
+        
+        return new { username, idPerson, idGroup, isSingleChat, isPartnerIdPeron = isSingleChat ? idPartnerPerson : (int?)null};
     }
     
     public async Task LeaveChat(int idGroup, bool isSingleChat)

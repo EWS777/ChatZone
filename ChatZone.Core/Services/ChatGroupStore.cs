@@ -22,7 +22,7 @@ public class ChatGroupStore
         UsersGroups.TryGetValue(idPerson, out _);
     }
 
-    public static int GetSecondPersonInSingleChat(int idGroup, int firstIdPerson)
+    public static int GetSecondPersonInSingleChat(int? idGroup, int firstIdPerson)
     {
         return UsersGroups.FirstOrDefault(x => x.Value == idGroup && x.Key != firstIdPerson).Key;
     }
