@@ -23,6 +23,12 @@ public class AddBlockedGroupMemberHandler(
             .SingleOrDefaultAsync(cancellationToken);
         if(!isAdmin) return Result<IActionResult>.Failure(new ForbiddenAccessException("You are not an owner of this group!"));
 
+        var groupMember = await dbContext.GroupMembers.SingleOrDefaultAsync(
+            x => x.IdGroupMember == request.IdBlockedPerson, cancellationToken);
+        if(groupMember is null) return Result<IActionResult>.Failure(new NotFoundException("Person is not found in group!")); 
+        
+        dbContext.GroupMembers.Remove(groupMember);
+
         await dbContext.BlockedGroupMembers.AddAsync(new BlockedGroupMember
         {
             IdChat = request.IdChat,
