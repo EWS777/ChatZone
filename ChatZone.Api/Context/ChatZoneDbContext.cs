@@ -18,6 +18,7 @@ public class ChatZoneDbContext : DbContext
     public DbSet<Statistic> Statistics { get; set; }
     public DbSet<MatchQueue> MatchQueues { get; set; }
     public DbSet<PersonFilterProperty> PersonFilterProperties { get; set; }
+    public DbSet<BlockedGroupMember> BlockedGroupMembers { get; set; }
     public ChatZoneDbContext(DbContextOptions<ChatZoneDbContext> options) : base(options)
     {
         
