@@ -29,7 +29,7 @@ public class ChatHub(IMediator mediator) : Hub
         var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!string.IsNullOrEmpty(idPerson))
         {
-            var groupName = ChatGroupStore.GetPersonGroup(int.Parse(idPerson));
+            var groupName = ChatManagerService.GetPersonGroup(int.Parse(idPerson));
             if(groupName is not null) await Groups.AddToGroupAsync(Context.ConnectionId, groupName.ToString()!);
         }
         
@@ -49,14 +49,14 @@ public class ChatHub(IMediator mediator) : Hub
         var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
         if (username is null) throw new Exception("Username does not exist!");
         
-        var idGroup = ChatGroupStore.GetPersonGroup(int.Parse(personId));
+        var idGroup = ChatManagerService.GetPersonGroup(int.Parse(personId));
         if (idGroup is null) throw new Exception("User does not has any group!");
 
         //ToDo IsSingleChat(int? idGroup) добавил ? может быть можно как то обойти?
-        var isSingleChat = ChatGroupStore.IsSingleChat(idGroup);
+        var isSingleChat = ChatManagerService.IsSingleChat(idGroup);
         
         var idPerson = int.Parse(personId);
-        var idPartnerPerson = ChatGroupStore.GetSecondPersonInSingleChat(idGroup, int.Parse(personId));
+        var idPartnerPerson = ChatManagerService.GetSecondPersonInSingleChat(idGroup, int.Parse(personId));
         
         return new { username, idPerson, idGroup, isSingleChat, isPartnerIdPeron = isSingleChat ? idPartnerPerson : (int?)null};
     }
@@ -64,14 +64,14 @@ public class ChatHub(IMediator mediator) : Hub
     public async Task LeaveChat(int idGroup, bool isSingleChat)
     {
         var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        ChatGroupStore.RemovePersonFromGroup(int.Parse(idPerson!));
+        ChatManagerService.RemovePersonFromGroup(int.Parse(idPerson!));
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, idGroup.ToString());
 
         if (isSingleChat)
         {
-            var otherPerson = ChatGroupStore.GetSecondPersonInSingleChat(idGroup, int.Parse(idPerson!));
+            var otherPerson = ChatManagerService.GetSecondPersonInSingleChat(idGroup, int.Parse(idPerson!));
             
-            ChatGroupStore.RemovePersonFromGroup(otherPerson);
+            ChatManagerService.RemovePersonFromGroup(otherPerson);
             
             await Clients.OthersInGroup(idGroup.ToString()).SendAsync("LeftChat");
         }
@@ -81,8 +81,8 @@ public class ChatHub(IMediator mediator) : Hub
     {
         var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        ChatGroupStore.AddPersonToGroup(int.Parse(idPerson!), idGroup);
-        ChatGroupStore.AddTypeOfGroup(idGroup, false);
+        ChatManagerService.AddPersonToGroup(int.Parse(idPerson!), idGroup);
+        ChatManagerService.AddTypeOfGroup(idGroup, false);
         await Groups.AddToGroupAsync(Context.ConnectionId, idGroup.ToString());
         
         await Clients.Caller.SendAsync("ChatCreated");

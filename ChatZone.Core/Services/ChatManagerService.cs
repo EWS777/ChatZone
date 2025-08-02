@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 namespace ChatZone.Core.Services;
 
-public class ChatGroupStore
+public class ChatManagerService
 {
     private static readonly ConcurrentDictionary<int, int> UsersGroups = new();
     private static readonly ConcurrentDictionary<int, bool> IsTypeOfChatSingle = new();
