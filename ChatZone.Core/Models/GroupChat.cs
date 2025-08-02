@@ -13,4 +13,5 @@ public class GroupChat
     public int UserCount { set; get; }
     public ICollection<GroupMember> GroupMembers { get; set; } = new List<GroupMember>();
     public ICollection<GroupMessage> GroupMessages { get; set; } = new List<GroupMessage>();
+    public ICollection<BlockedGroupMember> BlockedGroupMembers { get; set; } = new List<BlockedGroupMember>();
 }

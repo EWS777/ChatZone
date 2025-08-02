@@ -38,5 +38,6 @@ public class Person
     public ICollection<Report> Reporter { get; set; } = new List<Report>();
     public ICollection<Report> Reported { get; set; } = new List<Report>();
     public ICollection<GroupMessage> GroupMessages { get; set; } = new List<GroupMessage>();
+    public ICollection<BlockedGroupMember> BlockedGroupMembers { get; set; } = new List<BlockedGroupMember>();
     public GroupMember GroupMember { get; set; }
 }
