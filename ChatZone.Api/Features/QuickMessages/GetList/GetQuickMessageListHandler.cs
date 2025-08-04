@@ -13,7 +13,7 @@ public class GetQuickMessageListHandler(
     {
         var quickMessageList = await dbContext.QuickMessages
             .AsNoTracking()
-            .Where(x => x.IdPerson == request.Id)
+            .Where(x => x.IdPerson == request.IdPerson)
             .Select(x => new GetQuickMessageListResponse
             {
                 IdQuickMessage = x.IdQuickMessage,

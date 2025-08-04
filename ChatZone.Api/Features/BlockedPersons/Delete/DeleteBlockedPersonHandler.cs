@@ -11,7 +11,7 @@ public class DeleteBlockedPersonHandler(ChatZoneDbContext dbContext) : IRequestH
 {
     public async Task<Result<IActionResult>> Handle(DeleteBlockedPersonRequest request, CancellationToken cancellationToken)
     {
-        var deletePerson = await dbContext.BlockedPeoples.SingleOrDefaultAsync(x => x.IdBlockerPerson == request.Id && x.IdBlockedPerson == request.IdBlockedPerson, cancellationToken);
+        var deletePerson = await dbContext.BlockedPeoples.SingleOrDefaultAsync(x => x.IdBlockerPerson == request.IdPerson && x.IdBlockedPerson == request.IdBlockedPerson, cancellationToken);
         if (deletePerson is null) return Result<IActionResult>.Failure(new NotFoundException("Person is not found!"));
 
         dbContext.BlockedPeoples.Remove(deletePerson);

@@ -22,7 +22,7 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) throw new Exception("User does not exist!");
 
-        var result = await mediator.Send(new GetQuickMessageListRequest{Id = int.Parse(idPerson)}, cancellationToken);
+        var result = await mediator.Send(new GetQuickMessageListRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     

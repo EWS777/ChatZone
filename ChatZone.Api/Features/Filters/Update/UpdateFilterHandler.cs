@@ -10,7 +10,7 @@ public class UpdateFilterHandler(ChatZoneDbContext dbContext) : IRequestHandler<
 {
     public async Task<Result<UpdateFilterResponse>> Handle(UpdateFilterRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == request.Id, cancellationToken);
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
         if (person is null) return Result<UpdateFilterResponse>.Failure(new NotFoundException("User is not found!"));
         
         person.Theme = request.Theme;

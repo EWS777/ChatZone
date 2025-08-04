@@ -21,7 +21,7 @@ public class BlockPersonController(IMediator mediator) : ControllerBase
 
         if (idPerson is null) throw new Exception("User does not exist!");
 
-        var result = await mediator.Send(new GetBlockedPersonsRequest{Id = int.Parse(idPerson)}, cancellationToken);
+        var result = await mediator.Send(new GetBlockedPersonsRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
         return result.Match(x => x, x=>throw x);
     }
 
@@ -47,7 +47,7 @@ public class BlockPersonController(IMediator mediator) : ControllerBase
 
         if (idPerson is null) throw new Exception("User does not exist!");
         
-        var result = await mediator.Send(new DeleteBlockedPersonRequest{Id = int.Parse(idPerson), IdBlockedPerson = idBlockedPerson}, cancellationToken);
+        var result = await mediator.Send(new DeleteBlockedPersonRequest{IdPerson = int.Parse(idPerson), IdBlockedPerson = idBlockedPerson}, cancellationToken);
         return result.Match<IActionResult>(x=>x, x => throw x);
     }
 }

@@ -12,7 +12,7 @@ public class GetFilterHandler(ChatZoneDbContext dbContext) : IRequestHandler<Get
     {
         var person = await dbContext.Persons
             .AsNoTracking()
-            .Where(x => x.IdPerson == request.Id)
+            .Where(x => x.IdPerson == request.IdPerson)
             .Select(x => new GetFilterResponse
             {
                 Theme = x.Theme,

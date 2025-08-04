@@ -17,10 +17,10 @@ public class FilterController(IMediator mediator) : ControllerBase
     [Route("")]
     public async Task<GetFilterResponse> GetFilter(CancellationToken cancellationToken)
     {
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (id is null) throw new Exception("User does not exist!");
-        var result = await mediator.Send(new GetFilterRequest{Id = int.Parse(id)}, cancellationToken);
+        if (idPerson is null) throw new Exception("User does not exist!");
+        var result = await mediator.Send(new GetFilterRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
         return result.Match<GetFilterResponse>(e => e, x=> throw x);
     }
 
@@ -32,7 +32,7 @@ public class FilterController(IMediator mediator) : ControllerBase
         var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (id is null) throw new Exception("User does not exist!");
-        filterRequest.Id = int.Parse(id);
+        filterRequest.IdPerson = int.Parse(id);
         
         var result = await mediator.Send(filterRequest, cancellationToken);
         return result.Match<UpdateFilterResponse>(e => e, e => throw e);

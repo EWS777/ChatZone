@@ -7,7 +7,7 @@ namespace ChatZone.Features.Identity.Password.Update;
 
 public class UpdatePasswordRequest : IRequest<Result<IActionResult>>
 {
-    public int Id { get; set; }
+    public int IdPerson { get; set; }
     [MinLength(8, ErrorMessage = "Password can not be less than 8")]
     [MaxLength(50, ErrorMessage = "Password can not be more than 50")] 
     public required string OldPassword { get; init; }

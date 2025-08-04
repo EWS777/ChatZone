@@ -12,7 +12,7 @@ public class UpdatePasswordHandler(ChatZoneDbContext dbContext) : IRequestHandle
 {
     public async Task<Result<IActionResult>> Handle(UpdatePasswordRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.IdPerson == request.Id, cancellationToken);
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.IdPerson == request.IdPerson, cancellationToken);
         if (person is null) return Result<IActionResult>.Failure(new NotFoundException("User is not found!"));
         
         var oldHashedPassword = SecurityHelper.GetHashedPasswordWithSalt(request.OldPassword, person.Salt);

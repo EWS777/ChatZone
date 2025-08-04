@@ -6,5 +6,5 @@ namespace ChatZone.Features.Identity.Authentication.Logout;
 
 public class LogoutRequest : IRequest<Result<IActionResult>>
 {
-    public int Id { get; init; }
+    public int IdPerson { get; init; }
 }

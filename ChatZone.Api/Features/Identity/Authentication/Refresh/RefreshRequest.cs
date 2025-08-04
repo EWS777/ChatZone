@@ -5,5 +5,5 @@ namespace ChatZone.Features.Identity.Authentication.Refresh;
 
 public class RefreshRequest : IRequest<Result<RefreshResponse>>
 {
-    public int Id { get; set; }
+    public int IdPerson { get; set; }
 }

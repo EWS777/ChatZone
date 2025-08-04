@@ -12,7 +12,7 @@ public class GetBlockedPersonsHandler(
     {
         var blockedPersons = await dbContext.BlockedPeoples
             .AsNoTracking()
-            .Where(x => x.IdBlockerPerson == request.Id)
+            .Where(x => x.IdBlockerPerson == request.IdPerson)
             .OrderByDescending(x=>x.CreatedAt)
             .Select(x => new GetBlockedPersonsResponse
             {

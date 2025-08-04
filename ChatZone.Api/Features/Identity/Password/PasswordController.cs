@@ -29,7 +29,7 @@ public class PasswordController(IMediator mediator) : ControllerBase
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (idPerson is null) throw new Exception("User does not exist!");
-        request.Id = int.Parse(idPerson);
+        request.IdPerson = int.Parse(idPerson);
         
         var result = await mediator.Send(request, cancellationToken);
         return result.Match<IActionResult>(x=> x, x=> throw x);

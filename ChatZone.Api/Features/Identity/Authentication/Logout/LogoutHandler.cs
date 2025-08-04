@@ -10,7 +10,7 @@ public class LogoutHandler(ChatZoneDbContext dbContext) : IRequestHandler<Logout
 {
     public async Task<Result<IActionResult>> Handle(LogoutRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == request.Id, cancellationToken);
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
 
         person!.RefreshToken = "";
         person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(-1);

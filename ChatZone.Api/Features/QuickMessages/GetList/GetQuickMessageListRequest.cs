@@ -5,5 +5,5 @@ namespace ChatZone.Features.QuickMessages.GetList;
 
 public class GetQuickMessageListRequest : IRequest<Result<List<GetQuickMessageListResponse>>>
 {
-    public int Id { get; init; }
+    public int IdPerson { get; init; }
 }

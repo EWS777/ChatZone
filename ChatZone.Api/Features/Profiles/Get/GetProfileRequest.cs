@@ -5,5 +5,5 @@ namespace ChatZone.Features.Profiles.Get;
 
 public class GetProfileRequest : IRequest<Result<GetProfileResponse>>
 {
-    public int Id { get; init; }
+    public int IdPerson { get; init; }
 }

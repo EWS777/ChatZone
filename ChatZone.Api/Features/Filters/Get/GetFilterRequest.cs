@@ -5,5 +5,5 @@ namespace ChatZone.Features.Filters.Get;
 
 public class GetFilterRequest : IRequest<Result<GetFilterResponse>>
 {
-    public int Id { get; set; }
+    public int IdPerson { get; set; }
 }

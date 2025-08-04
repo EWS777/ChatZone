@@ -6,7 +6,7 @@ namespace ChatZone.Features.Filters.Update;
 
 public class UpdateFilterRequest : IRequest<Result<UpdateFilterResponse>>
 {
-    public int Id { get; set; }
+    public int IdPerson { get; set; }
     public ThemeList? Theme { get; set; }
     public CountryList? Country { get; set; }
     public CityList? City { get; set; }

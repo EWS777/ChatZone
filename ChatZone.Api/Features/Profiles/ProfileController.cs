@@ -17,10 +17,10 @@ public class ProfileController(IMediator mediator) : ControllerBase
     [Route("")]
     public async Task<GetProfileResponse> GetProfile(CancellationToken cancellationToken)
     {
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (id is null) throw new Exception("User does not exist!");
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) throw new Exception("User does not exist!");
 
-        var result = await mediator.Send(new GetProfileRequest{Id = int.Parse(id)}, cancellationToken);
+        var result = await mediator.Send(new GetProfileRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     
@@ -30,12 +30,12 @@ public class ProfileController(IMediator mediator) : ControllerBase
     public async Task<UpdateProfileResponse> UpdateProfile(string username, [FromBody] UpdateProfileRequest profileRequest, CancellationToken cancellationToken)
     {
         var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (tokenUsername is null || idPerson is null) throw new Exception("User does not exist!");
         if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
 
-        profileRequest.Id = int.Parse(id);
+        profileRequest.IdPerson = int.Parse(idPerson);
         
         var result = await mediator.Send(profileRequest, cancellationToken);
         

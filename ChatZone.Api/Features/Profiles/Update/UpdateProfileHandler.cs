@@ -15,7 +15,7 @@ public class UpdateProfileHandler(
 {
     public async Task<Result<UpdateProfileResponse>> Handle(UpdateProfileRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == request.Id, cancellationToken);
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
         if(person is null) return Result<UpdateProfileResponse>.Failure(new NotFoundException("User is not found!"));
         
         bool isUsernameChanged = request.Username != person.Username;

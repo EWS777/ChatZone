@@ -53,10 +53,10 @@ public class AuthenticationController(IMediator mediator) : ControllerBase
     [Route("refresh")]
     public async Task<RefreshResponse> Refresh(CancellationToken cancellationToken)
     {
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (id is null) throw new Exception("User does not exist!");
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) throw new Exception("User does not exist!");
         
-        var result = await mediator.Send(new RefreshRequest{Id = int.Parse(id)}, cancellationToken);
+        var result = await mediator.Send(new RefreshRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
         
         if (result.IsSuccess)
         {
@@ -84,10 +84,10 @@ public class AuthenticationController(IMediator mediator) : ControllerBase
     [Route("logout")]
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (id is null) throw new Exception("User does not exist!");
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) throw new Exception("User does not exist!");
         
-        var result = await mediator.Send(new LogoutRequest{Id = int.Parse(id)}, cancellationToken);
+        var result = await mediator.Send(new LogoutRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
         
         Response.Cookies.Append("AccessToken", "", new CookieOptions
         {
