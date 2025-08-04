@@ -19,7 +19,7 @@ public class RegisterRequest : IRequest<Result<IActionResult>>
     public required string Username { get; set; }
     
     [Required(ErrorMessage = "Password is required!")]
-    [MinLength(8, ErrorMessage = "Password max length is 50 characters!")]
+    [MinLength(8, ErrorMessage = "Password min length is 8 characters!")]
     [MaxLength(50, ErrorMessage = "Password max length is 50 characters!")]
     public required string Password { get; set; }
 }
