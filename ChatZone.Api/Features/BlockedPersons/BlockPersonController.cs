@@ -17,12 +17,11 @@ public class BlockPersonController(IMediator mediator) : ControllerBase
     [Route("")]
     public async Task<List<GetBlockedPersonsResponse>> GetBlockedPersons(CancellationToken cancellationToken)
     {
-        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (idPerson is null) throw new Exception("User does not exist!");
 
-        var result = await mediator.Send(new GetBlockedPersonsRequest{Id = int.Parse(id)}, cancellationToken);
+        var result = await mediator.Send(new GetBlockedPersonsRequest{Id = int.Parse(idPerson)}, cancellationToken);
         return result.Match(x => x, x=>throw x);
     }
 
@@ -31,12 +30,11 @@ public class BlockPersonController(IMediator mediator) : ControllerBase
     [Route("add/{idPartnerPerson}")]
     public async Task<IActionResult> CreateBlockedPerson([FromRoute] int idPartnerPerson, CancellationToken cancellationToken)
     {
-        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (idPerson is null) throw new Exception("User does not exist!");
 
-        var result = await mediator.Send(new CreateBlockedPersonRequest { IdPerson = int.Parse(id), IdPartnerPerson = idPartnerPerson }, cancellationToken);
+        var result = await mediator.Send(new CreateBlockedPersonRequest { IdPerson = int.Parse(idPerson), IdPartnerPerson = idPartnerPerson }, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     
@@ -45,12 +43,11 @@ public class BlockPersonController(IMediator mediator) : ControllerBase
     [Route("delete/{idBlockedPerson}")]
     public async Task<IActionResult> DeleteBlockedPerson([FromRoute] int idBlockedPerson, CancellationToken cancellationToken)
     {
-        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
+        if (idPerson is null) throw new Exception("User does not exist!");
         
-        var result = await mediator.Send(new DeleteBlockedPersonRequest{Id = int.Parse(id), IdBlockedPerson = idBlockedPerson}, cancellationToken);
+        var result = await mediator.Send(new DeleteBlockedPersonRequest{Id = int.Parse(idPerson), IdBlockedPerson = idBlockedPerson}, cancellationToken);
         return result.Match<IActionResult>(x=>x, x => throw x);
     }
 }

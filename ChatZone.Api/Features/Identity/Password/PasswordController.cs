@@ -26,11 +26,10 @@ public class PasswordController(IMediator mediator) : ControllerBase
     [Route("change-password")]
     public async Task<IActionResult> UpdatePassword([FromBody]UpdatePasswordRequest request, CancellationToken cancellationToken)
     {
-        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
-        request.Id = int.Parse(id);
+        if (idPerson is null) throw new Exception("User does not exist!");
+        request.Id = int.Parse(idPerson);
         
         var result = await mediator.Send(request, cancellationToken);
         return result.Match<IActionResult>(x=> x, x=> throw x);

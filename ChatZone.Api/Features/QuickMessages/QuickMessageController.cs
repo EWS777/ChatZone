@@ -19,12 +19,10 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
     [Route("")]
     public async Task<List<GetQuickMessageListResponse>> GetQuickMessages(CancellationToken cancellationToken)
     {
-        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) throw new Exception("User does not exist!");
 
-        if (tokenUsername is null || id is null) throw new Exception("User does not exist!");
-
-        var result = await mediator.Send(new GetQuickMessageListRequest{Id = int.Parse(id)}, cancellationToken);
+        var result = await mediator.Send(new GetQuickMessageListRequest{Id = int.Parse(idPerson)}, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     
@@ -48,10 +46,9 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
     public async Task<UpdateQuickMessageResponse> UpdateQuickMessage([FromRoute] int id,
         [FromBody] UpdateQuickMessageRequest request, CancellationToken cancellationToken)
     {
-        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        if (tokenUsername is null || idPerson is null) throw new NotFoundException("User does not exist!");
+        if (idPerson is null) throw new NotFoundException("User does not exist!");
         
         request.IdPerson = int.Parse(idPerson);
         var result = await mediator.Send(request, cancellationToken);
@@ -63,12 +60,11 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
     [Route("delete/{idQuickMessage:int}")]
     public async Task<IActionResult> DeleteQuickMessage([FromRoute] int idQuickMessage, CancellationToken cancellationToken)
     {
-        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        if (tokenUsername is null || id is null) throw new NotFoundException("User does not exist!");
+        if (idPerson is null) throw new NotFoundException("User does not exist!");
         
-        var result = await mediator.Send(new DeleteQuickMessageRequest{IdPerson = int.Parse(id), IdMessage = idQuickMessage}, cancellationToken);
+        var result = await mediator.Send(new DeleteQuickMessageRequest{IdPerson = int.Parse(idPerson), IdMessage = idQuickMessage}, cancellationToken);
         return result.Match<IActionResult>(x => x, x => throw x);
     }
 }
