@@ -1,6 +1,5 @@
 using ChatZone.Context;
 using ChatZone.Core.Extensions;
-using ChatZone.Core.Extensions.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

@@ -10,7 +10,6 @@ namespace ChatZone.Features.Profiles.Update;
 
 public class UpdateProfileHandler(
     ChatZoneDbContext dbContext,
-    IHttpContextAccessor httpContextAccessor,
     IToken token) : IRequestHandler<UpdateProfileRequest, Result<UpdateProfileResponse>>
 {
     public async Task<Result<UpdateProfileResponse>> Handle(UpdateProfileRequest request, CancellationToken cancellationToken)

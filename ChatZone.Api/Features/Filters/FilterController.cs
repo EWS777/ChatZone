@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Features.Filters.Get;
 using ChatZone.Features.Filters.Update;
 using MediatR;

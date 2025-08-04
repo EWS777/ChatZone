@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace ChatZone.Core.Notifications;
 
-public class EmailSender()
+public class EmailSender
 {
     private static IConfiguration _configuration;
 
