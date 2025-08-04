@@ -32,11 +32,11 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
     [HttpPost]
     [Route("add")]
     public async Task<CreateQuickMessageResponse> CreateQuickMessage([FromBody] CreateQuickMessageRequest quickMessageRequest, CancellationToken cancellationToken)
-    { 
-        var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
-        var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    {
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) throw new NotFoundException("User does not exist!");
         
-        if (tokenUsername is null || id is null) throw new NotFoundException("User does not exist!");
+        quickMessageRequest.IdPerson = int.Parse(idPerson);
 
         var result = await mediator.Send(quickMessageRequest, cancellationToken);
         return result.Match<CreateQuickMessageResponse>(x => x, x => throw x);
