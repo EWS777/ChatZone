@@ -10,9 +10,9 @@ namespace ChatZone.Features.Messages;
 [Route("[controller]")]
 public class MessageController(IMediator mediator) : ControllerBase
 {
-    [Authorize("User")]
+    [Authorize(Roles = "User")]
     [Route("get")]
-    [HttpGet]
+    [HttpPost]
     public async Task<GetMessageResponse> GetMessages([FromBody] GetMessageRequest request, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
