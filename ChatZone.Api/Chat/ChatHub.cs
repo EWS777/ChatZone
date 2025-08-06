@@ -12,15 +12,15 @@ public class ChatHub(IMediator mediator) : Hub
     {
         var idSender = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+        var createdAt = DateTimeOffset.UtcNow;
         await mediator.Send(new AddMessageRequest
         {
             Message = message,
             IdSender = int.Parse(idSender!),
             IdChat = idGroup,
-            IsSingleChat = isSingleChat
+            IsSingleChat = isSingleChat,
+            CreatedAt = createdAt
         });
-        //TODO return correct time from AddMessageRequest
-        var createdAt = DateTimeOffset.UtcNow;
         await Clients.Group(idGroup.ToString()).SendAsync("Receive", int.Parse(idSender!), message, createdAt);
     }
     

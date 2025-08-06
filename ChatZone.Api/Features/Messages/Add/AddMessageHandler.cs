@@ -14,7 +14,7 @@ public class AddMessageHandler(
         {
             var message = new SingleMessage
             {
-                CreatedAt = DateTimeOffset.Now,
+                CreatedAt = request.CreatedAt,
                 Message = request.Message,
                 IdSender = request.IdSender,
                 IdChat = request.IdChat
@@ -26,7 +26,7 @@ public class AddMessageHandler(
         {
             var message = new GroupMessage
             {
-                CreatedAt = DateTimeOffset.Now,
+                CreatedAt = request.CreatedAt,
                 Message = request.Message,
                 IdSender = request.IdSender,
                 IdChat = request.IdChat

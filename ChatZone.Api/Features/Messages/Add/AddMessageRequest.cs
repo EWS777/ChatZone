@@ -13,4 +13,5 @@ public class AddMessageRequest : IRequest<IActionResult>
     [Required(ErrorMessage = "Id chat can not be null!")]
     public int IdChat { get; set; }
     public bool IsSingleChat { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }
