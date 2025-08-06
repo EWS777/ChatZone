@@ -46,9 +46,6 @@ public class ChatHub(IMediator mediator) : Hub
         var personId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (personId is null) throw new Exception("User does not exist!");
         
-        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
-        if (username is null) throw new Exception("Username does not exist!");
-        
         var idGroup = ChatManagerService.GetPersonGroup(int.Parse(personId));
         if (idGroup is null) throw new Exception("User does not has any group!");
 
@@ -58,7 +55,7 @@ public class ChatHub(IMediator mediator) : Hub
         var idPerson = int.Parse(personId);
         var idPartnerPerson = ChatManagerService.GetSecondPersonInSingleChat(idGroup, int.Parse(personId));
         
-        return new { username, idPerson, idGroup, isSingleChat, isPartnerIdPeron = isSingleChat ? idPartnerPerson : (int?)null};
+        return new { idPerson, idGroup, isSingleChat, isPartnerIdPeron = isSingleChat ? idPartnerPerson : (int?)null};
     }
     
     public async Task LeaveChat(int idGroup, bool isSingleChat)
