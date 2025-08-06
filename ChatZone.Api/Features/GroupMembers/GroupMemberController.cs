@@ -62,10 +62,10 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
     [Route("change-admin")]
     public async Task<IActionResult> ChangeAdmin([FromBody] ChangeAdminRequest request, CancellationToken cancellationToken)
     {
-        var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (personId is null) throw new Exception("User does not exist!");
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) throw new Exception("User does not exist!");
 
-        request.IdPerson = int.Parse(personId);
+        request.IdPerson = int.Parse(idPerson);
         
         var result = await mediator.Send(request, cancellationToken);
         return result.Match(x => x, x => throw x);
