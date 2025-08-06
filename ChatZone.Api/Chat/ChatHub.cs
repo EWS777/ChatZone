@@ -10,18 +10,18 @@ public class ChatHub(IMediator mediator) : Hub
 {
     public async Task SendMessage(int idGroup, string message, bool isSingleChat)
     {
-        var username = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
-        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var idSender = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         await mediator.Send(new AddMessageRequest
         {
             Message = message,
-            IdSender = int.Parse(idPerson!),
+            IdSender = int.Parse(idSender!),
             IdChat = idGroup,
             IsSingleChat = isSingleChat
         });
-        
-        await Clients.Group(idGroup.ToString()).SendAsync("Receive", username, message);
+        //TODO return correct time from AddMessageRequest
+        var createdAt = DateTimeOffset.UtcNow;
+        await Clients.Group(idGroup.ToString()).SendAsync("Receive", int.Parse(idSender!), message, createdAt);
     }
     
     public override async Task OnConnectedAsync()
