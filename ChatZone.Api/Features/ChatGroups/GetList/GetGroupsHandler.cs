@@ -20,7 +20,8 @@ public class GetGroupsHandler(
                     Country = x.Country,
                     City = x.City,
                     Age = x.Age,
-                    Lang = x.Lang
+                    Lang = x.Lang,
+                    PersonCount = x.UserCount
                 }).ToListAsync(cancellationToken));
     }
 }
