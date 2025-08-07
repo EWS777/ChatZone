@@ -47,12 +47,13 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
 
     [HttpDelete]
     [Route("leave")]
-    public async Task<IActionResult> LeaveGroup(CancellationToken cancellationToken)
+    public async Task<IActionResult> LeaveGroup([FromQuery] int idChat, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var groupMember = new LeaveGroupRequest
         {
-            IdPerson = int.Parse(idPerson!)
+            IdPerson = int.Parse(idPerson!),
+            IdChat = idChat
         };
 
         var result = await mediator.Send(groupMember, cancellationToken);

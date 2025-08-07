@@ -28,6 +28,9 @@ public class ChangeAdminAutoHandler(
 
             dbContext.GroupMembers.Remove(previousAdmin!);
             
+            var groupChat = await dbContext.GroupChats.SingleOrDefaultAsync(x => x.IdGroupChat == request.IdChat, cancellationToken);
+            groupChat!.UserCount -= 1;
+            
             newAdmin.IsAdmin = true;
             await hubContext.Clients.User(newAdmin.IdGroupMember.ToString()).SendAsync("ChangeAdminAuto", cancellationToken);
         }
