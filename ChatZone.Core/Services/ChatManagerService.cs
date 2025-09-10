@@ -19,7 +19,7 @@ public class ChatManagerService
 
     public static void RemovePersonFromGroup(int idPerson)
     {
-        UsersGroups.TryGetValue(idPerson, out _);
+        UsersGroups.TryRemove(idPerson, out _);
     }
 
     public static int GetSecondPersonInSingleChat(int? idGroup, int firstIdPerson)
