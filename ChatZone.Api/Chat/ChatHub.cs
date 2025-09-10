@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using ChatZone.Core.Services;
 using ChatZone.Features.Messages.Add;
+using ChatZone.Features.Messages.GetStatus;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
@@ -41,7 +42,7 @@ public class ChatHub(IMediator mediator) : Hub
     {
         return Context.ConnectionId;
     }
-    public object GetPersonGroupAndUsername()
+    public async Task<object> GetPersonGroupAndUsername()
     {
         var personId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (personId is null) throw new Exception("User does not exist!");
@@ -55,7 +56,10 @@ public class ChatHub(IMediator mediator) : Hub
         var idPerson = int.Parse(personId);
         var idPartnerPerson = ChatManagerService.GetSecondPersonInSingleChat(idGroup, int.Parse(personId));
         
-        return new { idPerson, idGroup, isSingleChat, isPartnerIdPeron = isSingleChat ? idPartnerPerson : (int?)null};
+        var isSentMessage = await mediator.Send(new GetStatusRequest { IdPerson = int.Parse(personId), IdChat = idGroup.Value, IsSingleChat = isSingleChat });
+        if (idGroup == 0) idGroup = null;
+        
+        return new { idPerson, idGroup, isSingleChat, isPartnerIdPeron = isSingleChat ? idPartnerPerson : (int?)null, isSentMessage};
     }
     
     public async Task LeaveChat(int idGroup, bool isSingleChat)
