@@ -1,13 +1,13 @@
-﻿using ChatZone.Core.Extensions;
+﻿using System.ComponentModel.DataAnnotations;
+using ChatZone.Core.Extensions;
 using ChatZone.Core.Models.Enums;
 using MediatR;
+namespace ChatZone.Features.GroupChats.Create;
 
-namespace ChatZone.Features.ChatGroups.Update;
-
-public class UpdateGroupRequest : IRequest<Result<UpdateGroupResponse>>
+public class CreateGroupChatRequest : IRequest<Result<int>>
 {
     public int IdPerson { get; set; }
-    public int IdGroup { get; set; }
+    [MaxLength(25, ErrorMessage = "Title max length is 25 characters")]
     public required string Title { get; set; }
     public CountryList? Country { get; set; }
     public CityList? City { get; set; }

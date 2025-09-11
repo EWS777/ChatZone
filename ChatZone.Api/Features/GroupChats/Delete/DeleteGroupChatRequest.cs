@@ -3,9 +3,9 @@ using ChatZone.Core.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatZone.Features.ChatGroups.Delete;
+namespace ChatZone.Features.GroupChats.Delete;
 
-public class DeleteGroupRequest : IRequest<Result<IActionResult>>
+public class DeleteGroupChatRequest : IRequest<Result<IActionResult>>
 {
     [Required(ErrorMessage = "Id group can not be null!")]
     public int IdGroup { get; set; }

@@ -1,8 +1,8 @@
 ﻿using ChatZone.Core.Models.Enums;
 
-namespace ChatZone.Features.ChatGroups.Update;
+namespace ChatZone.Features.GroupChats.Get;
 
-public class UpdateGroupResponse
+public class GetGroupChatResponse
 {
     public int IdGroup { get; set; }
     public required string Title { get; set; }
@@ -10,4 +10,5 @@ public class UpdateGroupResponse
     public CityList? City { get; set; }
     public AgeList? Age { get; set; }
     public LangList? Lang { get; set; }
+    public bool IsAdmin { get; set; }
 }

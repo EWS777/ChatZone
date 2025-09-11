@@ -1,42 +1,42 @@
 ﻿using System.Security.Claims;
-using ChatZone.Features.ChatGroups.Create;
-using ChatZone.Features.ChatGroups.Delete;
-using ChatZone.Features.ChatGroups.Get;
-using ChatZone.Features.ChatGroups.GetList;
-using ChatZone.Features.ChatGroups.Update;
+using ChatZone.Features.GroupChats.Create;
+using ChatZone.Features.GroupChats.Delete;
+using ChatZone.Features.GroupChats.Get;
+using ChatZone.Features.GroupChats.GetList;
+using ChatZone.Features.GroupChats.Update;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatZone.Features.ChatGroups;
+namespace ChatZone.Features.GroupChats;
 
 [ApiController]
 [Authorize(Roles = "User")]
 [Route("[controller]")]
-public class GroupController(IMediator mediator) : ControllerBase
+public class GroupChatController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
     [Route("get-group")]
-    public async Task<GetGroupResponse> GetGroup([FromQuery] int idGroup, CancellationToken cancellationToken)
+    public async Task<GetGroupChatResponse> GetGroupChat([FromQuery] int idGroup, CancellationToken cancellationToken)
     {
         var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (personId is null) throw new Exception("User does not exist!");
         
-        var result = await mediator.Send(new GetGroupRequest{IdGroup = idGroup, IdPerson = int.Parse(personId)}, cancellationToken);
+        var result = await mediator.Send(new GetGroupChatRequest{IdGroup = idGroup, IdPerson = int.Parse(personId)}, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     
     [HttpGet]
     [Route("get")]
-    public async Task<List<GetGroupsResponse>> GetGroups(CancellationToken cancellationToken)
+    public async Task<List<GetGroupChatsResponse>> GetGroupChats(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetGroupsRequest(), cancellationToken);
+        var result = await mediator.Send(new GetGroupChatsRequest(), cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     
     [HttpPost]
     [Route("create")]
-    public async Task<int> CreateGroup([FromBody] CreateGroupRequest request, CancellationToken cancellationToken)
+    public async Task<int> CreateGroupChat([FromBody] CreateGroupChatRequest request, CancellationToken cancellationToken)
     {
         var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (personId is null) throw new Exception("User does not exist!");
@@ -49,7 +49,7 @@ public class GroupController(IMediator mediator) : ControllerBase
     
     [HttpPut]
     [Route("update")]
-    public async Task<UpdateGroupResponse> UpdateGroup([FromBody] UpdateGroupRequest request, CancellationToken cancellationToken)
+    public async Task<UpdateGroupChatResponse> UpdateGroupChat([FromBody] UpdateGroupChatRequest request, CancellationToken cancellationToken)
     {
         var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (personId is null) throw new Exception("User does not exist!");
@@ -62,12 +62,12 @@ public class GroupController(IMediator mediator) : ControllerBase
     
     [HttpDelete]
     [Route("delete")]
-    public async Task<IActionResult> DeleteGroup([FromQuery] int idGroup, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteGroupChat([FromQuery] int idGroup, CancellationToken cancellationToken)
     {
         var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (personId is null) throw new Exception("User does not exist!");
 
-        var request = new DeleteGroupRequest
+        var request = new DeleteGroupChatRequest
         {
             IdPerson = int.Parse(personId),
             IdGroup = idGroup

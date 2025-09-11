@@ -12,7 +12,7 @@ public class BlockedGroupMemberController(IMediator mediator) : ControllerBase
 {
     [Authorize(Roles = "User")]
     [HttpPost]
-    [Route("block")]
+    [Route("add")]
     public async Task<IActionResult> AddBlockedGroupMember([FromBody] AddBlockedGroupRequest request, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

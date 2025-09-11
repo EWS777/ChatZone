@@ -5,12 +5,12 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatZone.Features.ChatGroups.Delete;
+namespace ChatZone.Features.GroupChats.Delete;
 
-public class DeleteGroupHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<DeleteGroupRequest, Result<IActionResult>>
+public class DeleteGroupChatHandler(
+    ChatZoneDbContext dbContext) : IRequestHandler<DeleteGroupChatRequest, Result<IActionResult>>
 {
-    public async Task<Result<IActionResult>> Handle(DeleteGroupRequest request, CancellationToken cancellationToken)
+    public async Task<Result<IActionResult>> Handle(DeleteGroupChatRequest request, CancellationToken cancellationToken)
     {
         var isAdmin = await dbContext.GroupMembers.AnyAsync(
             x => x.IdGroupMember == request.IdPerson && x.IdChat == request.IdGroup && x.IsAdmin == true,

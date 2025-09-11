@@ -4,17 +4,17 @@ using ChatZone.Core.Extensions.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatZone.Features.ChatGroups.Get;
+namespace ChatZone.Features.GroupChats.Get;
 
-public class GetGroupHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<GetGroupRequest, Result<GetGroupResponse>>
+public class GetGroupChatHandler(
+    ChatZoneDbContext dbContext) : IRequestHandler<GetGroupChatRequest, Result<GetGroupChatResponse>>
 {
-    public async Task<Result<GetGroupResponse>> Handle(GetGroupRequest request, CancellationToken cancellationToken)
+    public async Task<Result<GetGroupChatResponse>> Handle(GetGroupChatRequest request, CancellationToken cancellationToken)
     {
         var group = await dbContext.GroupChats
             .AsNoTracking()
             .Where(x => x.IdGroupChat == request.IdGroup)
-            .Select(x => new GetGroupResponse
+            .Select(x => new GetGroupChatResponse
             {
                 IdGroup = x.IdGroupChat,
                 Title = x.Title,
@@ -29,6 +29,6 @@ public class GetGroupHandler(
             })
             .SingleOrDefaultAsync(cancellationToken);
         
-        return group is null ? Result<GetGroupResponse>.Failure(new NotFoundException("Group is not found!")) : Result<GetGroupResponse>.Ok(group);
+        return group is null ? Result<GetGroupChatResponse>.Failure(new NotFoundException("Group is not found!")) : Result<GetGroupChatResponse>.Ok(group);
     }
 }

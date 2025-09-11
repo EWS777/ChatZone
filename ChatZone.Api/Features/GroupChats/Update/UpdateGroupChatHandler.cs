@@ -4,12 +4,12 @@ using ChatZone.Core.Extensions.Exceptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatZone.Features.ChatGroups.Update;
+namespace ChatZone.Features.GroupChats.Update;
 
-public class UpdateGroupHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<UpdateGroupRequest, Result<UpdateGroupResponse>>
+public class UpdateGroupChatHandler(
+    ChatZoneDbContext dbContext) : IRequestHandler<UpdateGroupChatRequest, Result<UpdateGroupChatResponse>>
 {
-    public async Task<Result<UpdateGroupResponse>> Handle(UpdateGroupRequest request,
+    public async Task<Result<UpdateGroupChatResponse>> Handle(UpdateGroupChatRequest request,
         CancellationToken cancellationToken)
     {
         var isAdmin = await dbContext.GroupMembers
@@ -17,11 +17,11 @@ public class UpdateGroupHandler(
             .Select(x => x.IsAdmin)
             .SingleOrDefaultAsync(cancellationToken);
 
-        if (!isAdmin) return Result<UpdateGroupResponse>.Failure(new ForbiddenAccessException("You are not an owner of this group!"));
+        if (!isAdmin) return Result<UpdateGroupChatResponse>.Failure(new ForbiddenAccessException("You are not an owner of this group!"));
 
 
         var group = await dbContext.GroupChats.SingleOrDefaultAsync(x => x.IdGroupChat == request.IdGroup, cancellationToken);
-        if(group is null) return Result<UpdateGroupResponse>.Failure(new NotFoundException("Group is not found!"));
+        if(group is null) return Result<UpdateGroupChatResponse>.Failure(new NotFoundException("Group is not found!"));
 
         group.Title = request.Title;
         group.Country = request.Country;
@@ -32,7 +32,7 @@ public class UpdateGroupHandler(
         dbContext.GroupChats.Update(group);
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        return Result<UpdateGroupResponse>.Ok(new UpdateGroupResponse
+        return Result<UpdateGroupChatResponse>.Ok(new UpdateGroupChatResponse
         {
             IdGroup = group.IdGroupChat,
             Title = group.Title,

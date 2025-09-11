@@ -1,8 +1,8 @@
 ﻿using ChatZone.Core.Models.Enums;
 
-namespace ChatZone.Features.ChatGroups.GetList;
+namespace ChatZone.Features.GroupChats.GetList;
 
-public class GetGroupsResponse
+public class GetGroupChatsResponse
 {
     public int IdGroup { get; set; }
     public required string Title { get; set; }

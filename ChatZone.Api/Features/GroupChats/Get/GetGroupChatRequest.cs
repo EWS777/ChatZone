@@ -2,9 +2,9 @@
 using ChatZone.Core.Extensions;
 using MediatR;
 
-namespace ChatZone.Features.ChatGroups.Get;
+namespace ChatZone.Features.GroupChats.Get;
 
-public class GetGroupRequest : IRequest<Result<GetGroupResponse>>
+public class GetGroupChatRequest : IRequest<Result<GetGroupChatResponse>>
 {
     public int IdPerson { get; set; }
     [Required(ErrorMessage = "Id group can not be null!")]

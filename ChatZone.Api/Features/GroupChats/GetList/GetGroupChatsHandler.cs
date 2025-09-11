@@ -3,17 +3,17 @@ using ChatZone.Core.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatZone.Features.ChatGroups.GetList;
+namespace ChatZone.Features.GroupChats.GetList;
 
-public class GetGroupsHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<GetGroupsRequest, Result<List<GetGroupsResponse>>>
+public class GetGroupChatsHandler(
+    ChatZoneDbContext dbContext) : IRequestHandler<GetGroupChatsRequest, Result<List<GetGroupChatsResponse>>>
 {
-    public async Task<Result<List<GetGroupsResponse>>> Handle(GetGroupsRequest request, CancellationToken cancellationToken)
+    public async Task<Result<List<GetGroupChatsResponse>>> Handle(GetGroupChatsRequest request, CancellationToken cancellationToken)
     {
-        return Result<List<GetGroupsResponse>>.Ok(
+        return Result<List<GetGroupChatsResponse>>.Ok(
             await dbContext.GroupChats
                 .AsNoTracking()
-                .Select(x => new GetGroupsResponse
+                .Select(x => new GetGroupChatsResponse
                 {
                     IdGroup = x.IdGroupChat,
                     Title = x.Title,

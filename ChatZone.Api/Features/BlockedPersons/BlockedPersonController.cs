@@ -10,7 +10,7 @@ namespace ChatZone.Features.BlockedPersons;
 
 [ApiController]
 [Route("[controller]")]
-public class BlockPersonController(IMediator mediator) : ControllerBase
+public class BlockedPersonController(IMediator mediator) : ControllerBase
 {
     [Authorize(Roles = "User")]
     [HttpGet]

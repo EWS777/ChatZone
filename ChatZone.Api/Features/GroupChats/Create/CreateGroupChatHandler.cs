@@ -5,12 +5,12 @@ using ChatZone.Core.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatZone.Features.ChatGroups.Create;
+namespace ChatZone.Features.GroupChats.Create;
 
-public class CreateGroupHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<CreateGroupRequest, Result<int>>
+public class CreateGroupChatHandler(
+    ChatZoneDbContext dbContext) : IRequestHandler<CreateGroupChatRequest, Result<int>>
 {
-    public async Task<Result<int>> Handle(CreateGroupRequest request, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(CreateGroupChatRequest request, CancellationToken cancellationToken)
     {
         var exists = await dbContext.GroupMembers.AnyAsync(x => x.IdGroupMember == request.IdPerson, cancellationToken);
         if (exists) return Result<int>.Failure(new ExistPersonException("You already have a group!"));
