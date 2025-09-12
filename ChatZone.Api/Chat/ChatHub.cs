@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using ChatZone.Features.ChatInfo.GetChat;
 using ChatZone.Features.Messages.Add;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
@@ -28,6 +29,8 @@ public class ChatHub(IMediator mediator) : Hub
         var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!string.IsNullOrEmpty(idPerson))
         {
+            var groupName = await mediator.Send(new GetChatRequest { IdPerson = int.Parse(idPerson)});
+            if(groupName is not null) await Groups.AddToGroupAsync(Context.ConnectionId, groupName.Value.ToString());
         }
         
         await base.OnConnectedAsync();
