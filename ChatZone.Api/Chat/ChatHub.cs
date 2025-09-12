@@ -28,8 +28,6 @@ public class ChatHub(IMediator mediator) : Hub
         var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!string.IsNullOrEmpty(idPerson))
         {
-            var groupName = ChatManagerService.GetPersonGroup(int.Parse(idPerson));
-            if(groupName is not null) await Groups.AddToGroupAsync(Context.ConnectionId, groupName.ToString()!);
         }
         
         await base.OnConnectedAsync();
