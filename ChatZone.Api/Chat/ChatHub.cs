@@ -52,8 +52,6 @@ public class ChatHub(IMediator mediator) : Hub
 
     public async Task AddToGroup(int idGroup)
     {
-        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
         await Groups.AddToGroupAsync(Context.ConnectionId, idGroup.ToString());
         
         await Clients.Caller.SendAsync("ChatCreated");
