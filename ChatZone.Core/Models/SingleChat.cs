@@ -8,6 +8,7 @@ public class SingleChat
     public int IdSecondPerson { get; set; }
     public Person SecondPerson { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? FinishedAt { get; set; }
 
     public ICollection<SingleMessage> SingleMessages { get; set; } = new List<SingleMessage>();
 }

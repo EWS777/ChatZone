@@ -26,6 +26,10 @@ public class SingleChatEfConfig : IEntityTypeConfiguration<SingleChat>
         builder
             .Property(x => x.CreatedAt)
             .IsRequired();
+
+        builder
+            .Property(x => x.FinishedAt)
+            .IsRequired(false);
         
         builder.ToTable(nameof(SingleChat));
     }
