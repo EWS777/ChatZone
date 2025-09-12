@@ -3,7 +3,6 @@ using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Core.Models;
-using ChatZone.Core.Services;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -37,7 +36,6 @@ public class AddBlockedGroupMemberHandler(
         }, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        ChatManagerService.RemovePersonFromGroup(request.IdBlockedPerson);
         await hubContext.Clients.User(request.IdBlockedPerson.ToString()).SendAsync("BlockedIntoGroupChat", cancellationToken);
         
         return Result<IActionResult>.Ok(new OkObjectResult(new {message = "Person has blocked successfully!"}));

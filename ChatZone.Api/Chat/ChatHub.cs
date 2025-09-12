@@ -1,7 +1,5 @@
 ﻿using System.Security.Claims;
-using ChatZone.Core.Services;
 using ChatZone.Features.Messages.Add;
-using ChatZone.Features.Messages.GetStatus;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
@@ -42,37 +40,13 @@ public class ChatHub(IMediator mediator) : Hub
     {
         return Context.ConnectionId;
     }
-    public async Task<object> GetPersonGroupAndUsername()
-    {
-        var personId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (personId is null) throw new Exception("User does not exist!");
-        
-        var idGroup = ChatManagerService.GetPersonGroup(int.Parse(personId));
-        if (idGroup is null) throw new Exception("User does not has any group!");
-
-        //ToDo IsSingleChat(int? idGroup) добавил ? может быть можно как то обойти?
-        var isSingleChat = ChatManagerService.IsSingleChat(idGroup);
-        
-        var idPerson = int.Parse(personId);
-        var idPartnerPerson = ChatManagerService.GetSecondPersonInSingleChat(idGroup, int.Parse(personId));
-        
-        var isSentMessage = await mediator.Send(new GetStatusRequest { IdPerson = int.Parse(personId), IdChat = idGroup.Value, IsSingleChat = isSingleChat });
-        if (idGroup == 0) idGroup = null;
-        
-        return new { idPerson, idGroup, isSingleChat, isPartnerIdPeron = isSingleChat ? idPartnerPerson : (int?)null, isSentMessage};
-    }
     
     public async Task LeaveChat(int idGroup, bool isSingleChat)
     {
-        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        ChatManagerService.RemovePersonFromGroup(int.Parse(idPerson!));
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, idGroup.ToString());
 
         if (isSingleChat)
         {
-            var otherPerson = ChatManagerService.GetSecondPersonInSingleChat(idGroup, int.Parse(idPerson!));
-            
-            ChatManagerService.RemovePersonFromGroup(otherPerson);
             
             await Clients.OthersInGroup(idGroup.ToString()).SendAsync("LeftChat");
         }
@@ -82,8 +56,6 @@ public class ChatHub(IMediator mediator) : Hub
     {
         var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        ChatManagerService.AddPersonToGroup(int.Parse(idPerson!), idGroup);
-        ChatManagerService.AddTypeOfGroup(idGroup, false);
         await Groups.AddToGroupAsync(Context.ConnectionId, idGroup.ToString());
         
         await Clients.Caller.SendAsync("ChatCreated");
