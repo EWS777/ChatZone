@@ -25,7 +25,8 @@ public class GetGroupChatHandler(
                 IsAdmin = x.GroupMembers
                     .Where(q=>q.IdGroupMember == request.IdPerson)
                     .Select(q=>q.IsAdmin)
-                    .SingleOrDefault()
+                    .SingleOrDefault(),
+                UserCount = x.UserCount
             })
             .SingleOrDefaultAsync(cancellationToken);
         

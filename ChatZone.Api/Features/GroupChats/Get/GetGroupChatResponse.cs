@@ -11,4 +11,5 @@ public class GetGroupChatResponse
     public AgeList? Age { get; set; }
     public LangList? Lang { get; set; }
     public bool IsAdmin { get; set; }
+    public int UserCount { get; set; }
 }
