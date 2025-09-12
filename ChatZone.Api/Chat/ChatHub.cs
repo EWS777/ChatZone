@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using ChatZone.Features.ChatInfo.GetChat;
 using ChatZone.Features.Messages.Add;
+using ChatZone.Features.SingleChats.Finish;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
@@ -48,7 +49,7 @@ public class ChatHub(IMediator mediator) : Hub
 
         if (isSingleChat)
         {
-            
+            await mediator.Send(new FinishSingleChatRequest { IdChat = idGroup });
             await Clients.OthersInGroup(idGroup.ToString()).SendAsync("LeftChat");
         }
     }
