@@ -13,14 +13,14 @@ public class SingleChatEfConfig : IEntityTypeConfiguration<SingleChat>
 
         builder
             .HasOne(x => x.FirstPerson)
-            .WithOne(x => x.FirstPerson)
-            .HasForeignKey<SingleChat>(x => x.IdFirstPerson)
+            .WithMany(x => x.FirstPerson)
+            .HasForeignKey(x => x.IdFirstPerson)
             .OnDelete(DeleteBehavior.Restrict);
         
         builder
             .HasOne(x => x.SecondPerson)
-            .WithOne(x => x.SecondPerson)
-            .HasForeignKey<SingleChat>(x => x.IdSecondPerson)
+            .WithMany(x => x.SecondPerson)
+            .HasForeignKey(x => x.IdSecondPerson)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder

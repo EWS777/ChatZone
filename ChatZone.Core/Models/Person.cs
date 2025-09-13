@@ -32,8 +32,8 @@ public class Person
     public ICollection<QuickMessage> QuickMessages { get; set; } = new List<QuickMessage>();
     public ICollection<BlockedPerson> BlockerPeoples { get; set; } = new List<BlockedPerson>();
     public ICollection<BlockedPerson> BlockedPeoples { get; set; } = new List<BlockedPerson>();
-    public SingleChat FirstPerson { get; set; }
-    public SingleChat SecondPerson { get; set; }
+    public ICollection<SingleChat> FirstPerson { get; set; } = new List<SingleChat>();
+    public ICollection<SingleChat> SecondPerson { get; set; } = new List<SingleChat>();
     public ICollection<SingleMessage> SingleMessages { get; set; } = new List<SingleMessage>();
     public ICollection<Report> Reporter { get; set; } = new List<Report>();
     public ICollection<Report> Reported { get; set; } = new List<Report>();
