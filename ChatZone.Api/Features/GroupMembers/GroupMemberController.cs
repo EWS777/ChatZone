@@ -3,7 +3,6 @@ using ChatZone.Features.GroupMembers.Add;
 using ChatZone.Features.GroupMembers.LeaveGroup;
 using ChatZone.Features.GroupMembers.GetList;
 using ChatZone.Features.GroupMembers.ChangeAdmin;
-using ChatZone.Features.GroupMembers.ChangeAdminAuto;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -71,15 +70,5 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
         
         var result = await mediator.Send(request, cancellationToken);
         return result.Match(x => x, x => throw x);
-    }
-    
-    [HttpPut]
-    [Route("change-admin-auto")]
-    public async Task ChangeAdminAuto([FromQuery] int idChat, CancellationToken cancellationToken)
-    {
-        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) throw new Exception("User does not exist!");
-        
-        await mediator.Send(new ChangeAdminAutoRequest{IdChat = idChat, IdPersonAdmin = int.Parse(idPerson)}, cancellationToken);
     }
 }
