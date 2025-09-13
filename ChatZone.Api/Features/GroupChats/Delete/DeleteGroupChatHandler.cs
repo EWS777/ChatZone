@@ -1,14 +1,17 @@
+using ChatZone.Chat;
 using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.GroupChats.Delete;
 
 public class DeleteGroupChatHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<DeleteGroupChatRequest, Result<IActionResult>>
+    ChatZoneDbContext dbContext,
+    IHubContext<ChatHub> hubContext) : IRequestHandler<DeleteGroupChatRequest, Result<IActionResult>>
 {
     public async Task<Result<IActionResult>> Handle(DeleteGroupChatRequest request, CancellationToken cancellationToken)
     {
@@ -27,6 +30,7 @@ public class DeleteGroupChatHandler(
         dbContext.GroupChats.Remove(group!);
         await dbContext.SaveChangesAsync(cancellationToken);
         
+        await hubContext.Clients.Group(request.IdGroup.ToString()).SendAsync("NotifyDeleteGroup", cancellationToken);
         return Result<IActionResult>.Ok(new OkObjectResult(new {message = "Group was deleted successfully!"}));
     }
 }
