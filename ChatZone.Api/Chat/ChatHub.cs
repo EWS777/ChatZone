@@ -45,8 +45,6 @@ public class ChatHub(IMediator mediator) : Hub
     
     public async Task LeaveChat(int idGroup, bool isSingleChat)
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, idGroup.ToString());
-
         if (isSingleChat)
         {
             await mediator.Send(new FinishSingleChatRequest { IdChat = idGroup });
