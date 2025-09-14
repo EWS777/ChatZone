@@ -1,13 +1,16 @@
-﻿using ChatZone.Context;
+﻿using ChatZone.Chat;
+using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
 using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.GroupChats.Update;
 
 public class UpdateGroupChatHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<UpdateGroupChatRequest, Result<UpdateGroupChatResponse>>
+    ChatZoneDbContext dbContext,
+    IHubContext<ChatHub> hubContext) : IRequestHandler<UpdateGroupChatRequest, Result<UpdateGroupChatResponse>>
 {
     public async Task<Result<UpdateGroupChatResponse>> Handle(UpdateGroupChatRequest request,
         CancellationToken cancellationToken)
@@ -32,7 +35,7 @@ public class UpdateGroupChatHandler(
         dbContext.GroupChats.Update(group);
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        return Result<UpdateGroupChatResponse>.Ok(new UpdateGroupChatResponse
+        var result = new UpdateGroupChatResponse
         {
             IdGroup = group.IdGroupChat,
             Title = group.Title,
@@ -40,6 +43,9 @@ public class UpdateGroupChatHandler(
             City = group.City,
             Age = group.Age,
             Lang = group.Lang
-        });
+        };
+        
+        await hubContext.Clients.Group(group.IdGroupChat.ToString()).SendAsync("UpdateGroupChatParam", result, cancellationToken);
+        return Result<UpdateGroupChatResponse>.Ok(result);
     }
 }
