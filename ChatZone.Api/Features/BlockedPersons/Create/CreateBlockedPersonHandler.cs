@@ -19,6 +19,6 @@ public class CreateBlockedPersonHandler(
         }, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
-        return Result<IActionResult>.Ok(new OkObjectResult("Person has blocked successfully!"));
+        return Result<IActionResult>.Ok(new OkObjectResult(new {message = "Person has blocked successfully!"}));
     }
 }
