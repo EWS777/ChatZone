@@ -22,7 +22,7 @@ public class GetChatPersonInfoHandler(
                 IdPerson = request.IdPerson,
                 IdGroup = singleChat.IdSingleChat,
                 IsSingleChat = true,
-                IdPartnerPerson = request.IdPerson == singleChat.IdFirstPerson ? singleChat.IdFirstPerson : singleChat.IdSecondPerson,
+                IdPartnerPerson = request.IdPerson == singleChat.IdFirstPerson ? singleChat.IdSecondPerson : singleChat.IdFirstPerson,
                 IsSentMessage = isSentMessage
             });
         }
