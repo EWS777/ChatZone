@@ -23,6 +23,10 @@ public class DeleteGroupChatHandler(
         await dbContext.GroupMembers
             .Where(x=>x.IdChat == request.IdGroup)
             .ExecuteDeleteAsync(cancellationToken);
+        
+        await dbContext.BlockedGroupMembers
+            .Where(x=>x.IdChat == request.IdGroup)
+            .ExecuteDeleteAsync(cancellationToken);
 
         var group = await dbContext.GroupChats.SingleOrDefaultAsync(x => x.IdGroupChat == request.IdGroup,
             cancellationToken);
