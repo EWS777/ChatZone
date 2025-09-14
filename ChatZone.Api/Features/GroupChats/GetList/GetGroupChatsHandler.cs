@@ -13,6 +13,7 @@ public class GetGroupChatsHandler(
         return Result<List<GetGroupChatsResponse>>.Ok(
             await dbContext.GroupChats
                 .AsNoTracking()
+                .Where(x=> x.BlockedGroupMembers.All(q => q.IdBlockedPerson != request.IdPerson))
                 .Select(x => new GetGroupChatsResponse
                 {
                     IdGroup = x.IdGroupChat,

@@ -30,7 +30,10 @@ public class GroupChatController(IMediator mediator) : ControllerBase
     [Route("get")]
     public async Task<List<GetGroupChatsResponse>> GetGroupChats(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetGroupChatsRequest(), cancellationToken);
+        var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (personId is null) throw new Exception("User does not exist!");
+        
+        var result = await mediator.Send(new GetGroupChatsRequest{IdPerson = int.Parse(personId)}, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     
