@@ -22,7 +22,7 @@ public class SearchController(IMediator mediator) : ControllerBase
         return result.Match(x => x, x=> throw x);
     }
 
-    [HttpDelete]
+    [HttpPost]
     [Route("cancel")]
     public async Task<IActionResult> Cancel(CancellationToken cancellationToken)
     {
