@@ -1,8 +1,8 @@
-using ChatZone.Chat;
 using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Core.Models;
+using ChatZone.Hubs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -12,7 +12,7 @@ namespace ChatZone.Features.BlockedGroupMembers.Add;
 
 public class AddBlockedGroupMemberHandler(
     ChatZoneDbContext dbContext,
-    IHubContext<ChatHub> hubContext) : IRequestHandler<AddBlockedGroupRequest, Result<IActionResult>>
+    IHubContext<ChatZoneHub> hubContext) : IRequestHandler<AddBlockedGroupRequest, Result<IActionResult>>
 {
     public async Task<Result<IActionResult>> Handle(AddBlockedGroupRequest request, CancellationToken cancellationToken)
     {

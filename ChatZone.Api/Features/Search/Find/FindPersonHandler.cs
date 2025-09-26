@@ -1,5 +1,5 @@
-using ChatZone.Chat;
 using ChatZone.Core.Extensions;
+using ChatZone.Hubs;
 using ChatZone.Matchmaking;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +9,7 @@ namespace ChatZone.Features.Search.Find;
 
 public class FindPersonHandler(
     IMatchmakingService matchmakingService,
-    IHubContext<ChatHub> hubContext)
+    IHubContext<ChatZoneHub> hubContext)
     : IRequestHandler<FindPersonRequest, Result<IActionResult>>
 {
     public async Task<Result<IActionResult>> Handle(FindPersonRequest request, CancellationToken cancellationToken)

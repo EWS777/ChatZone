@@ -5,9 +5,9 @@ using ChatZone.Features.SingleChats.Finish;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ChatZone.Chat;
+namespace ChatZone.Hubs;
 
-public class ChatHub(IMediator mediator) : Hub
+public class ChatZoneHub(IMediator mediator) : Hub
 {
     public async Task SendMessage(int idGroup, string message, bool isSingleChat)
     {

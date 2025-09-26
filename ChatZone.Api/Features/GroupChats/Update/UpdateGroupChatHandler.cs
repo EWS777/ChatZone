@@ -1,7 +1,7 @@
-﻿using ChatZone.Chat;
-using ChatZone.Context;
+﻿using ChatZone.Context;
 using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
+using ChatZone.Hubs;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +10,7 @@ namespace ChatZone.Features.GroupChats.Update;
 
 public class UpdateGroupChatHandler(
     ChatZoneDbContext dbContext,
-    IHubContext<ChatHub> hubContext) : IRequestHandler<UpdateGroupChatRequest, Result<UpdateGroupChatResponse>>
+    IHubContext<ChatZoneHub> hubContext) : IRequestHandler<UpdateGroupChatRequest, Result<UpdateGroupChatResponse>>
 {
     public async Task<Result<UpdateGroupChatResponse>> Handle(UpdateGroupChatRequest request,
         CancellationToken cancellationToken)

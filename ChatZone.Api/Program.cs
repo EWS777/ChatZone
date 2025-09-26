@@ -1,9 +1,9 @@
 using System.Text;
-using ChatZone.Chat;
 using ChatZone.Context;
 using ChatZone.Core.Notifications;
 using ChatZone.Features.Identity.Authentication.Login;
 using ChatZone.Features.QuickMessages.Create;
+using ChatZone.Hubs;
 using ChatZone.Matchmaking;
 using ChatZone.Security;
 using ChatZone.Validation.Middleware;
@@ -130,7 +130,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapHub<ChatHub>("/chat").RequireAuthorization();
+app.MapHub<ChatZoneHub>("/chat").RequireAuthorization();
 
 app.MapControllers(); //with 'builder.Services.AddControllers();'
 
