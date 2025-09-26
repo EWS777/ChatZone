@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
-using ChatZone.Features.ChatInfo.GetChat;
+using ChatZone.Features.Chats.Common.GetChat;
 using ChatZone.Features.Messages.Add;
-using ChatZone.Features.SingleChats.Finish;
+using ChatZone.Features.Chats.SingleChats.Finish;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 

@@ -26,4 +26,10 @@
       <ProjectReference Include="..\ChatZone.Core\ChatZone.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Features\Chats\Common\" />
+      <Folder Include="Features\Chats\GroupChats\" />
+      <Folder Include="Features\Chats\SingleChats\" />
+    </ItemGroup>
+
 </Project>
