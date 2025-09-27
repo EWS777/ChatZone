@@ -31,7 +31,7 @@ public class ChatZoneHub(IMediator mediator) : Hub
         if (!string.IsNullOrEmpty(idPerson))
         {
             var groupName = await mediator.Send(new GetActiveChatRequest { IdPerson = int.Parse(idPerson)});
-            if(groupName is not null) await Groups.AddToGroupAsync(Context.ConnectionId, groupName.Value.ToString());
+            if(groupName.IsSingleChat is not null) await Groups.AddToGroupAsync(Context.ConnectionId, groupName.IdChat.ToString() ?? string.Empty);
         }
         
         await base.OnConnectedAsync();

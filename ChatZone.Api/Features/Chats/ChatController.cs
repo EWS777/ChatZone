@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using ChatZone.Features.Chats.Common.Get;
+using ChatZone.Features.Chats.Common.GetActiveChat;
 using ChatZone.Features.Chats.GroupChats.Create;
 using ChatZone.Features.Chats.GroupChats.Delete;
 using ChatZone.Features.Chats.GroupChats.Get;
@@ -16,6 +17,16 @@ namespace ChatZone.Features.Chats;
 [Route("[controller]")]
 public class ChatController(IMediator mediator) : ControllerBase
 {
+    [HttpGet]
+    [Route("active-chat")]
+    public async Task<GetActiveChatResponse> GetActiveChat(CancellationToken cancellationToken)
+    {
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) throw new Exception("User does not exist!");
+        
+        return await mediator.Send(new GetActiveChatRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
+    }
+    
     [HttpGet]
     [Route("")]
     public async Task<GetChatPersonInfoResponse> GetChatPersonInfo(CancellationToken cancellationToken)
