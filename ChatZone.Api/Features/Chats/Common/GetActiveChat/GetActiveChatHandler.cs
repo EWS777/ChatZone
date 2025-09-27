@@ -2,12 +2,12 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatZone.Features.Chats.Common.GetChat;
+namespace ChatZone.Features.Chats.Common.GetActiveChat;
 
-public class GetChatHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<GetChatRequest, int?>
+public class GetActiveChatHandler(
+    ChatZoneDbContext dbContext) : IRequestHandler<GetActiveChatRequest, int?>
 {
-    public async Task<int?> Handle(GetChatRequest request, CancellationToken cancellationToken)
+    public async Task<int?> Handle(GetActiveChatRequest request, CancellationToken cancellationToken)
     {
         var singleChat = await dbContext.SingleChats
             .SingleOrDefaultAsync(x=> (x.IdFirstPerson == request.IdPerson || x.IdSecondPerson == request.IdPerson) 

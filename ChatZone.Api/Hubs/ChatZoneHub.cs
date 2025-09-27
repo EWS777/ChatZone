@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using ChatZone.Features.Chats.Common.GetChat;
+using ChatZone.Features.Chats.Common.GetActiveChat;
 using ChatZone.Features.Messages.Add;
 using ChatZone.Features.Chats.SingleChats.Finish;
 using MediatR;
@@ -30,7 +30,7 @@ public class ChatZoneHub(IMediator mediator) : Hub
         var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!string.IsNullOrEmpty(idPerson))
         {
-            var groupName = await mediator.Send(new GetChatRequest { IdPerson = int.Parse(idPerson)});
+            var groupName = await mediator.Send(new GetActiveChatRequest { IdPerson = int.Parse(idPerson)});
             if(groupName is not null) await Groups.AddToGroupAsync(Context.ConnectionId, groupName.Value.ToString());
         }
         
