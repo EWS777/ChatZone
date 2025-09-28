@@ -24,11 +24,11 @@ public class RegisterHandler(
 
             var getEmailResult = await dbContext.Persons.AnyAsync(x=>x.Email == request.Email, cancellationToken);
 
-            if (getEmailResult) return Result<IActionResult>.Failure(new ExistPersonException("The email is exist!"));
+            if (getEmailResult) return Result<IActionResult>.Failure(new ExistPersonException("The email or username already exists."));
             
             var getUsernameResult = await dbContext.Persons.AnyAsync(x=>x.Username == request.Username, cancellationToken);
             
-            if (getUsernameResult) return Result<IActionResult>.Failure(new ExistPersonException("The username is exist!"));
+            if (getUsernameResult) return Result<IActionResult>.Failure(new ExistPersonException("The email or username already exists."));
             
             var getHashedPasswordAndSalt = SecurityHelper.GetHashedPasswordAndSalt(request.Password);
             
