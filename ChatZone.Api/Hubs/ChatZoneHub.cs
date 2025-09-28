@@ -42,15 +42,6 @@ public class ChatZoneHub(IMediator mediator) : Hub
     {
         return Context.ConnectionId;
     }
-    
-    public async Task LeaveChat(int idGroup, bool isSingleChat)
-    {
-        if (isSingleChat)
-        {
-            await mediator.Send(new FinishSingleChatRequest { IdChat = idGroup });
-            await Clients.OthersInGroup(idGroup.ToString()).SendAsync("LeftChat");
-        }
-    }
 
     public async Task AddToGroup(int idGroup)
     {

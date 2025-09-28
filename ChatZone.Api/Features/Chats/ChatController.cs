@@ -6,6 +6,7 @@ using ChatZone.Features.Chats.GroupChats.Delete;
 using ChatZone.Features.Chats.GroupChats.Get;
 using ChatZone.Features.Chats.GroupChats.GetList;
 using ChatZone.Features.Chats.GroupChats.Update;
+using ChatZone.Features.Chats.SingleChats.Finish;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -102,5 +103,12 @@ public class ChatController(IMediator mediator) : ControllerBase
         
         var result = await mediator.Send(request, cancellationToken);
         return result.Match(x => x, x => throw x);
+    }
+
+    [HttpPut]
+    [Route("finish")]
+    public async Task FinishSingleChat([FromQuery] int idChat, CancellationToken cancellationToken)
+    {
+        await mediator.Send(new FinishSingleChatRequest{IdChat = idChat}, cancellationToken);
     }
 }

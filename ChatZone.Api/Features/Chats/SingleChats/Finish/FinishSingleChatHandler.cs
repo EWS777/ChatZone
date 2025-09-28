@@ -1,11 +1,14 @@
 ﻿using ChatZone.Context;
+using ChatZone.Hubs;
 using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Chats.SingleChats.Finish;
 
 public class FinishSingleChatHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<FinishSingleChatRequest, Unit>
+    ChatZoneDbContext dbContext,
+    IHubContext<ChatZoneHub> hubContext) : IRequestHandler<FinishSingleChatRequest, Unit>
 {
     public async Task<Unit> Handle(FinishSingleChatRequest request, CancellationToken cancellationToken)
     {
@@ -14,6 +17,7 @@ public class FinishSingleChatHandler(
         singleChat.FinishedAt = DateTimeOffset.UtcNow;
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await hubContext.Clients.Group(request.IdChat.ToString()).SendAsync("LeftChat", cancellationToken);
         return Unit.Value;
     }
 }
