@@ -20,7 +20,7 @@ public class QuickMessageEfConfig : IEntityTypeConfiguration<QuickMessage>
         builder
             .Property(x => x.Message)
             .IsRequired()
-            .HasMaxLength(250);
+            .HasMaxLength(50);
         
         builder.ToTable(nameof(QuickMessage));
     }

@@ -25,7 +25,7 @@ public class SingleMessageEfConfig : IEntityTypeConfiguration<SingleMessage>
         builder
             .Property(x => x.Message)
             .IsRequired()
-            .HasMaxLength(250);
+            .HasMaxLength(1024);
 
         builder
             .Property(x => x.CreatedAt)

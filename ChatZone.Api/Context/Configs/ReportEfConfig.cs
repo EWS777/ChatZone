@@ -30,7 +30,7 @@ public class ReportEfConfig : IEntityTypeConfiguration<Report>
         builder
             .Property(x => x.ReportMessage)
             .IsRequired()
-            .HasMaxLength(250);
+            .HasMaxLength(1024);
 
         builder
             .HasOne(x => x.SingleMessage)

@@ -24,7 +24,7 @@ public class GroupMessageEfConfig : IEntityTypeConfiguration<GroupMessage>
 
         builder
             .Property(x => x.Message)
-            .HasMaxLength(250)
+            .HasMaxLength(1024)
             .IsRequired();
 
         builder

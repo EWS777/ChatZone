@@ -12,7 +12,7 @@ public class GroupChatEfConfig : IEntityTypeConfiguration<GroupChat>
         
         builder
             .Property(x => x.Title)
-            .HasMaxLength(25)
+            .HasMaxLength(50)
             .IsRequired();
 
         builder

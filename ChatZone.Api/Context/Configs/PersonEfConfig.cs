@@ -19,7 +19,7 @@ public class PersonEfConfig : IEntityTypeConfiguration<Person>
         builder
             .Property(x => x.Username)
             .IsRequired()
-            .HasMaxLength(20);
+            .HasMaxLength(30);
 
         builder
             .HasIndex(x => x.Username)
@@ -28,7 +28,7 @@ public class PersonEfConfig : IEntityTypeConfiguration<Person>
         builder
             .Property(x => x.Email)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasMaxLength(254);
         
         builder
             .HasIndex(x => x.Email)
@@ -37,7 +37,7 @@ public class PersonEfConfig : IEntityTypeConfiguration<Person>
         builder
             .Property(x => x.Password)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasMaxLength(64);
 
         builder
             .Property(x => x.Salt)
