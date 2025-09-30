@@ -52,7 +52,7 @@ public class RegisterHandler(
         }
         catch (Exception e)
         {
-            return Result<IActionResult>.Failure(e);
+            return Result<IActionResult>.Failure(new BackendException());
         }
         
         await EmailSender.SendCodeToEmail(person.Email, person.EmailConfirmToken, cancellationToken);

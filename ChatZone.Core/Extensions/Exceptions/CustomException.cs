@@ -16,3 +16,4 @@ public class ForbiddenAccessException(string message) : CustomException(message,
 public class NotAnyDataException(string message) : CustomException(message, 204);
 public class IsExistsException(string message) : CustomException(message, 409); //409 - Conflict when this data is exists
 public class ExpiredTokenException(string message) : CustomException(message, 410); //410 -> means that it was but not is not available
+public class BackendException() : CustomException("Something went wrong. Please try again", 500);
