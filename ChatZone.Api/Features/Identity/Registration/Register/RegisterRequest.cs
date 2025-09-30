@@ -16,7 +16,7 @@ public class RegisterRequest : IRequest<Result<IActionResult>>
     [Required(ErrorMessage = "Username is required!")]
     [MinLength(8,ErrorMessage = "Username min length is 8 characters")]
     [MaxLength(30,ErrorMessage = "Username max length is 30 characters")]
-    [RegularExpression("^[^@]*$", ErrorMessage = "Username can not contains '@'!")]
+    [RegularExpression("^[^@]*$", ErrorMessage = "Username can not contains '@'")]
     public required string Username { get; set; }
     
     [Required(ErrorMessage = "Password is required!")]
