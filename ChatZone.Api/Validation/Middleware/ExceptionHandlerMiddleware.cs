@@ -18,7 +18,7 @@ public class ExceptionHandlerMiddleware(RequestDelegate next, ILogger<ExceptionH
             var statusCode = StatusCodes.Status500InternalServerError;
             var errorMessage = "Unknown error";
 
-            if (exception is CustomException customException)
+            if (exception is DomainException customException)
             {
                 statusCode = customException.StatusCode;
                 errorMessage = customException.Message;
