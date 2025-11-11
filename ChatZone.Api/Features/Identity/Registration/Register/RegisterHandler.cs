@@ -20,8 +20,6 @@ public class RegisterHandler(
         Person person;
         try
         {
-            await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-
             var getEmailResult = await dbContext.Persons.AnyAsync(x=>x.Email == request.Email, cancellationToken);
 
             if (getEmailResult) return Result<IActionResult>.Failure(new ExistPersonException("The email or username already exists."));
@@ -47,8 +45,6 @@ public class RegisterHandler(
             
             await dbContext.Persons.AddAsync(person, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
-            
-            await transaction.CommitAsync(cancellationToken);
         }
         catch (Exception e)
         {
