@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ChatZone.Core.Extensions;
+using ChatZone.Shared.DTOs;
 using MediatR;
 
 namespace ChatZone.Features.QuickMessages.Update;

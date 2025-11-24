@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ChatZone.Core.Extensions;
 using ChatZone.Core.Models.Enums;
+using ChatZone.Shared.DTOs;
 using MediatR;
 namespace ChatZone.Features.Chats.GroupChats.Create;
 

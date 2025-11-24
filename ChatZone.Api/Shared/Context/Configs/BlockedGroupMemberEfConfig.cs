@@ -2,7 +2,7 @@ using ChatZone.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace ChatZone.Context.Configs;
+namespace ChatZone.Shared.Context.Configs;
 
 public class BlockedGroupMemberEfConfig : IEntityTypeConfiguration<BlockedGroupMember>
 {

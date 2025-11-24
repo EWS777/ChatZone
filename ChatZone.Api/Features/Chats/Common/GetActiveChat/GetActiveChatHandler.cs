@@ -1,4 +1,4 @@
-﻿using ChatZone.Context;
+﻿using ChatZone.Shared.Context;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,6 +1,6 @@
-using ChatZone.Context;
-using ChatZone.Core.Extensions;
 using ChatZone.Core.Models;
+using ChatZone.Shared.Context;
+using ChatZone.Shared.DTOs;
 using MediatR;
 
 namespace ChatZone.Features.QuickMessages.Create;

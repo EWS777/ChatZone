@@ -1,6 +1,6 @@
-﻿using ChatZone.Context;
-using ChatZone.Core.Extensions;
-using ChatZone.Core.Extensions.Exceptions;
+﻿using ChatZone.Core.Extensions.Exceptions;
+using ChatZone.Shared.Context;
+using ChatZone.Shared.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

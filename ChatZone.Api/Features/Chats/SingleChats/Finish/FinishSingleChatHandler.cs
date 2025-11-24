@@ -1,5 +1,5 @@
-﻿using ChatZone.Context;
-using ChatZone.Hubs;
+﻿using ChatZone.Shared.Context;
+using ChatZone.Shared.Hubs;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;

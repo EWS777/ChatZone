@@ -1,6 +1,6 @@
-﻿using ChatZone.Context;
-using ChatZone.Core.Models;
+﻿using ChatZone.Core.Models;
 using ChatZone.Features.Search.Find;
+using ChatZone.Shared.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Matchmaking;

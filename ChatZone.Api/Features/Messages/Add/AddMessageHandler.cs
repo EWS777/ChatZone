@@ -1,5 +1,5 @@
-using ChatZone.Context;
 using ChatZone.Core.Models;
+using ChatZone.Shared.Context;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

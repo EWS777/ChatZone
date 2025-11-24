@@ -1,6 +1,6 @@
-using ChatZone.Core.Extensions;
-using ChatZone.Hubs;
 using ChatZone.Matchmaking;
+using ChatZone.Shared.DTOs;
+using ChatZone.Shared.Hubs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

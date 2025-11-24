@@ -5,7 +5,7 @@ using System.Text;
 using ChatZone.Core.Models.Enums;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ChatZone.Security;
+namespace ChatZone.Shared.Security;
 
 public class Token(IConfiguration configuration) : IToken
 {

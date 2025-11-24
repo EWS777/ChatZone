@@ -1,6 +1,6 @@
 ﻿using FluentValidation.Results;
 
-namespace ChatZone.Core.Extensions;
+namespace ChatZone.Shared.DTOs;
 
 public class Result<T>
 {

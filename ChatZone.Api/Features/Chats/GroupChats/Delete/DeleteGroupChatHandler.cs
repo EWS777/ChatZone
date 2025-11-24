@@ -1,7 +1,7 @@
-using ChatZone.Context;
-using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
-using ChatZone.Hubs;
+using ChatZone.Shared.Context;
+using ChatZone.Shared.DTOs;
+using ChatZone.Shared.Hubs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

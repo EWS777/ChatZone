@@ -1,11 +1,10 @@
 ﻿using System.Security.Claims;
 using ChatZone.Features.Chats.Common.GetActiveChat;
 using ChatZone.Features.Messages.Add;
-using ChatZone.Features.Chats.SingleChats.Finish;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ChatZone.Hubs;
+namespace ChatZone.Shared.Hubs;
 
 public class ChatZoneHub(IMediator mediator) : Hub
 {

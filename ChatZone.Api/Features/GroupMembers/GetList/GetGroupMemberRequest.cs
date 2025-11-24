@@ -1,4 +1,4 @@
-using ChatZone.Core.Extensions;
+using ChatZone.Shared.DTOs;
 using MediatR;
 
 namespace ChatZone.Features.GroupMembers.GetList;

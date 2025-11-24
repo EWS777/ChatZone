@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
-namespace ChatZone.Security;
+namespace ChatZone.Shared.Security;
 
 public static class SecurityHelper
 {

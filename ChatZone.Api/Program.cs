@@ -1,12 +1,12 @@
 using System.Text;
-using ChatZone.Context;
 using ChatZone.Core.Notifications;
 using ChatZone.Features.Identity.Authentication.Login;
 using ChatZone.Features.QuickMessages.Create;
-using ChatZone.Hubs;
 using ChatZone.Matchmaking;
-using ChatZone.Security;
-using ChatZone.Validation.Middleware;
+using ChatZone.Shared.Context;
+using ChatZone.Shared.Hubs;
+using ChatZone.Shared.Middlewares;
+using ChatZone.Shared.Security;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

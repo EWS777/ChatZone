@@ -1,7 +1,7 @@
 using ChatZone.Core.Extensions.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatZone.Validation.Middleware;
+namespace ChatZone.Shared.Middlewares;
 
 public class ExceptionHandlerMiddleware(RequestDelegate next, ILogger<ExceptionHandlerMiddleware> logger)
 {

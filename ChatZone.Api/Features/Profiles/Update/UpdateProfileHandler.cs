@@ -1,8 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
-using ChatZone.Context;
-using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
-using ChatZone.Security;
+using ChatZone.Shared.Context;
+using ChatZone.Shared.DTOs;
+using ChatZone.Shared.Security;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

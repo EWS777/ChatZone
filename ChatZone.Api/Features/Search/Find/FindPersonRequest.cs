@@ -1,5 +1,5 @@
-using ChatZone.Core.Extensions;
 using ChatZone.Core.Models.Enums;
+using ChatZone.Shared.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

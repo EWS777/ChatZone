@@ -1,7 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using ChatZone.Core.Models.Enums;
 
-namespace ChatZone.Security;
+namespace ChatZone.Shared.Security;
 
 public interface IToken
 {

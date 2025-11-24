@@ -1,10 +1,10 @@
-using ChatZone.Context;
-using ChatZone.Core.Extensions;
 using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Core.Models;
 using ChatZone.Core.Models.Enums;
 using ChatZone.Core.Notifications;
-using ChatZone.Security;
+using ChatZone.Shared.Context;
+using ChatZone.Shared.DTOs;
+using ChatZone.Shared.Security;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

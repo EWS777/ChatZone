@@ -1,8 +1,8 @@
-﻿using ChatZone.Context.Configs;
-using ChatZone.Core.Models;
+﻿using ChatZone.Core.Models;
+using ChatZone.Shared.Context.Configs;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatZone.Context;
+namespace ChatZone.Shared.Context;
 
 public class ChatZoneDbContext : DbContext
 {
