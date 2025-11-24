@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>ChatZone</RootNamespace>
+        <UserSecretsId>d2e945f5-ff94-4499-99c3-de77138e8177</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
