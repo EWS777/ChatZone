@@ -30,8 +30,8 @@ public static class SecurityHelper
         string currentHashedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
             password: password,
             salt: saltBytes,
-            prf: KeyDerivationPrf.HMACSHA1,
-            iterationCount: 10000,
+            prf: KeyDerivationPrf.HMACSHA512,
+            iterationCount: 210000,
             numBytesRequested: 256 / 8));
 
         return currentHashedPassword;
