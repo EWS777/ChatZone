@@ -14,8 +14,8 @@ public static class SecurityHelper
         string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
             password: password,
             salt: salt,
-            prf: KeyDerivationPrf.HMACSHA1,
-            iterationCount: 10000,
+            prf: KeyDerivationPrf.HMACSHA512,
+            iterationCount: 210000,
             numBytesRequested: 256 / 8));
 
         string saltBase64 = Convert.ToBase64String(salt);
