@@ -10,6 +10,8 @@ public class ChatZoneHub(IMediator mediator) : Hub
 {
     public async Task SendMessage(int idGroup, string message, bool isSingleChat)
     {
+        if (string.IsNullOrWhiteSpace(message)) throw new HubException("Message is required!");
+        if(message.Length >= 1025) throw new HubException("Message max length is 1024 characters!");
         var idSender = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         var createdAt = DateTimeOffset.UtcNow;

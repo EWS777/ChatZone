@@ -15,9 +15,9 @@ public class PasswordController(IMediator mediator) : ControllerBase
     [AllowAnonymous]
     [HttpPost]
     [Route("reset-password")]
-    public async Task<IActionResult> ResetPassword([FromQuery]string email, CancellationToken cancellationToken)
+    public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordRequest request, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ResetPasswordRequest{Email = email}, cancellationToken);
+        var result = await mediator.Send(request, cancellationToken);
         return result.Match<IActionResult>(x => x, x => throw x);
     }
 
