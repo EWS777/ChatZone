@@ -17,8 +17,7 @@ public class ConfirmHandler(
     {
         var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.EmailConfirmToken == request.Token, cancellationToken);
         
-        if (person is null) return Result<ConfirmResponse>.Failure(new NotFoundException("Token is not exists!"));
-        if (person.EmailConfirmTokenExp < DateTimeOffset.UtcNow) return Result<ConfirmResponse>.Failure(new ExpiredTokenException("Token was expired!"));
+        if(person is null || person.EmailConfirmTokenExp < DateTimeOffset.UtcNow) return Result<ConfirmResponse>.Failure(new ExpiredTokenException("The activation link is not correct or time activate is expired! Please confirm your email again."));
         
         var generatedRefreshToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
         var generatedAccessToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);

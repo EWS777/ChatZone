@@ -9,6 +9,7 @@ public class ReconfirmRequest : IRequest<Result<IActionResult>>
 {
     [Required(ErrorMessage = "Email is required!")]
     [EmailAddress(ErrorMessage = "Invalid email format!")]
-    [MaxLength(50, ErrorMessage = "Email max length is 50 characters!")]
+    [MinLength(5, ErrorMessage = "Email min length is 5 characters!")]
+    [MaxLength(254, ErrorMessage = "Email max length is 254 characters!")]
     public required string Email { get; set; }
 }

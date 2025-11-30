@@ -24,14 +24,14 @@ public class LoginHandler(
             ? await dbContext.Persons.SingleOrDefaultAsync(x=>x.Email == request.UsernameOrEmail, cancellationToken)
             : await dbContext.Persons.SingleOrDefaultAsync(x=>x.Username == request.UsernameOrEmail, cancellationToken);
 
-        if (person is null) return Result<LoginResponse>.Failure(new NotFoundException("User is not found!"));
+        if (person is null) return Result<LoginResponse>.Failure(new NotFoundException("Email or password is not correct!"));
         
-        if(person.Role != PersonRole.User) return Result<LoginResponse>.Failure(new ForbiddenAccessException("The email is not confirmed"));
+        if(person.Role != PersonRole.User) return Result<LoginResponse>.Failure(new ForbiddenAccessException("Email or password is not correct!"));
 
         var currentHashedCode = SecurityHelper.GetHashedPasswordWithSalt(request.Password, person.Salt);
 
         if (currentHashedCode != person.Password)
-            return Result<LoginResponse>.Failure(new ForbiddenAccessException("The password is not match"));
+            return Result<LoginResponse>.Failure(new ForbiddenAccessException("Email or password is not correct!"));
 
         var generatedAccessToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
         var generatedRefreshToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
