@@ -13,6 +13,10 @@ public class AddGroupMemberHandler(
 {
     public async Task<Result<IActionResult>> Handle(AddGroupMemberRequest request, CancellationToken cancellationToken)
     {
+        var isPersonExists = await dbContext.GroupMembers.
+            AnyAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson, cancellationToken);
+        if(isPersonExists) return Result<IActionResult>.Ok(new OkResult());
+        
         var isPersonBlocked = await dbContext.BlockedGroupMembers
             .AnyAsync(x=>x.IdChat == request.IdGroup && x.IdBlockedPerson == request.IdPerson, cancellationToken);
         if(isPersonBlocked) return Result<IActionResult>.Failure(new ForbiddenAccessException("You have been blocked in this group!"));
