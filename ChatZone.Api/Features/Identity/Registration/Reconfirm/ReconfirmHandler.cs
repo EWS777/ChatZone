@@ -25,6 +25,10 @@ public class ReconfirmHandler(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         await EmailSender.SendCodeToEmail(person.Email, person.EmailConfirmToken, cancellationToken);
-        return Result<IActionResult>.Ok(new OkObjectResult("Link was sent!"));
+        return Result<IActionResult>.Ok(new OkObjectResult(new
+        {
+            message = "Link was sent!",
+            status = 200
+        }));
     }
 }
