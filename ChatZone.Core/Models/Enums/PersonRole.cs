@@ -5,5 +5,6 @@ public enum PersonRole
     Unknown,
     Unconfirmed,
     User,
-    Admin
+    Admin,
+    Deleted
 }

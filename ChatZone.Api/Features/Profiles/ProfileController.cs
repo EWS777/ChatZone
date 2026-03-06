@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ChatZone.Core.Extensions.Exceptions;
+using ChatZone.Features.Profiles.Delete;
 using ChatZone.Features.Profiles.Get;
 using ChatZone.Features.Profiles.Update;
 using MediatR;
@@ -57,6 +58,40 @@ public class ProfileController(IMediator mediator) : ControllerBase
             });
         }
         
+        return result.Match(x => x, x => throw x);
+    }
+    
+    [Authorize(Roles = "User")]
+    [HttpPost]
+    [Route("delete")]
+    public async Task<IActionResult> DeleteProfile([FromBody] DeleteProfileRequest profileRequest,
+        CancellationToken cancellationToken)
+    {
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) throw new Exception("User does not exist!");
+
+        profileRequest.IdPerson = int.Parse(idPerson);
+
+        var result = await mediator.Send(profileRequest, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            Response.Cookies.Delete("AccessToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(-1)
+            });
+            Response.Cookies.Delete("RefreshToken", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(-1)
+            });
+        }
+
         return result.Match(x => x, x => throw x);
     }
 }
