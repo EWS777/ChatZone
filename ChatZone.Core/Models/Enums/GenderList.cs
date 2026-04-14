@@ -4,5 +4,5 @@ public enum GenderList
 {
     Male,
     Female,
-    Nothing
+    Both
 }
