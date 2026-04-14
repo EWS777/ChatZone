@@ -61,11 +61,6 @@ public class PersonEfConfig : IEntityTypeConfiguration<Person>
             .IsRequired()
             .HasDefaultValue(false);
 
-        builder
-            .Property(x => x.IsFindByProfile)
-            .IsRequired()
-            .HasDefaultValue(true);
-
         builder.ToTable(nameof(Person));
     }
 }

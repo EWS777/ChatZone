@@ -16,8 +16,7 @@ public class GetProfileHandler(ChatZoneDbContext dbContext) : IRequestHandler<Ge
             .Select(x => new GetProfileResponse
             {
                 Username = x.Username,
-                Email = x.Email,
-                IsFindByProfile = x.IsFindByProfile
+                Email = x.Email
             })
             .SingleOrDefaultAsync(cancellationToken);
         

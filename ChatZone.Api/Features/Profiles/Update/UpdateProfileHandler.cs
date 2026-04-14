@@ -27,7 +27,6 @@ public class UpdateProfileHandler(
             
             person.Username = request.Username;
         }
-        person.IsFindByProfile = request.IsFindByProfile;
         
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -38,7 +37,6 @@ public class UpdateProfileHandler(
             {
                 Username = person.Username,
                 Email = person.Email,
-                IsFindByProfile = person.IsFindByProfile,
                 AccessToken = new JwtSecurityTokenHandler().WriteToken(token.GenerateJwtToken(person.Username, person.Role, person.IdPerson)),
                 RefreshToken = person.RefreshToken
             });
@@ -47,8 +45,7 @@ public class UpdateProfileHandler(
         return Result<UpdateProfileResponse>.Ok(new UpdateProfileResponse
         {
             Username = person.Username,
-            Email = person.Email,
-            IsFindByProfile = person.IsFindByProfile
+            Email = person.Email
         });
     }
 }
