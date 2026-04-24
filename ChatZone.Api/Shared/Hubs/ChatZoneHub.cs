@@ -1,6 +1,8 @@
-﻿using System.Security.Claims;
+﻿using System.Collections.Concurrent;
+using System.Security.Claims;
 using ChatZone.Features.Chats.Common.GetActiveChat;
 using ChatZone.Features.Messages.Add;
+using ChatZone.Features.Search.Find;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
@@ -8,6 +10,7 @@ namespace ChatZone.Shared.Hubs;
 
 public class ChatZoneHub(IMediator mediator) : Hub
 {
+    private static readonly ConcurrentDictionary<string, CancellationTokenSource> _activeSearches = new();
     public async Task SendMessage(int idGroup, string message, bool isSingleChat)
     {
         if (string.IsNullOrWhiteSpace(message)) throw new HubException("Message is required!");
@@ -49,5 +52,43 @@ public class ChatZoneHub(IMediator mediator) : Hub
         await Groups.AddToGroupAsync(Context.ConnectionId, idGroup.ToString());
         
         await Clients.Caller.SendAsync("ChatCreated");
+    }
+
+    public async Task StartSearchSingeChat(FindPersonRequest request)
+    {
+        var connectionId = Context.ConnectionId;
+        request.ConnectionId = connectionId;
+        
+        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(Context.ConnectionAborted);
+        
+        //to check if the person exists already
+        if (_activeSearches.TryRemove(connectionId, out var oldConnection))
+        {
+            await oldConnection.CancelAsync();
+            oldConnection.Dispose();
+        }
+
+        _activeSearches.TryAdd(connectionId, cts);
+
+        try
+        {
+            while (!cts.Token.IsCancellationRequested)
+            {
+                var result = await mediator.Send(request, cts.Token);
+                
+                // if(result.IsSuccess && result.Value.IsFound) break;
+            }
+            await Task.Delay(3000, cts.Token);
+        }
+        catch (Exception e)
+        {
+            //
+        }
+        finally
+        {
+            _activeSearches.TryRemove(connectionId, out _);
+        }
     }
 }
