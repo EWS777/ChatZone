@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Security.Claims;
 using ChatZone.Features.Chats.Common.GetActiveChat;
+using ChatZone.Features.GroupMembers.CheckMember;
 using ChatZone.Features.Messages.Add;
 using ChatZone.Features.Search.Find;
 using MediatR;
@@ -49,8 +50,17 @@ public class ChatZoneHub(IMediator mediator) : Hub
 
     public async Task AddToGroup(int idGroup)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, idGroup.ToString());
+        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        var isMember = await mediator.Send(new CheckMemberRequest
+        {
+            IdChat = idGroup,
+            IdPerson = int.Parse(idPerson!)
+        });
         
+        if (!isMember) throw new HubException("You are not a member of this group!");
+        
+        await Groups.AddToGroupAsync(Context.ConnectionId, idGroup.ToString());
         await Clients.Caller.SendAsync("ChatCreated");
     }
 

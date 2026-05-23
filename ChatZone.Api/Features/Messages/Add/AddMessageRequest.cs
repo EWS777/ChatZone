@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Messages.Add;
 
-public class AddMessageRequest : IRequest<IActionResult>
+public class AddMessageRequest : IRequest<bool>
 {
     public required string Message { get; set; }
     public int IdSender { get; set; }
