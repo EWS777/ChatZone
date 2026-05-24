@@ -9,16 +9,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Identity.Password.Reset;
 
-public class ResetPasswordHandler(
-    ChatZoneDbContext dbContext,
-    IToken token) : IRequestHandler<ResetPasswordRequest, Result<IActionResult>>
+public class ResetPasswordHandler(ChatZoneDbContext dbContext) : IRequestHandler<ResetPasswordRequest, Result<IActionResult>>
 {
     public async Task<Result<IActionResult>> Handle(ResetPasswordRequest request, CancellationToken cancellationToken)
     {
         var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.Email==request.Email, cancellationToken);
         if (person is null) return Result<IActionResult>.Failure(new NotFoundException("User is not found!"));
 
-        person.EmailConfirmToken = token.GenerateAuthorizationToken();
+        person.EmailConfirmToken = SecurityHelper.GenerateEmailAuthorizationToken();
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         

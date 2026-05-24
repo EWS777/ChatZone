@@ -11,15 +11,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Identity.Registration.Register;
 
-public class RegisterHandler(
-    ChatZoneDbContext dbContext,
-    IToken token) : IRequestHandler<RegisterRequest, Result<IActionResult>>
+public class RegisterHandler(ChatZoneDbContext dbContext) : IRequestHandler<RegisterRequest, Result<bool>>
 {
-    public async Task<Result<IActionResult>> Handle(RegisterRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(RegisterRequest request, CancellationToken cancellationToken)
     {
         var isEmailOrUsernameExists =
             await dbContext.Persons.AnyAsync(x => x.Email == request.Email || x.Username == request.Username, cancellationToken);
-        if(isEmailOrUsernameExists) return Result<IActionResult>.Failure(new ExistPersonException("The email or username already exists."));
+        if(isEmailOrUsernameExists) return Result<bool>.Failure(new ExistPersonException("The email or username already exists."));
         
         var getHashedPasswordAndSalt = SecurityHelper.GetHashedPasswordAndSalt(request.Password);
         
@@ -30,9 +28,9 @@ public class RegisterHandler(
             Email = request.Email,
             Password = getHashedPasswordAndSalt.Item1,
             Salt = getHashedPasswordAndSalt.Item2,
-            RefreshToken = SecurityHelper.GenerateRefreshToken(),
-            RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7),
-            EmailConfirmToken = token.GenerateAuthorizationToken(),
+            RefreshToken = "",
+            RefreshTokenExp = DateTimeOffset.UtcNow,
+            EmailConfirmToken = SecurityHelper.GenerateEmailAuthorizationToken(),
             EmailConfirmTokenExp = DateTimeOffset.UtcNow.AddMinutes(15)
         };
         
@@ -41,6 +39,6 @@ public class RegisterHandler(
 
         await EmailSender.SendCodeToEmail(person.Email, person.EmailConfirmToken, cancellationToken);
         
-        return Result<IActionResult>.Ok(new OkResult());
+        return Result<bool>.Ok(true);
     }
 }

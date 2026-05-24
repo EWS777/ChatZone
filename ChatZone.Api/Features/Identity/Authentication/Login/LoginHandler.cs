@@ -34,17 +34,17 @@ public class LoginHandler(
             return Result<LoginResponse>.Failure(new ForbiddenAccessException("Email or password is not correct!"));
 
         var generatedAccessToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
-        var generatedRefreshToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
+        var generatedRefreshToken = SecurityHelper.GenerateRefreshToken();
         
         person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7);
-        person.RefreshToken = generatedRefreshToken.ToString();
+        person.RefreshToken = SecurityHelper.HashRefreshToken(generatedRefreshToken);
         
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<LoginResponse>.Ok(new LoginResponse{
             AccessToken = new JwtSecurityTokenHandler().WriteToken(generatedAccessToken),
-            RefreshToken = new JwtSecurityTokenHandler().WriteToken(generatedRefreshToken)
+            RefreshToken = generatedRefreshToken
         });
     }
 }

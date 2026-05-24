@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Features.Identity.Authentication.Login;
 using ChatZone.Features.Identity.Authentication.Logout;
 using ChatZone.Features.Identity.Authentication.Refresh;
@@ -35,7 +36,7 @@ public class AuthenticationController(IMediator mediator) : ControllerBase
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
             });
             Response.Cookies.Append("RefreshToken", result.Value.RefreshToken, new CookieOptions
             {
@@ -53,10 +54,17 @@ public class AuthenticationController(IMediator mediator) : ControllerBase
     [Route("refresh")]
     public async Task<RefreshResponse> Refresh(CancellationToken cancellationToken)
     {
+        var oldRefreshToken = Request.Cookies["RefreshToken"];
+        if (string.IsNullOrEmpty(oldRefreshToken)) throw new SecurityTokenException("Refresh token is missing in cookies!");
+        
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) throw new Exception("User does not exist!");
         
-        var result = await mediator.Send(new RefreshRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
+        var result = await mediator.Send(new RefreshRequest
+        {
+            IdPerson = int.Parse(idPerson),
+            RefreshToken = oldRefreshToken
+        }, cancellationToken);
         
         if (result.IsSuccess)
         {
@@ -65,7 +73,7 @@ public class AuthenticationController(IMediator mediator) : ControllerBase
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
             });
             Response.Cookies.Append("RefreshToken", result.Value.RefreshToken, new CookieOptions
             {

@@ -16,4 +16,5 @@ public class ForbiddenAccessException(string message) : DomainException(message,
 public class NotAnyDataException(string message) : DomainException(message, 204);
 public class IsExistsException(string message) : DomainException(message, 409); //409 - Conflict when this data is exists
 public class ExpiredTokenException(string message) : DomainException(message, 410); //410 -> means that it was but not is not available
+public class SecurityTokenException(string message) : DomainException(message, 401);
 public class BackendException() : DomainException("Something went wrong. Please try again", 500);

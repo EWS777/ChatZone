@@ -47,7 +47,7 @@ public class ProfileController(IMediator mediator) : ControllerBase
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
             });
             Response.Cookies.Append("RefreshToken", result.Value.RefreshToken!, new CookieOptions
             {

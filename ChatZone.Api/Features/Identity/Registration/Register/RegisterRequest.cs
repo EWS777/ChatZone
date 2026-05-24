@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Identity.Registration.Register;
 
-public class RegisterRequest : IRequest<Result<IActionResult>>
+public class RegisterRequest : IRequest<Result<bool>>
 {
     [Required(ErrorMessage = "Email is required!")]
     [EmailAddress(ErrorMessage = "Invalid email format!")]
