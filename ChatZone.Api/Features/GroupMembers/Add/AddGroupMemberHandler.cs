@@ -27,7 +27,7 @@ public class AddGroupMemberHandler(ChatZoneDbContext dbContext) : IRequestHandle
             IdChat = request.IdGroup,
             IdGroupMember = request.IdPerson,
             IsAdmin = false,
-            JoinedAt = DateTimeOffset.Now
+            JoinedAt = DateTimeOffset.UtcNow
         }, cancellationToken);
 
         groupChat.UserCount += 1;
