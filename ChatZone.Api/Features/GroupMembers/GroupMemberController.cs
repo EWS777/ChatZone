@@ -41,7 +41,7 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
         };
 
         var result = await mediator.Send(groupMember, cancellationToken);
-        return result.Match(x => x, x => throw x);
+        return result.Match(x => Ok(), x => throw x);
     }
 
     [HttpDelete]
@@ -56,7 +56,7 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
         };
 
         var result = await mediator.Send(groupMember, cancellationToken);
-        return result.Match(x => x, x => throw x);
+        return result.Match(x => Ok(), x => throw x);
     }
     
     [HttpPut]
@@ -69,6 +69,6 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
         request.IdPerson = int.Parse(idPerson);
         
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match(x => x, x => throw x);
+        return result.Match(x => Ok(), x => throw x);
     }
 }

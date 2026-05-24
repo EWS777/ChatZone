@@ -7,19 +7,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.GroupMembers.LeaveGroup;
 
-public class LeaveGroupHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<LeaveGroupRequest, Result<IActionResult>>
+public class LeaveGroupHandler(ChatZoneDbContext dbContext) : IRequestHandler<LeaveGroupRequest, Result<bool>>
 {
-    public async Task<Result<IActionResult>> Handle(LeaveGroupRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(LeaveGroupRequest request, CancellationToken cancellationToken)
     {
-        var groupMember = await dbContext.GroupMembers.SingleOrDefaultAsync(x => x.IdGroupMember == request.IdPerson, cancellationToken);
+        var groupMember = await dbContext.GroupMembers
+            .Include(x=>x.GroupChat)
+            .SingleOrDefaultAsync(x => x.IdChat == request.IdChat && x.IdGroupMember == request.IdPerson, cancellationToken);
+        if(groupMember is null) return Result<bool>.Failure(new NotFoundException("You are not a member of this group!"));
         
-        var groupChat = await dbContext.GroupChats.SingleOrDefaultAsync(x => x.IdGroupChat == request.IdChat, cancellationToken);
-        if(groupChat is null) return Result<IActionResult>.Failure(new NotFoundException("Group chat is not found!"));
-        groupChat.UserCount -= 1;
+        groupMember.GroupChat.UserCount -= 1;
         
-        dbContext.GroupMembers.Remove(groupMember!);
+        dbContext.GroupMembers.Remove(groupMember);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return Result<IActionResult>.Ok(new OkResult());
+        return Result<bool>.Ok(true);
     }
 }

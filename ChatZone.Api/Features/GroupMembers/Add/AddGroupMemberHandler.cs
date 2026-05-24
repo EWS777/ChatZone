@@ -8,18 +8,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.GroupMembers.Add;
 
-public class AddGroupMemberHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<AddGroupMemberRequest, Result<IActionResult>>
+public class AddGroupMemberHandler(ChatZoneDbContext dbContext) : IRequestHandler<AddGroupMemberRequest, Result<bool>>
 {
-    public async Task<Result<IActionResult>> Handle(AddGroupMemberRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(AddGroupMemberRequest request, CancellationToken cancellationToken)
     {
-        var isPersonExists = await dbContext.GroupMembers.
-            AnyAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson, cancellationToken);
-        if(isPersonExists) return Result<IActionResult>.Ok(new OkResult());
+        var groupChat = await dbContext.GroupChats.SingleOrDefaultAsync(x => x.IdGroupChat == request.IdGroup, cancellationToken);
+        if(groupChat is null) return Result<bool>.Failure(new NotFoundException("Group chat is not found!"));
+        
+        var isPersonExists = await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson, cancellationToken);
+        if(isPersonExists) return Result<bool>.Ok(true);
         
         var isPersonBlocked = await dbContext.BlockedGroupMembers
             .AnyAsync(x=>x.IdChat == request.IdGroup && x.IdBlockedPerson == request.IdPerson, cancellationToken);
-        if(isPersonBlocked) return Result<IActionResult>.Failure(new ForbiddenAccessException("You have been blocked in this group!"));
+        if(isPersonBlocked) return Result<bool>.Failure(new ForbiddenAccessException("You have been blocked in this group!"));
         
         await dbContext.GroupMembers.AddAsync(new GroupMember
         {
@@ -29,13 +30,10 @@ public class AddGroupMemberHandler(
             JoinedAt = DateTimeOffset.Now
         }, cancellationToken);
 
-        var groupChat = await dbContext.GroupChats.SingleOrDefaultAsync(x => x.IdGroupChat == request.IdGroup, cancellationToken);
-        if(groupChat is null) return Result<IActionResult>.Failure(new NotFoundException("Group chat is not found!"));
-
         groupChat.UserCount += 1;
         
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        return Result<IActionResult>.Ok(new OkResult());
+        return Result<bool>.Ok(true);
     }
 }

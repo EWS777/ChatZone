@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.GroupMembers.ChangeAdmin;
 
-public class ChangeAdminRequest : IRequest<Result<IActionResult>>
+public class ChangeAdminRequest : IRequest<Result<bool>>
 {
     public int IdPerson { get; set; }
     public int IdNewAdminPerson { get; set; }
