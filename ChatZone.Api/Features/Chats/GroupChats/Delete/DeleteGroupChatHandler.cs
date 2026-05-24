@@ -11,30 +11,43 @@ namespace ChatZone.Features.Chats.GroupChats.Delete;
 
 public class DeleteGroupChatHandler(
     ChatZoneDbContext dbContext,
-    IHubContext<ChatZoneHub> hubContext) : IRequestHandler<DeleteGroupChatRequest, Result<IActionResult>>
+    IHubContext<ChatZoneHub> hubContext) : IRequestHandler<DeleteGroupChatRequest, Result<bool>>
 {
-    public async Task<Result<IActionResult>> Handle(DeleteGroupChatRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(DeleteGroupChatRequest request, CancellationToken cancellationToken)
     {
-        var isAdmin = await dbContext.GroupMembers.AnyAsync(
-            x => x.IdGroupMember == request.IdPerson && x.IdChat == request.IdGroup && x.IsAdmin == true,
-            cancellationToken);
-        if(!isAdmin) return Result<IActionResult>.Failure(new ForbiddenAccessException("You are not an owner of this group!"));
-
-        await dbContext.GroupMembers
-            .Where(x=>x.IdChat == request.IdGroup)
-            .ExecuteDeleteAsync(cancellationToken);
+        var isAdmin = await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson && x.IsAdmin == true, cancellationToken);
+        if(!isAdmin) return Result<bool>.Failure(new ForbiddenAccessException("You are not an owner of this group!"));
         
-        await dbContext.BlockedGroupMembers
-            .Where(x=>x.IdChat == request.IdGroup)
-            .ExecuteDeleteAsync(cancellationToken);
-
-        var group = await dbContext.GroupChats.SingleOrDefaultAsync(x => x.IdGroupChat == request.IdGroup,
-            cancellationToken);
+        var group = await dbContext.GroupChats.SingleOrDefaultAsync(x => x.IdGroupChat == request.IdGroup, cancellationToken);
+        if(group is null) return Result<bool>.Failure(new NotFoundException("Group chat is not found!"));
         
-        dbContext.GroupChats.Remove(group!);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            await dbContext.GroupMembers
+                .Where(x=>x.IdChat == request.IdGroup)
+                .ExecuteDeleteAsync(cancellationToken);
+            
+            await dbContext.BlockedGroupMembers
+                .Where(x=>x.IdChat == request.IdGroup)
+                .ExecuteDeleteAsync(cancellationToken);
+            
+            await dbContext.GroupMessages
+                .Where(x => x.IdChat == request.IdGroup)
+                .ExecuteDeleteAsync(cancellationToken);
         
-        await hubContext.Clients.Group(request.IdGroup.ToString()).SendAsync("NotifyDeleteGroup", cancellationToken);
-        return Result<IActionResult>.Ok(new OkObjectResult(new {message = "Group was deleted successfully!"}));
+            dbContext.GroupChats.Remove(group);
+            
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            
+            await hubContext.Clients.Group(request.IdGroup.ToString()).SendAsync("NotifyDeleteGroup", cancellationToken);
+            return Result<bool>.Ok(true);
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return Result<bool>.Failure(new BackendException());
+        }
     }
 }

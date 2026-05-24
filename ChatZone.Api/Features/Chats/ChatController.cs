@@ -102,7 +102,7 @@ public class ChatController(IMediator mediator) : ControllerBase
         };
         
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match(x => x, x => throw x);
+        return result.Match(x => Ok(new {message = "Group was deleted successfully!"}), x => throw x);
     }
 
     [HttpPut]

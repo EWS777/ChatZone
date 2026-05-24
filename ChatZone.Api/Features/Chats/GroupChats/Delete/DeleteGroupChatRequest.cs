@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Chats.GroupChats.Delete;
 
-public class DeleteGroupChatRequest : IRequest<Result<IActionResult>>
+public class DeleteGroupChatRequest : IRequest<Result<bool>>
 {
     [Required(ErrorMessage = "Id group can not be null!")]
     public int IdGroup { get; set; }
