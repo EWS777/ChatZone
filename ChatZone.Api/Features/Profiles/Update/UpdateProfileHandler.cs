@@ -18,14 +18,19 @@ public class UpdateProfileHandler(
         if(person is null) return Result<UpdateProfileResponse>.Failure(new NotFoundException("User is not found!"));
         
         bool isUsernameChanged = request.Username != person.Username;
+        string? newRefreshToken = null;
         
         //is username changed and doesn't exist in database
         if (isUsernameChanged)
         {
-            var isUsernameIsNotUsed = await dbContext.Persons.AnyAsync(x=>x.Username == request.Username, cancellationToken);
-            if (isUsernameIsNotUsed) return Result<UpdateProfileResponse>.Failure(new IsExistsException("This username is exists!"));
+            var isUsernameTaken = await dbContext.Persons.AnyAsync(x=>x.Username == request.Username, cancellationToken);
+            if (isUsernameTaken) return Result<UpdateProfileResponse>.Failure(new IsExistsException("This username is exists!"));
             
             person.Username = request.Username;
+            
+            newRefreshToken = SecurityHelper.GenerateRefreshToken();
+            person.RefreshToken = SecurityHelper.HashRefreshToken(newRefreshToken);
+            person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7);
         }
         
         dbContext.Persons.Update(person);
@@ -38,7 +43,7 @@ public class UpdateProfileHandler(
                 Username = person.Username,
                 Email = person.Email,
                 AccessToken = new JwtSecurityTokenHandler().WriteToken(token.GenerateJwtToken(person.Username, person.Role, person.IdPerson)),
-                RefreshToken = person.RefreshToken
+                RefreshToken = newRefreshToken
             });
         }
 
