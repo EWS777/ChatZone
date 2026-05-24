@@ -21,6 +21,6 @@ public class BlockedGroupMemberController(IMediator mediator) : ControllerBase
         request.IdAdminPerson = int.Parse(idPerson);
 
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match(x => x, x => throw x);
+        return result.Match(x => Ok(new {message = "Person has blocked successfully!"}), x => throw x);
     }
 }
