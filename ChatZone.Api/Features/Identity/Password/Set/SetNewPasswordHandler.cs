@@ -8,24 +8,30 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Identity.Password.Set;
 
-public class SetNewPasswordHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<SetNewPasswordRequest, Result<IActionResult>>
+public class SetNewPasswordHandler(ChatZoneDbContext dbContext) : IRequestHandler<SetNewPasswordRequest, Result<bool>>
 {
-    public async Task<Result<IActionResult>> Handle(SetNewPasswordRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(SetNewPasswordRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(
-                x => x.Email == request.Email && x.EmailConfirmToken == request.Token, cancellationToken);
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+        if(person is null) return Result<bool>.Failure(new NotFoundException("User is not found!"));
         
-        if(person is null) return Result<IActionResult>.Failure(new NotFoundException("User is not found!"));
+        var hashedPasswordResetTokenRequest = SecurityHelper.HashRefreshToken(request.Token);
+        if (hashedPasswordResetTokenRequest != person.PasswordResetToken) return Result<bool>.Failure(new SecurityTokenException("Invalid password reset token"));
+        
+        if(person.PasswordResetTokenExp < DateTimeOffset.UtcNow) return Result<bool>.Failure(new ExpiredTokenException("Your token has expired. Please try again"));
         
         var hashedPassword = SecurityHelper.GetHashedPasswordAndSalt(request.Password);
 
         person.Password = hashedPassword.Item1;
         person.Salt = hashedPassword.Item2;
+        person.PasswordResetToken = null;
+        person.PasswordResetTokenExp = null;
+        person.RefreshToken = "";
+        person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(-1);
         
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        return Result<IActionResult>.Ok(new OkObjectResult(new {message = "Update password has completed successfully!"}));
+        return Result<bool>.Ok(true);
     }
 }

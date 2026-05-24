@@ -20,6 +20,7 @@ public class RegisterHandler(ChatZoneDbContext dbContext) : IRequestHandler<Regi
         if(isEmailOrUsernameExists) return Result<bool>.Failure(new ExistPersonException("The email or username already exists."));
         
         var getHashedPasswordAndSalt = SecurityHelper.GetHashedPasswordAndSalt(request.Password);
+        var generatedEmailConfirmToken = SecurityHelper.GenerateRefreshToken();
         
         var person = new Person
         {
@@ -30,14 +31,14 @@ public class RegisterHandler(ChatZoneDbContext dbContext) : IRequestHandler<Regi
             Salt = getHashedPasswordAndSalt.Item2,
             RefreshToken = "",
             RefreshTokenExp = DateTimeOffset.UtcNow,
-            EmailConfirmToken = SecurityHelper.GenerateEmailAuthorizationToken(),
+            EmailConfirmToken = SecurityHelper.HashRefreshToken(generatedEmailConfirmToken),
             EmailConfirmTokenExp = DateTimeOffset.UtcNow.AddMinutes(15)
         };
         
         await dbContext.Persons.AddAsync(person, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        await EmailSender.SendCodeToEmail(person.Email, person.EmailConfirmToken, cancellationToken);
+        await EmailSender.SendCodeToEmail(person.Email, generatedEmailConfirmToken, cancellationToken);
         
         return Result<bool>.Ok(true);
     }

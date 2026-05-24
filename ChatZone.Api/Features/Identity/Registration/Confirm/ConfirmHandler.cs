@@ -15,7 +15,8 @@ public class ConfirmHandler(
 {
     public async Task<Result<ConfirmResponse>> Handle(ConfirmRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.EmailConfirmToken == request.Token, cancellationToken);
+        var currentHashedEmailConfirmToken = SecurityHelper.HashRefreshToken(request.Token);
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.EmailConfirmToken == currentHashedEmailConfirmToken, cancellationToken);
         
         if(person is null || person.EmailConfirmTokenExp < DateTimeOffset.UtcNow) return Result<ConfirmResponse>.Failure(new ExpiredTokenException("The activation link is not correct or time activate is expired! Please confirm your email again."));
         

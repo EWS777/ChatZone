@@ -16,11 +16,14 @@ public class ResetPasswordHandler(ChatZoneDbContext dbContext) : IRequestHandler
         var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.Email==request.Email, cancellationToken);
         if (person is null) return Result<IActionResult>.Failure(new NotFoundException("User is not found!"));
 
-        person.EmailConfirmToken = SecurityHelper.GenerateEmailAuthorizationToken();
+        var passwordResetToken = SecurityHelper.GenerateRefreshToken();
+        person.PasswordResetToken = SecurityHelper.HashRefreshToken(passwordResetToken);
+        person.PasswordResetTokenExp = DateTimeOffset.UtcNow.AddMinutes(15);
+        
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        await EmailSender.ResetPassword(person.Email, person.EmailConfirmToken, cancellationToken);
+        await EmailSender.ResetPassword(person.Email, passwordResetToken, cancellationToken);
         return Result<IActionResult>.Ok(new OkObjectResult(new {message = "The reset link was sent to your email!"}));
     }
 }

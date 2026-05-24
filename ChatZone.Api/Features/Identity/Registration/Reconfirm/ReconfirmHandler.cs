@@ -16,13 +16,14 @@ public class ReconfirmHandler(ChatZoneDbContext dbContext) : IRequestHandler<Rec
         var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
         if(person is null) return Result<IActionResult>.Failure(new NotFoundException("User is not found!"));
 
-        person.EmailConfirmToken = SecurityHelper.GenerateEmailAuthorizationToken();
+        var emailConfirmToken = SecurityHelper.GenerateRefreshToken();
+        person.EmailConfirmToken = SecurityHelper.HashRefreshToken(emailConfirmToken);
         person.EmailConfirmTokenExp = DateTimeOffset.UtcNow.AddMinutes(15);
 
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        await EmailSender.SendCodeToEmail(person.Email, person.EmailConfirmToken, cancellationToken);
+        await EmailSender.SendCodeToEmail(person.Email, emailConfirmToken, cancellationToken);
         return Result<IActionResult>.Ok(new OkObjectResult(new
         {
             message = "Link was sent!",

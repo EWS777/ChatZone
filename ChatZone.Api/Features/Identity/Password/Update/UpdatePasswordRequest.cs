@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Identity.Password.Update;
 
-public class UpdatePasswordRequest : IRequest<Result<IActionResult>>
+public class UpdatePasswordRequest : IRequest<Result<bool>>
 {
     public int IdPerson { get; set; }
     [Required(ErrorMessage = "Old password is required!")]

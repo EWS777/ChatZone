@@ -26,7 +26,8 @@ public class Person
     public LangList? Language { get; set; }
     public string? EmailConfirmToken { get; set; }
     public DateTimeOffset? EmailConfirmTokenExp { get; set; }
-    
+    public string? PasswordResetToken { get; set; }
+    public DateTimeOffset? PasswordResetTokenExp { get; set; }
     public ICollection<QuickMessage> QuickMessages { get; set; } = new List<QuickMessage>();
     public ICollection<BlockedPerson> BlockerPeoples { get; set; } = new List<BlockedPerson>();
     public ICollection<BlockedPerson> BlockedPeoples { get; set; } = new List<BlockedPerson>();

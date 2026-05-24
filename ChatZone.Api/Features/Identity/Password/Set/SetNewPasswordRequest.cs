@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Identity.Password.Set;
 
-public class SetNewPasswordRequest : IRequest<Result<IActionResult>>
+public class SetNewPasswordRequest : IRequest<Result<bool>>
 {
     public required string Token { get; set; }
     [Required(ErrorMessage = "Email is required!")]
