@@ -10,7 +10,8 @@ namespace ChatZone.Features.Profiles.Update;
 
 public class UpdateProfileHandler(
     ChatZoneDbContext dbContext,
-    IToken token) : IRequestHandler<UpdateProfileRequest, Result<UpdateProfileResponse>>
+    IToken token,
+    IConfiguration configuration) : IRequestHandler<UpdateProfileRequest, Result<UpdateProfileResponse>>
 {
     public async Task<Result<UpdateProfileResponse>> Handle(UpdateProfileRequest request, CancellationToken cancellationToken)
     {
@@ -30,7 +31,7 @@ public class UpdateProfileHandler(
             
             newRefreshToken = SecurityHelper.GenerateRefreshToken();
             person.RefreshToken = SecurityHelper.HashRefreshToken(newRefreshToken);
-            person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7);
+            person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!));
         }
         
         dbContext.Persons.Update(person);

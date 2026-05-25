@@ -11,7 +11,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Identity.Registration.Register;
 
-public class RegisterHandler(ChatZoneDbContext dbContext) : IRequestHandler<RegisterRequest, Result<bool>>
+public class RegisterHandler(ChatZoneDbContext dbContext,
+    IConfiguration configuration) : IRequestHandler<RegisterRequest, Result<bool>>
 {
     public async Task<Result<bool>> Handle(RegisterRequest request, CancellationToken cancellationToken)
     {
@@ -19,7 +20,7 @@ public class RegisterHandler(ChatZoneDbContext dbContext) : IRequestHandler<Regi
             await dbContext.Persons.AnyAsync(x => x.Email == request.Email || x.Username == request.Username, cancellationToken);
         if(isEmailOrUsernameExists) return Result<bool>.Failure(new ExistPersonException("The email or username already exists."));
         
-        var getHashedPasswordAndSalt = SecurityHelper.GetHashedPasswordAndSalt(request.Password);
+        var getHashedPasswordAndSalt = SecurityHelper.GetHashedPasswordAndSalt(request.Password, configuration);
         var generatedEmailConfirmToken = SecurityHelper.GenerateRefreshToken();
         
         var person = new Person
@@ -32,7 +33,7 @@ public class RegisterHandler(ChatZoneDbContext dbContext) : IRequestHandler<Regi
             RefreshToken = "",
             RefreshTokenExp = DateTimeOffset.UtcNow,
             EmailConfirmToken = SecurityHelper.HashRefreshToken(generatedEmailConfirmToken),
-            EmailConfirmTokenExp = DateTimeOffset.UtcNow.AddMinutes(15)
+            EmailConfirmTokenExp = DateTimeOffset.UtcNow.AddMinutes(double.Parse(configuration["JWT:EmailConfirmTokenExpMinutes"]!))
         };
         
         await dbContext.Persons.AddAsync(person, cancellationToken);

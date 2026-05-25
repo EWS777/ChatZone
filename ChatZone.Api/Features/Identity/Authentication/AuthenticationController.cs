@@ -11,7 +11,8 @@ namespace ChatZone.Features.Identity.Authentication;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthenticationController(IMediator mediator) : ControllerBase
+public class AuthenticationController(IMediator mediator,
+    IConfiguration configuration) : ControllerBase
 {
     [Authorize(Roles = "User")]
     [HttpGet]
@@ -36,14 +37,14 @@ public class AuthenticationController(IMediator mediator) : ControllerBase
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
+                Expires = DateTimeOffset.UtcNow.AddMinutes(double.Parse(configuration["JWT:AccessTokenExpMinutes"]!))
             });
             Response.Cookies.Append("RefreshToken", result.Value.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Expires = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!))
             });
         }
         return result.Match<LoginResponse>(x => x, x => throw x);
@@ -73,14 +74,14 @@ public class AuthenticationController(IMediator mediator) : ControllerBase
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
+                Expires = DateTimeOffset.UtcNow.AddMinutes(double.Parse(configuration["JWT:AccessTokenExpMinutes"]!))
             });
             Response.Cookies.Append("RefreshToken", result.Value.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Expires = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!))
             });
         }
         

@@ -6,7 +6,7 @@ namespace ChatZone.Shared.Security;
 
 public static class SecurityHelper
 {
-    public static Tuple<string, string> GetHashedPasswordAndSalt(string password){
+    public static Tuple<string, string> GetHashedPasswordAndSalt(string password, IConfiguration configuration){
         byte[] salt = new byte[128 / 8];
         using (var rng = RandomNumberGenerator.Create()) {
             rng.GetBytes(salt);
@@ -16,7 +16,7 @@ public static class SecurityHelper
             password: password,
             salt: salt,
             prf: KeyDerivationPrf.HMACSHA512,
-            iterationCount: 210000,
+            iterationCount: int.Parse(configuration["Security:PasswordHashIterationCount"]!),
             numBytesRequested: 256 / 8));
 
         string saltBase64 = Convert.ToBase64String(salt);
@@ -25,14 +25,14 @@ public static class SecurityHelper
         //hashed => password
     } 
     
-    public static string GetHashedPasswordWithSalt(string password, string salt) {
+    public static string GetHashedPasswordWithSalt(string password, string salt, IConfiguration configuration) {
         byte[] saltBytes = Convert.FromBase64String(salt);
 
         string currentHashedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
             password: password,
             salt: saltBytes,
             prf: KeyDerivationPrf.HMACSHA512,
-            iterationCount: 210000,
+            iterationCount: int.Parse(configuration["Security:PasswordHashIterationCount"]!),
             numBytesRequested: 256 / 8));
 
         return currentHashedPassword;

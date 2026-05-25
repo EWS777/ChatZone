@@ -10,7 +10,8 @@ namespace ChatZone.Features.Identity.Authentication.Refresh;
 
 public class RefreshHandler(
     ChatZoneDbContext dbContext,
-    IToken token) : IRequestHandler<RefreshRequest, Result<RefreshResponse>>
+    IToken token,
+    IConfiguration configuration) : IRequestHandler<RefreshRequest, Result<RefreshResponse>>
 {
     public async Task<Result<RefreshResponse>> Handle(RefreshRequest request, CancellationToken cancellationToken)
     {
@@ -26,7 +27,7 @@ public class RefreshHandler(
         var newRefreshToken = SecurityHelper.GenerateRefreshToken();
 
         person.RefreshToken = SecurityHelper.HashRefreshToken(newRefreshToken);
-        person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7);
+        person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!));
         
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);

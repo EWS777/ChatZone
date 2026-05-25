@@ -9,7 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Identity.Password.Reset;
 
-public class ResetPasswordHandler(ChatZoneDbContext dbContext) : IRequestHandler<ResetPasswordRequest, Result<IActionResult>>
+public class ResetPasswordHandler(ChatZoneDbContext dbContext,
+    IConfiguration configuration) : IRequestHandler<ResetPasswordRequest, Result<IActionResult>>
 {
     public async Task<Result<IActionResult>> Handle(ResetPasswordRequest request, CancellationToken cancellationToken)
     {
@@ -18,7 +19,7 @@ public class ResetPasswordHandler(ChatZoneDbContext dbContext) : IRequestHandler
 
         var passwordResetToken = SecurityHelper.GenerateRefreshToken();
         person.PasswordResetToken = SecurityHelper.HashRefreshToken(passwordResetToken);
-        person.PasswordResetTokenExp = DateTimeOffset.UtcNow.AddMinutes(15);
+        person.PasswordResetTokenExp = DateTimeOffset.UtcNow.AddMinutes(double.Parse(configuration["JWT:ResetPasswordTokenExpMinutes"]!));
         
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);

@@ -13,7 +13,8 @@ namespace ChatZone.Features.Identity.Authentication.Login;
 public class LoginHandler(
     ChatZoneDbContext dbContext,
     IValidator<LoginRequest> validator, 
-    IToken token) : IRequestHandler<LoginRequest, Result<LoginResponse>>
+    IToken token,
+    IConfiguration configuration) : IRequestHandler<LoginRequest, Result<LoginResponse>>
 {
     public async Task<Result<LoginResponse>> Handle(LoginRequest request, CancellationToken cancellationToken)
     {
@@ -28,7 +29,7 @@ public class LoginHandler(
         
         if(person.Role != PersonRole.User) return Result<LoginResponse>.Failure(new ForbiddenAccessException("Email or password is not correct!"));
 
-        var currentHashedCode = SecurityHelper.GetHashedPasswordWithSalt(request.Password, person.Salt);
+        var currentHashedCode = SecurityHelper.GetHashedPasswordWithSalt(request.Password, person.Salt, configuration);
 
         if (currentHashedCode != person.Password)
             return Result<LoginResponse>.Failure(new ForbiddenAccessException("Email or password is not correct!"));
@@ -36,7 +37,7 @@ public class LoginHandler(
         var generatedAccessToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
         var generatedRefreshToken = SecurityHelper.GenerateRefreshToken();
         
-        person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7);
+        person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!));
         person.RefreshToken = SecurityHelper.HashRefreshToken(generatedRefreshToken);
         
         dbContext.Persons.Update(person);

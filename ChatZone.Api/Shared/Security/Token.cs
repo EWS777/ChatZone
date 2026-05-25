@@ -25,7 +25,7 @@ public class Token(IConfiguration configuration) : IToken
             issuer: configuration["JWT:Issuer"],
             audience: configuration["JWT:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(15),
+            expires: DateTime.UtcNow.AddMinutes(double.Parse(configuration["JWT:AccessTokenExpMinutes"]!)),
             signingCredentials: creds
         );
     }

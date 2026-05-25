@@ -11,7 +11,8 @@ namespace ChatZone.Features.Profiles;
 
 [ApiController]
 [Route("[controller]")]
-public class ProfileController(IMediator mediator) : ControllerBase
+public class ProfileController(IMediator mediator,
+    IConfiguration configuration) : ControllerBase
 {
     [Authorize(Roles = "User")]
     [HttpGet]
@@ -47,14 +48,16 @@ public class ProfileController(IMediator mediator) : ControllerBase
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
+                Expires = DateTimeOffset.UtcNow.AddMinutes(double.Parse(configuration["JWT:AccessTokenExpMinutes"]!))
             });
             Response.Cookies.Append("RefreshToken", result.Value.RefreshToken!, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Expires = DateTimeOffset.UtcNow.AddDays(
+                    double.Parse(configuration["JWT:RefreshTokenExpDays"]!)
+                    )
             });
         }
         

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Profiles.Delete;
 
-public class DeleteProfileHandler(ChatZoneDbContext dbContext) : IRequestHandler<DeleteProfileRequest, Result<IActionResult>>
+public class DeleteProfileHandler(ChatZoneDbContext dbContext, IConfiguration configuration) : IRequestHandler<DeleteProfileRequest, Result<IActionResult>>
 {
     public async Task<Result<IActionResult>> Handle(DeleteProfileRequest request, CancellationToken cancellationToken)
     {
@@ -17,7 +17,7 @@ public class DeleteProfileHandler(ChatZoneDbContext dbContext) : IRequestHandler
             .SingleOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
         if(person is null) return Result<IActionResult>.Failure(new NotFoundException("User is not found"));
 
-        var currentHashedPassword = SecurityHelper.GetHashedPasswordWithSalt(request.Password, person.Salt);
+        var currentHashedPassword = SecurityHelper.GetHashedPasswordWithSalt(request.Password, person.Salt, configuration);
         if(currentHashedPassword != person.Password)
             return Result<IActionResult>.Failure(new ForbiddenAccessException("Password is not correct!"));
 

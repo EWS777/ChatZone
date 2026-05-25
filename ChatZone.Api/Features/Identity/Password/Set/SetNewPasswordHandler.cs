@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Identity.Password.Set;
 
-public class SetNewPasswordHandler(ChatZoneDbContext dbContext) : IRequestHandler<SetNewPasswordRequest, Result<bool>>
+public class SetNewPasswordHandler(ChatZoneDbContext dbContext, IConfiguration configuration) : IRequestHandler<SetNewPasswordRequest, Result<bool>>
 {
     public async Task<Result<bool>> Handle(SetNewPasswordRequest request, CancellationToken cancellationToken)
     {
@@ -20,7 +20,7 @@ public class SetNewPasswordHandler(ChatZoneDbContext dbContext) : IRequestHandle
         
         if(person.PasswordResetTokenExp < DateTimeOffset.UtcNow) return Result<bool>.Failure(new ExpiredTokenException("Your token has expired. Please try again"));
         
-        var hashedPassword = SecurityHelper.GetHashedPasswordAndSalt(request.Password);
+        var hashedPassword = SecurityHelper.GetHashedPasswordAndSalt(request.Password, configuration);
 
         person.Password = hashedPassword.Item1;
         person.Salt = hashedPassword.Item2;

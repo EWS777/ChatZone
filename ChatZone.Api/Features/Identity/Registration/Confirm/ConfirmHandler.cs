@@ -11,7 +11,8 @@ namespace ChatZone.Features.Identity.Registration.Confirm;
 
 public class ConfirmHandler(
     ChatZoneDbContext dbContext,
-    IToken token) : IRequestHandler<ConfirmRequest, Result<ConfirmResponse>>
+    IToken token,
+    IConfiguration configuration) : IRequestHandler<ConfirmRequest, Result<ConfirmResponse>>
 {
     public async Task<Result<ConfirmResponse>> Handle(ConfirmRequest request, CancellationToken cancellationToken)
     {
@@ -27,7 +28,7 @@ public class ConfirmHandler(
         person.EmailConfirmToken = null;
         person.EmailConfirmTokenExp = null;
         person.RefreshToken = SecurityHelper.HashRefreshToken(generatedRefreshToken);
-        person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(7);
+        person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!));
         
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
