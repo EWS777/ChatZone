@@ -1,4 +1,5 @@
-﻿using FluentValidation.Results;
+﻿using FluentValidation;
+using FluentValidation.Results;
 
 namespace ChatZone.Shared.DTOs;
 
@@ -33,7 +34,8 @@ public class Result<T>
 
     public static Result<T> Failure(List<ValidationFailure> validationFailures)
     {
-        return new Result<T>(false, default, default, validationFailures);
+        var validationException = new ValidationException(validationFailures);
+        return new Result<T>(false, validationException, default, validationFailures);
     }
 
     public TResult Match<TResult>(Func<T, TResult> ifSuccessful, Func<Exception, TResult> ifFailure)
