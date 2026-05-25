@@ -55,19 +55,4 @@ public static class SecurityHelper
         var hash = sha256.ComputeHash(bytes);
         return Convert.ToBase64String(hash);
     }
-    
-    public static string GenerateEmailAuthorizationToken()
-    {
-        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-        const int length = 70;
-        using var rng = RandomNumberGenerator.Create();
-        var bytes = new byte[length];
-        rng.GetBytes(bytes);
-        var result = new char[length];
-        for (int i = 0; i < length; i++)
-        {
-            result[i] = chars[bytes[i] % chars.Length];
-        }
-        return new string(result);
-    }
 }
