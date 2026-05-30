@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Identity.Authentication.Logout;
 
-public class LogoutRequest : IRequest<Result<IActionResult>>
+public class LogoutRequest : IRequest<Result<bool>>
 {
     public int IdPerson { get; init; }
 }

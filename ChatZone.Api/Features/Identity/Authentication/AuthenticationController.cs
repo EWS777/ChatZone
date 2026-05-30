@@ -94,26 +94,28 @@ public class AuthenticationController(IMediator mediator,
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) throw new Exception("User does not exist!");
+        // if (idPerson is null) throw new Exception("User does not exist!");
+        if (idPerson is null) return Unauthorized(new { message = "User is not authorized!" });
         
         var result = await mediator.Send(new LogoutRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
-        
-        Response.Cookies.Append("AccessToken", "", new CookieOptions
+        if (result.IsSuccess)
         {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
-            Expires = DateTimeOffset.UtcNow.AddDays(-1)
-        });
+            Response.Cookies.Append("AccessToken", "", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(-1)
+            });
         
-        Response.Cookies.Append("RefreshToken", "", new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
-            Expires = DateTimeOffset.UtcNow.AddDays(-1)
-        });
-
-        return result.Match<IActionResult>(x => x, x => throw x);
+            Response.Cookies.Append("RefreshToken", "", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(-1)
+            });
+        } 
+        return result.Match<IActionResult>(x => Ok(new {message = "Logout has completed successfully!"}), x => throw x);
     }
 }

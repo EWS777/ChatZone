@@ -18,7 +18,7 @@ public class PasswordController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordRequest request, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match<IActionResult>(x => x, x => throw x);
+        return result.Match<IActionResult>(x => Ok(new {message = "The reset link was sent to your email!"}), x => throw x);
     }
 
     [Authorize(Roles = "User")]

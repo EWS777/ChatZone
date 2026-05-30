@@ -10,12 +10,12 @@ using Microsoft.EntityFrameworkCore;
 namespace ChatZone.Features.Identity.Password.Reset;
 
 public class ResetPasswordHandler(ChatZoneDbContext dbContext,
-    IConfiguration configuration) : IRequestHandler<ResetPasswordRequest, Result<IActionResult>>
+    IConfiguration configuration) : IRequestHandler<ResetPasswordRequest, Result<bool>>
 {
-    public async Task<Result<IActionResult>> Handle(ResetPasswordRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(ResetPasswordRequest request, CancellationToken cancellationToken)
     {
         var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.Email==request.Email, cancellationToken);
-        if (person is null) return Result<IActionResult>.Failure(new NotFoundException("User is not found!"));
+        if (person is null) return Result<bool>.Failure(new NotFoundException("User is not found!"));
 
         var passwordResetToken = SecurityHelper.GenerateRefreshToken();
         person.PasswordResetToken = SecurityHelper.HashRefreshToken(passwordResetToken);
@@ -25,6 +25,6 @@ public class ResetPasswordHandler(ChatZoneDbContext dbContext,
         await dbContext.SaveChangesAsync(cancellationToken);
         
         await EmailSender.ResetPassword(person.Email, passwordResetToken, cancellationToken);
-        return Result<IActionResult>.Ok(new OkObjectResult(new {message = "The reset link was sent to your email!"}));
+        return Result<bool>.Ok(true);
     }
 }

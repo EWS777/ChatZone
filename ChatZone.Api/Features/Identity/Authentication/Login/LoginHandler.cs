@@ -21,13 +21,11 @@ public class LoginHandler(
         var validation = await validator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid) return Result<LoginResponse>.Failure(validation.Errors.ToList());
         
-        var person = request.UsernameOrEmail.Contains("@")
+        var person = request.UsernameOrEmail.Contains('@')
             ? await dbContext.Persons.SingleOrDefaultAsync(x=>x.Email == request.UsernameOrEmail, cancellationToken)
             : await dbContext.Persons.SingleOrDefaultAsync(x=>x.Username == request.UsernameOrEmail, cancellationToken);
 
-        if (person is null) return Result<LoginResponse>.Failure(new NotFoundException("Email or password is not correct!"));
-        
-        if(person.Role != PersonRole.User) return Result<LoginResponse>.Failure(new ForbiddenAccessException("Email or password is not correct!"));
+        if (person is null || person.Role != PersonRole.User) return Result<LoginResponse>.Failure(new ForbiddenAccessException("Email or password is not correct!"));
 
         var currentHashedCode = SecurityHelper.GetHashedPasswordWithSalt(request.Password, person.Salt, configuration);
 

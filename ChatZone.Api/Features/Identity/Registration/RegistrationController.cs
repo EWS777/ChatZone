@@ -55,6 +55,10 @@ public class RegistrationController(IMediator mediator,
     public async Task<IActionResult> Reconfirm([FromQuery] string email, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new ReconfirmRequest{Email = email}, cancellationToken);
-        return result.Match<IActionResult>(e => e, x => throw x);
+        return result.Match<IActionResult>(e => Ok(new
+        {
+            message = "Link was sent!",
+            status = 200
+        }), x => throw x);
     }
 }

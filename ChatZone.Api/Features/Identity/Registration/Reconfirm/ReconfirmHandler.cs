@@ -10,12 +10,12 @@ using Microsoft.EntityFrameworkCore;
 namespace ChatZone.Features.Identity.Registration.Reconfirm;
 
 public class ReconfirmHandler(ChatZoneDbContext dbContext,
-    IConfiguration configuration) : IRequestHandler<ReconfirmRequest, Result<IActionResult>>
+    IConfiguration configuration) : IRequestHandler<ReconfirmRequest, Result<bool>>
 {
-    public async Task<Result<IActionResult>> Handle(ReconfirmRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(ReconfirmRequest request, CancellationToken cancellationToken)
     {
         var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
-        if(person is null) return Result<IActionResult>.Failure(new NotFoundException("User is not found!"));
+        if(person is null) return Result<bool>.Failure(new NotFoundException("User is not found!"));
 
         var emailConfirmToken = SecurityHelper.GenerateRefreshToken();
         person.EmailConfirmToken = SecurityHelper.HashRefreshToken(emailConfirmToken);
@@ -25,10 +25,6 @@ public class ReconfirmHandler(ChatZoneDbContext dbContext,
         await dbContext.SaveChangesAsync(cancellationToken);
 
         await EmailSender.SendCodeToEmail(person.Email, emailConfirmToken, cancellationToken);
-        return Result<IActionResult>.Ok(new OkObjectResult(new
-        {
-            message = "Link was sent!",
-            status = 200
-        }));
+        return Result<bool>.Ok(true);
     }
 }

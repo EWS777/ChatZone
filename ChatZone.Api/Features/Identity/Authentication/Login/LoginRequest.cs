@@ -6,7 +6,7 @@ namespace ChatZone.Features.Identity.Authentication.Login;
 
 public class LoginRequest : IRequest<Result<LoginResponse>>
 {
-    public string? UsernameOrEmail { get; set; }
+    public required string UsernameOrEmail { get; set; }
     
     [Required(ErrorMessage = "Password is required!")]
     [MinLength(8, ErrorMessage = "Password min length is 8 characters!")]

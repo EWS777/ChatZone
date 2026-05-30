@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Identity.Password.Reset;
 
-public class ResetPasswordRequest : IRequest<Result<IActionResult>>
+public class ResetPasswordRequest : IRequest<Result<bool>>
 {
     [Required(ErrorMessage = "Email is required!")]
     [EmailAddress(ErrorMessage = "Invalid email format!")]
