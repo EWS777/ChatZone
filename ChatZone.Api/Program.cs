@@ -14,13 +14,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args); //zwraca obiekt i sluzy dla konfiguracji webowej
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
         policy
-            .WithOrigins("https://localhost:4200")
+            .WithOrigins(allowedOrigins!)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
