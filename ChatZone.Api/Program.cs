@@ -1,4 +1,5 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using ChatZone.Core.Notifications;
 using ChatZone.Features.Identity.Authentication.Login;
 using ChatZone.Features.QuickMessages.Create;
@@ -10,6 +11,7 @@ using ChatZone.Shared.Security;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -25,6 +27,23 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
+    });
+});
+
+var requestLimit = builder.Configuration.GetValue<int>("RateLimiting:RequestLimit", 50);
+var requestInSeconds = builder.Configuration.GetValue<int>("RateLimiting:RequestInSeconds", 60);
+var queueLimit = builder.Configuration.GetValue<int>("RateLimiting:QueueLimit", 2);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    
+    options.AddFixedWindowLimiter("RateLimitingPolicy", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = requestLimit;
+        limiterOptions.Window = TimeSpan.FromSeconds(requestInSeconds);
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = queueLimit;
     });
 });
 
@@ -124,7 +143,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowAngular");
-
+app.UseRateLimiter();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
@@ -133,6 +152,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapHub<ChatZoneHub>("/chat").RequireAuthorization();
 
-app.MapControllers(); //with 'builder.Services.AddControllers();'
+app.MapControllers().RequireRateLimiting("RateLimitingPolicy"); //with 'builder.Services.AddControllers();'
 
 app.Run();
