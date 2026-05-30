@@ -21,10 +21,22 @@ public class ReconfirmHandler(ChatZoneDbContext dbContext,
         person.EmailConfirmToken = SecurityHelper.HashRefreshToken(emailConfirmToken);
         person.EmailConfirmTokenExp = DateTimeOffset.UtcNow.AddMinutes(double.Parse(configuration["JWT:EmailConfirmTokenExpMinutes"]!));
 
-        dbContext.Persons.Update(person);
-        await dbContext.SaveChangesAsync(cancellationToken);
-
-        await EmailSender.SendCodeToEmail(person.Email, emailConfirmToken, cancellationToken);
-        return Result<bool>.Ok(true);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            dbContext.Persons.Update(person);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            
+            await EmailSender.SendCodeToEmail(person.Email, emailConfirmToken, cancellationToken);
+            
+            await transaction.CommitAsync(cancellationToken);
+            
+            return Result<bool>.Ok(true);
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return Result<bool>.Failure(new BackendException());
+        }
     }
 }

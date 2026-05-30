@@ -35,12 +35,23 @@ public class RegisterHandler(ChatZoneDbContext dbContext,
             EmailConfirmToken = SecurityHelper.HashRefreshToken(generatedEmailConfirmToken),
             EmailConfirmTokenExp = DateTimeOffset.UtcNow.AddMinutes(double.Parse(configuration["JWT:EmailConfirmTokenExpMinutes"]!))
         };
-        
-        await dbContext.Persons.AddAsync(person, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
 
-        await EmailSender.SendCodeToEmail(person.Email, generatedEmailConfirmToken, cancellationToken);
-        
-        return Result<bool>.Ok(true);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            await dbContext.Persons.AddAsync(person, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            
+            await EmailSender.SendCodeToEmail(person.Email, generatedEmailConfirmToken, cancellationToken);
+            
+            await transaction.CommitAsync(cancellationToken);
+            
+            return Result<bool>.Ok(true);
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return Result<bool>.Failure(new BackendException());
+        }
     }
 }

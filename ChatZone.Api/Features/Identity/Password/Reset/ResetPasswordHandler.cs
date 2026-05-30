@@ -21,10 +21,22 @@ public class ResetPasswordHandler(ChatZoneDbContext dbContext,
         person.PasswordResetToken = SecurityHelper.HashRefreshToken(passwordResetToken);
         person.PasswordResetTokenExp = DateTimeOffset.UtcNow.AddMinutes(double.Parse(configuration["JWT:ResetPasswordTokenExpMinutes"]!));
         
-        dbContext.Persons.Update(person);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        
-        await EmailSender.ResetPassword(person.Email, passwordResetToken, cancellationToken);
-        return Result<bool>.Ok(true);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            dbContext.Persons.Update(person);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            
+            await EmailSender.ResetPassword(person.Email, passwordResetToken, cancellationToken);
+            
+            await transaction.CommitAsync(cancellationToken);
+            
+            return Result<bool>.Ok(true);
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            return Result<bool>.Failure(new BackendException());
+        }
     }
 }
