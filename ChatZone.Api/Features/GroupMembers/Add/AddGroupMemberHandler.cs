@@ -20,7 +20,7 @@ public class AddGroupMemberHandler(ChatZoneDbContext dbContext) : IRequestHandle
         
         var isPersonBlocked = await dbContext.BlockedGroupMembers
             .AnyAsync(x=>x.IdChat == request.IdGroup && x.IdBlockedPerson == request.IdPerson, cancellationToken);
-        if(isPersonBlocked) return Result<bool>.Failure(new ForbiddenAccessException("You have been blocked in this group!"));
+        if(isPersonBlocked) return Result<bool>.Failure(new ForbiddenAccessException("You are blocked in this group!"));
         
         await dbContext.GroupMembers.AddAsync(new GroupMember
         {

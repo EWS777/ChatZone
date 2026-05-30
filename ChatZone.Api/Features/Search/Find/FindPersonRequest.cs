@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Search.Find;
 
-public class FindPersonRequest : IRequest<Result<IActionResult>>
+public class FindPersonRequest : IRequest<Result<bool>>
 {
     public int IdPerson { get; set; }
     public string ConnectionId { get; set; } = string.Empty;

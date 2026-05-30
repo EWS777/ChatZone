@@ -17,17 +17,25 @@ public class ChatZoneHub(IMediator mediator) : Hub
         if (string.IsNullOrWhiteSpace(message)) throw new HubException("Message is required!");
         if(message.Length >= 1025) throw new HubException("Message max length is 1024 characters!");
         var idSender = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idSender is null) throw new Exception("User does not exist!");
 
         var createdAt = DateTimeOffset.UtcNow;
-        await mediator.Send(new AddMessageRequest
+        var result = await mediator.Send(new AddMessageRequest
         {
             Message = message,
-            IdSender = int.Parse(idSender!),
+            IdSender = int.Parse(idSender),
             IdChat = idGroup,
             IsSingleChat = isSingleChat,
             CreatedAt = createdAt
         });
-        await Clients.Group(idGroup.ToString()).SendAsync("Receive", int.Parse(idSender!), message, createdAt);
+        if (result.IsSuccess)
+        {
+            await Clients.Group(idGroup.ToString()).SendAsync("Receive", int.Parse(idSender!), message, createdAt);
+        }
+        else
+        {
+            throw new HubException(result.Exception.Message);
+        }
     }
     
     public override async Task OnConnectedAsync()

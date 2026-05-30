@@ -13,7 +13,7 @@ public class GetMessageHandler(
     {
         var isPersonExists = request.IsSingleChat
             ? await dbContext.SingleChats.AnyAsync(x => x.IdSingleChat == request.IdChat && 
-                                                    (x.IdFirstPerson == request.IdPerson || x.IdSecondPerson == request.IdPerson), cancellationToken)
+                                                    (x.IdFirstPerson == request.IdPerson || x.IdSecondPerson == request.IdPerson) && x.FinishedAt == null, cancellationToken)
             : await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdChat && x.IdGroupMember == request.IdPerson, cancellationToken);
 
         if (!isPersonExists) return Result<GetMessageResponse>.Failure(new ForbiddenAccessException("You don't have access to this chat!"));

@@ -95,6 +95,6 @@ public class ProfileController(IMediator mediator,
             });
         }
 
-        return result.Match(x => x, x => throw x);
+        return result.Match(x => Ok(new {message = "Profile was deleted successfully!"}), x => throw x);
     }
 }

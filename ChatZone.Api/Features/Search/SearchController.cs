@@ -19,7 +19,9 @@ public class SearchController(IMediator mediator) : ControllerBase
         var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         personRequest.IdPerson = int.Parse(personId!);
         var result = await mediator.Send(personRequest, cancellationToken);
-        return result.Match(x => x, x=> throw x);
+        return result.Match(isChatCreated => isChatCreated ? 
+            Ok(new {message = "Chat was created!"}) : 
+            Ok(new { message = "Waiting for match...", chatCreated=false}), x=> throw x);
     }
 
     [HttpPost]
@@ -28,6 +30,6 @@ public class SearchController(IMediator mediator) : ControllerBase
     {
         var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var result = await mediator.Send(new CancelPersonRequest{IdPerson = int.Parse(personId!)}, cancellationToken);
-        return result.Match(x => x, x=> throw x);
+        return result.Match(x => Ok(new {message = "Cancel finding is successful!"}), x=> throw x);
     }
 }

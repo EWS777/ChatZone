@@ -35,7 +35,7 @@ public class BlockedPersonController(IMediator mediator) : ControllerBase
         if (idPerson is null) throw new Exception("User does not exist!");
 
         var result = await mediator.Send(new CreateBlockedPersonRequest { IdPerson = int.Parse(idPerson), IdPartnerPerson = idPartnerPerson }, cancellationToken);
-        return result.Match(x => x, x => throw x);
+        return result.Match(x => Ok(new {message = "Person has blocked successfully!"}), x => throw x);
     }
     
     [Authorize(Roles = "User")]
@@ -48,6 +48,6 @@ public class BlockedPersonController(IMediator mediator) : ControllerBase
         if (idPerson is null) throw new Exception("User does not exist!");
         
         var result = await mediator.Send(new DeleteBlockedPersonRequest{IdPerson = int.Parse(idPerson), IdBlockedPerson = idBlockedPerson}, cancellationToken);
-        return result.Match<IActionResult>(x=>x, x => throw x);
+        return result.Match<IActionResult>(x=>Ok(new {message = "User was deleted successfully!"}), x => throw x);
     }
 }

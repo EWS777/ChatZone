@@ -1,9 +1,10 @@
+using ChatZone.Shared.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Messages.Add;
 
-public class AddMessageRequest : IRequest<bool>
+public class AddMessageRequest : IRequest<Result<bool>>
 {
     public required string Message { get; set; }
     public int IdSender { get; set; }

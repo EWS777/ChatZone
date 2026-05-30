@@ -3,14 +3,18 @@ using ChatZone.Shared.Context;
 using ChatZone.Shared.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.BlockedPersons.Create;
 
 public class CreateBlockedPersonHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<CreateBlockedPersonRequest, Result<IActionResult>>
+    ChatZoneDbContext dbContext) : IRequestHandler<CreateBlockedPersonRequest, Result<bool>>
 {
-    public async Task<Result<IActionResult>> Handle(CreateBlockedPersonRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(CreateBlockedPersonRequest request, CancellationToken cancellationToken)
     {
+        var isCurrentPersonBlocked = await dbContext.BlockedPeoples.SingleOrDefaultAsync(x => x.IdBlockerPerson == request.IdPerson && x.IdBlockedPerson == request.IdPartnerPerson, cancellationToken);
+        if(isCurrentPersonBlocked is not null) return Result<bool>.Ok(true);
+        
         await dbContext.BlockedPeoples.AddAsync(new BlockedPerson
         {
             IdBlockerPerson = request.IdPerson,
@@ -19,6 +23,6 @@ public class CreateBlockedPersonHandler(
         }, cancellationToken);
 
         await dbContext.SaveChangesAsync(cancellationToken);
-        return Result<IActionResult>.Ok(new OkObjectResult(new {message = "Person has blocked successfully!"}));
+        return Result<bool>.Ok(true);
     }
 }

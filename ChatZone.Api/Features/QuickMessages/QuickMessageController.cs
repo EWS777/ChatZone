@@ -65,6 +65,6 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
         if (idPerson is null) throw new NotFoundException("User does not exist!");
         
         var result = await mediator.Send(new DeleteQuickMessageRequest{IdPerson = int.Parse(idPerson), IdMessage = idQuickMessage}, cancellationToken);
-        return result.Match<IActionResult>(x => x, x => throw x);
+        return result.Match<IActionResult>(x => Ok(new {message = "Quick message was deleted successfully!"}), x => throw x);
     }
 }

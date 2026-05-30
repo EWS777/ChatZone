@@ -7,17 +7,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.QuickMessages.Delete;
 
-public class DeleteQuickMessageHandler(
-    ChatZoneDbContext dbContext) : IRequestHandler<DeleteQuickMessageRequest, Result<IActionResult>>
+public class DeleteQuickMessageHandler(ChatZoneDbContext dbContext) : IRequestHandler<DeleteQuickMessageRequest, Result<bool>>
 {
-    public async Task<Result<IActionResult>> Handle(DeleteQuickMessageRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(DeleteQuickMessageRequest request, CancellationToken cancellationToken)
     {
-        var message = await dbContext.QuickMessages.SingleOrDefaultAsync(x => x.IdQuickMessage == request.IdMessage,
-                cancellationToken);
-        if(message is null) return Result<IActionResult>.Failure(new NotFoundException("Quick message is not found!"));
+        var message = await dbContext.QuickMessages.SingleOrDefaultAsync(x => x.IdPerson == request.IdPerson && x.IdQuickMessage == request.IdMessage, cancellationToken);
+        if(message is null) return Result<bool>.Failure(new NotFoundException("This quick messages doesn't exist!"));
         
         dbContext.QuickMessages.Remove(message);
         await dbContext.SaveChangesAsync(cancellationToken);
-        return Result<IActionResult>.Ok(new ObjectResult(new {message = "Quick message was deleted successfully!"}));
+        return Result<bool>.Ok(true);
     }
 }

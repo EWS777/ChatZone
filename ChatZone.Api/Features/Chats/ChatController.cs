@@ -107,8 +107,17 @@ public class ChatController(IMediator mediator) : ControllerBase
 
     [HttpPut]
     [Route("finish")]
-    public async Task FinishSingleChat([FromQuery] int idChat, CancellationToken cancellationToken)
+    public async Task<IActionResult> FinishSingleChat([FromQuery] int idChat, CancellationToken cancellationToken)
     {
-        await mediator.Send(new FinishSingleChatRequest{IdChat = idChat}, cancellationToken);
+        var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (personId is null) throw new Exception("User does not exist!");
+        
+        var result = await mediator.Send(new FinishSingleChatRequest
+        {
+            IdChat = idChat,
+            IdPerson = int.Parse(personId)
+        }, cancellationToken);
+        
+        return result.Match(x => Ok(), x => throw x);
     }
 }

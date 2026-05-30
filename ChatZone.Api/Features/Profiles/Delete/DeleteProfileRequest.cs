@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Profiles.Delete;
 
-public class DeleteProfileRequest : IRequest<Result<IActionResult>>
+public class DeleteProfileRequest : IRequest<Result<bool>>
 {
     public int IdPerson { get; set; }
     [Required(ErrorMessage = "Password is required!")]

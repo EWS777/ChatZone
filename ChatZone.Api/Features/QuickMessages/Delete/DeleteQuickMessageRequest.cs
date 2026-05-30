@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.QuickMessages.Delete;
 
-public class DeleteQuickMessageRequest : IRequest<Result<IActionResult>>
+public class DeleteQuickMessageRequest : IRequest<Result<bool>>
 {
     public int IdPerson { get; set; }
     public int IdMessage { get; set; }

@@ -10,20 +10,17 @@ namespace ChatZone.Features.Search.Find;
 public class FindPersonHandler(
     IMatchmakingService matchmakingService,
     IHubContext<ChatZoneHub> hubContext)
-    : IRequestHandler<FindPersonRequest, Result<IActionResult>>
+    : IRequestHandler<FindPersonRequest, Result<bool>>
 {
-    public async Task<Result<IActionResult>> Handle(FindPersonRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(FindPersonRequest request, CancellationToken cancellationToken)
     {
         var match = await matchmakingService.FindMatch(request, cancellationToken);
-        
-        if(match==null) return Result<IActionResult>.Ok(new ObjectResult(new { message = "Waiting for match...", chatCreated=false}));
+        if(match==null) return Result<bool>.Ok(false);
         
         await hubContext.Groups.AddToGroupAsync(match.Value.person1.ConnectionId, match.Value.idGroup.ToString(), cancellationToken);
         await hubContext.Groups.AddToGroupAsync(match.Value.person2.ConnectionId, match.Value.idGroup.ToString(), cancellationToken);
 
-        await hubContext.Clients.Group(match.Value.idGroup.ToString())
-            .SendAsync("ChatCreated", cancellationToken);
-        
-        return Result<IActionResult>.Ok(new ObjectResult(new {message = "Chat was created!"}));
+        await hubContext.Clients.Group(match.Value.idGroup.ToString()).SendAsync("ChatCreated", cancellationToken);
+        return Result<bool>.Ok(true);
     }
 }
