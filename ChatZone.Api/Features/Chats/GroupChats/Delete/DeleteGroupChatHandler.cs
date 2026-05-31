@@ -36,9 +36,10 @@ public class DeleteGroupChatHandler(
                 .Where(x => x.IdChat == request.IdGroup)
                 .ExecuteDeleteAsync(cancellationToken);
         
-            dbContext.GroupChats.Remove(group);
+            await dbContext.GroupChats
+                .Where(x => x.IdGroupChat == request.IdGroup)
+                .ExecuteDeleteAsync(cancellationToken);
             
-            await dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
             
             await hubContext.Clients.Group(request.IdGroup.ToString()).SendAsync("NotifyDeleteGroup", cancellationToken);

@@ -10,19 +10,20 @@ public class GetGroupChatsHandler(
 {
     public async Task<Result<List<GetGroupChatsResponse>>> Handle(GetGroupChatsRequest request, CancellationToken cancellationToken)
     {
-        return Result<List<GetGroupChatsResponse>>.Ok(
-            await dbContext.GroupChats
-                .AsNoTracking()
-                .Where(x=> x.BlockedGroupMembers.All(q => q.IdBlockedPerson != request.IdPerson))
-                .Select(x => new GetGroupChatsResponse
-                {
-                    IdGroup = x.IdGroupChat,
-                    Title = x.Title,
-                    Country = x.Country,
-                    City = x.City,
-                    Age = x.Age,
-                    Lang = x.Lang,
-                    PersonCount = x.UserCount
-                }).ToListAsync(cancellationToken));
+        var groupChats = await dbContext.GroupChats
+            .AsNoTracking()
+            .Where(x => x.BlockedGroupMembers.All(q => q.IdBlockedPerson != request.IdPerson))
+            .Select(x => new GetGroupChatsResponse
+            {
+                IdGroup = x.IdGroupChat,
+                Title = x.Title,
+                Country = x.Country,
+                City = x.City,
+                Age = x.Age,
+                Lang = x.Lang,
+                PersonCount = x.UserCount
+            }).ToListAsync(cancellationToken);
+        
+        return Result<List<GetGroupChatsResponse>>.Ok(groupChats);
     }
 }

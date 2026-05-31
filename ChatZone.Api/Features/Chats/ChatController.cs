@@ -25,7 +25,8 @@ public class ChatController(IMediator mediator) : ControllerBase
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) throw new Exception("User does not exist!");
         
-        return await mediator.Send(new GetActiveChatRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
+        var result = await mediator.Send(new GetActiveChatRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
+        return result.Match(x => x, x => throw x);
     }
     
     [HttpGet]

@@ -12,8 +12,8 @@ public class CreateBlockedPersonHandler(
 {
     public async Task<Result<bool>> Handle(CreateBlockedPersonRequest request, CancellationToken cancellationToken)
     {
-        var isCurrentPersonBlocked = await dbContext.BlockedPeoples.SingleOrDefaultAsync(x => x.IdBlockerPerson == request.IdPerson && x.IdBlockedPerson == request.IdPartnerPerson, cancellationToken);
-        if(isCurrentPersonBlocked is not null) return Result<bool>.Ok(true);
+        var isCurrentPersonBlocked = await dbContext.BlockedPeoples.AnyAsync(x => x.IdBlockerPerson == request.IdPerson && x.IdBlockedPerson == request.IdPartnerPerson, cancellationToken);
+        if(isCurrentPersonBlocked) return Result<bool>.Ok(true);
         
         await dbContext.BlockedPeoples.AddAsync(new BlockedPerson
         {

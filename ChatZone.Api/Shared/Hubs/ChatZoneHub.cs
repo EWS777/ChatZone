@@ -43,8 +43,11 @@ public class ChatZoneHub(IMediator mediator) : Hub
         var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!string.IsNullOrEmpty(idPerson))
         {
-            var groupName = await mediator.Send(new GetActiveChatRequest { IdPerson = int.Parse(idPerson)});
-            if(groupName.IsSingleChat is not null) await Groups.AddToGroupAsync(Context.ConnectionId, groupName.IdChat.ToString() ?? string.Empty);
+            var groupChatResult = await mediator.Send(new GetActiveChatRequest { IdPerson = int.Parse(idPerson)});
+            if (groupChatResult.IsSuccess && groupChatResult.Value.IsSingleChat != null && groupChatResult.Value.IdChat != null)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, groupChatResult.Value.IdChat.ToString()!);
+            }
         }
         
         await base.OnConnectedAsync();

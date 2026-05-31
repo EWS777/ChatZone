@@ -20,6 +20,7 @@ public class GetMessageHandler(
 
         var messageInfos = request.IsSingleChat
             ? await dbContext.SingleMessages
+                .AsNoTracking()
                 .Where(x => x.IdChat == request.IdChat)
                 .OrderByDescending(x=>x.CreatedAt)
                 .Skip(request.SkipMessage)
@@ -32,6 +33,7 @@ public class GetMessageHandler(
                 })
                 .ToListAsync(cancellationToken)
             : await dbContext.GroupMessages
+                .AsNoTracking()
                 .Where(x => x.IdChat == request.IdChat)
                 .OrderByDescending(x=>x.CreatedAt)
                 .Skip(request.SkipMessage)

@@ -13,7 +13,10 @@ public class CreateQuickMessageHandler(
 {
     public async Task<Result<CreateQuickMessageResponse>> Handle(CreateQuickMessageRequest request, CancellationToken cancellationToken)
     {
-        var quickMessageAmount = await dbContext.QuickMessages.CountAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
+        var quickMessageAmount = await dbContext.QuickMessages
+            .Where(x => x.IdPerson == request.IdPerson)
+            .Take(3)
+            .CountAsync(cancellationToken);
         if(quickMessageAmount >= 3) return Result<CreateQuickMessageResponse>.Failure(new IsExistsException("You can not create more than 3 quick messages!"));
         
         var quickMessage = new QuickMessage

@@ -10,8 +10,8 @@ public class GetGroupMemberHandler(ChatZoneDbContext dbContext) : IRequestHandle
 {
     public async Task<Result<List<GetGroupMemberResponse>>> Handle(GetGroupMemberRequest request, CancellationToken cancellationToken)
     {
-        var isAdmin = await dbContext.GroupMembers.SingleOrDefaultAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson && x.IsAdmin == true, cancellationToken);
-        if(isAdmin is null) return Result<List<GetGroupMemberResponse>>.Failure(new ForbiddenAccessException("You are not an admin of this group!"));
+        var isAdmin = await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson && x.IsAdmin == true, cancellationToken);
+        if(!isAdmin) return Result<List<GetGroupMemberResponse>>.Failure(new ForbiddenAccessException("You are not an admin of this group!"));
 
         var groupList = await dbContext.GroupMembers
             .AsNoTracking()
