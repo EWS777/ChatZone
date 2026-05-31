@@ -44,7 +44,7 @@ public static class SecurityHelper
         using (var rng = RandomNumberGenerator.Create())
         {
             rng.GetBytes(randomNumber);
-            return Convert.ToBase64String(randomNumber);
+            return Convert.ToHexString(randomNumber);
         }
     }
 
@@ -53,6 +53,6 @@ public static class SecurityHelper
         using var sha256 = SHA256.Create();
         var bytes = Encoding.UTF8.GetBytes(token);
         var hash = sha256.ComputeHash(bytes);
-        return Convert.ToBase64String(hash);
+        return Convert.ToHexString(hash);
     }
 }
