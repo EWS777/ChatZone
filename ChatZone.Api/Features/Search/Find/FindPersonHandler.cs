@@ -14,13 +14,17 @@ public class FindPersonHandler(
 {
     public async Task<Result<bool>> Handle(FindPersonRequest request, CancellationToken cancellationToken)
     {
-        var match = await matchmakingService.FindMatch(request, cancellationToken);
-        if(match==null) return Result<bool>.Ok(false);
+        var matchResult = await matchmakingService.FindMatch(request, cancellationToken);
         
-        await hubContext.Groups.AddToGroupAsync(match.Value.person1.ConnectionId, match.Value.idGroup.ToString(), cancellationToken);
-        await hubContext.Groups.AddToGroupAsync(match.Value.person2.ConnectionId, match.Value.idGroup.ToString(), cancellationToken);
+        if(!matchResult.IsSuccess) return Result<bool>.Failure(matchResult.Exception);
+        
+        if(matchResult.Value == null) return Result<bool>.Ok(false);
 
-        await hubContext.Clients.Group(match.Value.idGroup.ToString()).SendAsync("ChatCreated", cancellationToken);
+        var (person1, person2, idGroup) = matchResult.Value.Value;
+        await hubContext.Groups.AddToGroupAsync(person1.ConnectionId, idGroup.ToString(), cancellationToken);
+        await hubContext.Groups.AddToGroupAsync(person2.ConnectionId, idGroup.ToString(), cancellationToken);
+
+        await hubContext.Clients.Group(idGroup.ToString()).SendAsync("ChatCreated", cancellationToken);
         return Result<bool>.Ok(true);
     }
 }

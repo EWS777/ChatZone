@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using ChatZone.Features.Search.Cancel;
-using ChatZone.Features.Search.Find;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,18 +11,6 @@ namespace ChatZone.Features.Search;
 [Authorize(Roles = "User")]
 public class SearchController(IMediator mediator) : ControllerBase
 {
-    [HttpPost]
-    [Route("search")]
-    public async Task<IActionResult> FindPerson([FromBody] FindPersonRequest personRequest, CancellationToken cancellationToken)
-    {
-        var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        personRequest.IdPerson = int.Parse(personId!);
-        var result = await mediator.Send(personRequest, cancellationToken);
-        return result.Match(isChatCreated => isChatCreated ? 
-            Ok(new {message = "Chat was created!"}) : 
-            Ok(new { message = "Waiting for match...", chatCreated=false}), x=> throw x);
-    }
-
     [HttpPost]
     [Route("cancel")]
     public async Task<IActionResult> Cancel(CancellationToken cancellationToken)

@@ -66,21 +66,22 @@ public class ChatZoneHub(IMediator mediator) : Hub
 
     public async Task StartSearchSingeChat(FindPersonRequest request)
     {
-        var connectionId = Context.ConnectionId;
-        request.ConnectionId = connectionId;
-        
         var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(idPerson)) throw new HubException("User does not exist or not authorized!");
+
+        request.ConnectionId = Context.ConnectionId;
+        request.IdPerson = int.Parse(idPerson);
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(Context.ConnectionAborted);
         
         //to check if the person exists already
-        if (_activeSearches.TryRemove(connectionId, out var oldConnection))
+        if (_activeSearches.TryRemove(Context.ConnectionId, out var oldConnection))
         {
             await oldConnection.CancelAsync();
             oldConnection.Dispose();
         }
 
-        _activeSearches.TryAdd(connectionId, cts);
+        _activeSearches.TryAdd(Context.ConnectionId, cts);
 
         try
         {
@@ -88,17 +89,26 @@ public class ChatZoneHub(IMediator mediator) : Hub
             {
                 var result = await mediator.Send(request, cts.Token);
                 
-                // if(result.IsSuccess && result.Value.IsFound) break;
+                if (result.IsSuccess && result.Value) break;
+                if (!result.IsSuccess) throw new HubException(result.Exception.Message);
+
+                await Task.Delay(3000, cts.Token);
             }
-            await Task.Delay(3000, cts.Token);
         }
-        catch (Exception e)
+        catch (OperationCanceledException)
         {
-            //
+        }
+        catch (HubException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            // ignored
         }
         finally
         {
-            _activeSearches.TryRemove(connectionId, out _);
+            _activeSearches.TryRemove(Context.ConnectionId, out _);
         }
     }
 }

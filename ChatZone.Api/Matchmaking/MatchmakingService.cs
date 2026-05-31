@@ -2,61 +2,68 @@
 using ChatZone.Core.Models.Enums;
 using ChatZone.Features.Search.Find;
 using ChatZone.Shared.Context;
+using ChatZone.Shared.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Matchmaking;
 
 public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingService
 {
-    public async Task<(MatchQueue person1, MatchQueue person2, int idGroup)?> FindMatch(FindPersonRequest request, CancellationToken cancellationToken)
+    public async Task<Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>> FindMatch(FindPersonRequest request, CancellationToken cancellationToken)
     {
-        if(request.YourGender == null || request.PartnerGender == null || request.Language == null) throw new Exception("GenderRequired");
+        if(request.YourGender == null || request.PartnerGender == null || request.Language == null) return Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>.Failure(new ArgumentException("`YourGender`, `PartnerGender`, and `Language` fields are required for matchmaking."));
 
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+        var currentPerson = await dbContext.MatchQueues.FirstOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
 
-        try
+        if (currentPerson == null)
         {
-            var currentPerson =
-                await dbContext.MatchQueues.FirstOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
-
-            if (currentPerson == null)
+            currentPerson = new MatchQueue
             {
-                currentPerson = new MatchQueue
+                IdPerson = request.IdPerson,
+                ConnectionId = request.ConnectionId,
+                Theme = request.Theme,
+                Country = request.Country,
+                City = request.City,
+                Age = request.Age,
+                YourGender = request.YourGender.Value,
+                PartnerGender = request.PartnerGender.Value,
+                Language = request.Language.Value,
+                JoinedAt = DateTimeOffset.UtcNow,
+                IsRandomPartner = request.IsRandomPartner
+            };
+            dbContext.MatchQueues.Add(currentPerson);
+        }
+        else
+        {
+            currentPerson.ConnectionId = request.ConnectionId;
+            currentPerson.Theme = request.Theme;
+            currentPerson.Country = request.Country;
+            currentPerson.City = request.City;
+            currentPerson.Age = request.Age;
+            currentPerson.YourGender = request.YourGender.Value;
+            currentPerson.PartnerGender = request.PartnerGender.Value;
+            currentPerson.Language = request.Language.Value;
+            currentPerson.IsRandomPartner = request.IsRandomPartner;
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var partner = await FindBestPartnerAsync(currentPerson, cancellationToken);
+        
+        if (partner != null)
+        {
+            await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                var isPartnerStillAvailable = await dbContext.MatchQueues.AnyAsync(x => x.IdPerson == partner.IdPerson, cancellationToken);
+                var isCurrentPersonStillAvailable = await dbContext.MatchQueues.AnyAsync(x => x.IdPerson == currentPerson.IdPerson, cancellationToken);
+                if (!isPartnerStillAvailable || !isCurrentPersonStillAvailable)
                 {
-                    IdPerson = request.IdPerson,
-                    ConnectionId = request.ConnectionId,
-                    Theme = request.Theme,
-                    Country = request.Country,
-                    City = request.City,
-                    Age = request.Age,
-                    YourGender = request.YourGender.Value,
-                    PartnerGender = request.PartnerGender.Value,
-                    Language = request.Language.Value,
-                    JoinedAt = DateTimeOffset.UtcNow,
-                    IsRandomPartner = request.IsRandomPartner
-                };
-                dbContext.MatchQueues.Add(currentPerson);
-            }
-            else
-            {
-                currentPerson.ConnectionId = request.ConnectionId;
-                currentPerson.Theme = request.Theme;
-                currentPerson.Country = request.Country;
-                currentPerson.City = request.City;
-                currentPerson.Age = request.Age;
-                currentPerson.YourGender = request.YourGender.Value;
-                currentPerson.PartnerGender = request.PartnerGender.Value;
-                currentPerson.Language = request.Language.Value;
-                currentPerson.JoinedAt = DateTimeOffset.UtcNow;
-                currentPerson.IsRandomPartner = request.IsRandomPartner;
-            }
-
-            await dbContext.SaveChangesAsync(cancellationToken);
-
-            var partner = await FindBestPartnerAsync(currentPerson, cancellationToken);
+                    await transaction.RollbackAsync(cancellationToken);
+                    return Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>.Ok(null);
+                }
             
-            if (partner != null)
-            {
                 var newChat = new SingleChat
                 {
                     IdFirstPerson = currentPerson.IdPerson,
@@ -72,17 +79,15 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                 await dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
 
-                return (currentPerson, partner, newChat.IdSingleChat);
+                return Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>.Ok((currentPerson, partner, newChat.IdSingleChat));
             }
-
-            await transaction.CommitAsync(cancellationToken);
-            return null;
+            catch (Exception)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
-        catch (Exception)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+        return Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>.Ok(null);
     }
 
     private async Task<MatchQueue?> FindBestPartnerAsync(MatchQueue currentPerson, CancellationToken cancellationToken)
