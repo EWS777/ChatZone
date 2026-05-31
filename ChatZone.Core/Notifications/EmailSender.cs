@@ -1,151 +1,66 @@
 ﻿using System.Net;
 using System.Net.Mail;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace ChatZone.Core.Notifications;
 
-public class EmailSender
+public class EmailSender(IOptions<SmtpSettings> options)
 {
-    private static IConfiguration _configuration;
+    private readonly SmtpSettings _settings = options.Value;
 
-    public static void EmailSettings(IConfiguration configuration)
+    public Task SendCodeToEmail(string email, string token, CancellationToken cancellationToken)
     {
-        _configuration = configuration;
+        string linkToClick = $"{_settings.LinkToClick}confirm?link={token}";
+        string subject = "Hello! Please confirm the registration";
+        string title = "Activate Your Profile";
+
+        return SendEmailAsync(email, subject, title, linkToClick, cancellationToken);
     }
 
-    public static async Task SendCodeToEmail(string email, string token, CancellationToken cancellationToken)
+    public Task ResetPassword(string email, string token, CancellationToken cancellationToken)
     {
-        string linkToClick = _configuration["Gmail:LinkToClick"] + "confirm?link=" + token;
-        
-        using (var smtpClient = new SmtpClient(_configuration["Gmail:SMTPServer"], Convert.ToInt32(_configuration["Gmail:SMTPPort"])))
-        {
-            smtpClient.Credentials = new NetworkCredential(_configuration["Gmail:SMTPEmail"], _configuration["Gmail:SMTPPassword"]);
+        string linkToClick = $"{_settings.LinkToClick}reset?link={token}";
+        string subject = "Hello! Password Reset Request";
+        string title = "Reset Your Password";
 
-            smtpClient.EnableSsl = true;
-
-            using (var mailMessage = new MailMessage())
-            {
-                mailMessage.From = new MailAddress(_configuration["Gmail:SMTPEmail"]);
-                mailMessage.To.Add(email);
-                mailMessage.Subject = "Hello! Please confirm the registration";
-                mailMessage.IsBodyHtml = true;
-
-                mailMessage.Body = $@"
-                <html>
-                <head>
-                    <style>
-                        .container {{
-                            font-family: Arial, sans-serif;
-                            text-align: center;
-                            background-color: #f4f4f4;
-                            padding: 20px;
-                            border-radius: 10px;
-                            width: 80%;
-                            margin: auto;
-                        }}
-                        .button {{
-                            display: inline-block;
-                            padding: 10px 20px;
-                            font-size: 16px;
-                            color: #fff;
-                            background-color: #28a745;
-                            text-decoration: none;
-                            border-radius: 5px;
-                            font-weight: bold;
-                            margin-top: 20px;
-                        }}
-                        .button:hover {{
-                            background-color: #218838;
-                        }}
-                    </style>
-                </head>
-                <body>
-                    <div class='container'>
-                        <h2>Activate Your Profile</h2>
-                        <p>Please click the button below to activate your account:</p>
-                        <a href='{linkToClick}' class='button'>Activate</a>
-                    </div>
-                </body>
-                </html>";
-                try
-                {
-                    await smtpClient.SendMailAsync(mailMessage, cancellationToken);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
-            }
-
-        }
+        return SendEmailAsync(email, subject, title, linkToClick, cancellationToken);
     }
-    
-    public static async Task ResetPassword(string email, string token, CancellationToken cancellationToken)
+
+    private async Task SendEmailAsync(string email, string subject, string title, string linkToClick, CancellationToken cancellationToken)
     {
-        string linkToClick = _configuration["Gmail:LinkToClick"] + "reset?link=" + token;
-        
-        using (var smtpClient = new SmtpClient(_configuration["Gmail:SMTPServer"], Convert.ToInt32(_configuration["Gmail:SMTPPort"])))
-        {
-            smtpClient.Credentials = new NetworkCredential(_configuration["Gmail:SMTPEmail"], _configuration["Gmail:SMTPPassword"]);
+        using var smtpClient = new SmtpClient(_settings.SMTPServer, _settings.SMTPPort);
+        smtpClient.Credentials = new NetworkCredential(_settings.SMTPEmail, _settings.SMTPPassword);
+        smtpClient.EnableSsl = true;
 
-            smtpClient.EnableSsl = true;
+        using var mailMessage = new MailMessage();
+        mailMessage.From = new MailAddress(_settings.SMTPEmail);
+        mailMessage.Subject = subject;
+        mailMessage.IsBodyHtml = true;
+        mailMessage.Body = GenerateHtmlBody(title, linkToClick);
 
-            using (var mailMessage = new MailMessage())
-            {
-                mailMessage.From = new MailAddress(_configuration["Gmail:SMTPEmail"]);
-                mailMessage.To.Add(email);
-                mailMessage.Subject = "Hello! Please confirm the registration";
-                mailMessage.IsBodyHtml = true;
+        mailMessage.To.Add(email);
 
-                mailMessage.Body = $@"
-                <html>
-                <head>
-                    <style>
-                        .container {{
-                            font-family: Arial, sans-serif;
-                            text-align: center;
-                            background-color: #f4f4f4;
-                            padding: 20px;
-                            border-radius: 10px;
-                            width: 80%;
-                            margin: auto;
-                        }}
-                        .button {{
-                            display: inline-block;
-                            padding: 10px 20px;
-                            font-size: 16px;
-                            color: #fff;
-                            background-color: #28a745;
-                            text-decoration: none;
-                            border-radius: 5px;
-                            font-weight: bold;
-                            margin-top: 20px;
-                        }}
-                        .button:hover {{
-                            background-color: #218838;
-                        }}
-                    </style>
-                </head>
-                <body>
-                    <div class='container'>
-                        <h2>Activate Your Profile</h2>
-                        <p>Please click the button below to activate your account:</p>
-                        <a href='{linkToClick}' class='button'>Activate</a>
-                    </div>
-                </body>
-                </html>";
-                try
-                {
-                    await smtpClient.SendMailAsync(mailMessage, cancellationToken);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
-            }
+        await smtpClient.SendMailAsync(mailMessage, cancellationToken);
+    }
 
-        }
+    private string GenerateHtmlBody(string title, string linkToClick)
+    {
+        return $@"
+        <html>
+        <head>
+            <style>
+                .container {{ font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; padding: 20px; border-radius: 10px; width: 80%; margin: auto; }}
+                .button {{ display: inline-block; padding: 10px 20px; font-size: 16px; color: #fff; background-color: #28a745; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; }}
+                .button:hover {{ background-color: #218838; }}
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <h2>{title}</h2>
+                <p>Please click the button below to proceed:</p>
+                <a href='{linkToClick}' class='button'>Click Here</a>
+            </div>
+        </body>
+        </html>";
     }
 }

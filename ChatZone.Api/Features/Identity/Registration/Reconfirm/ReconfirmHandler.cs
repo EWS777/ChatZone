@@ -9,8 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Identity.Registration.Reconfirm;
 
-public class ReconfirmHandler(ChatZoneDbContext dbContext,
-    IConfiguration configuration) : IRequestHandler<ReconfirmRequest, Result<bool>>
+public class ReconfirmHandler(
+    ChatZoneDbContext dbContext,
+    IConfiguration configuration,
+    EmailSender emailSender) : IRequestHandler<ReconfirmRequest, Result<bool>>
 {
     public async Task<Result<bool>> Handle(ReconfirmRequest request, CancellationToken cancellationToken)
     {
@@ -27,7 +29,7 @@ public class ReconfirmHandler(ChatZoneDbContext dbContext,
             dbContext.Persons.Update(person);
             await dbContext.SaveChangesAsync(cancellationToken);
             
-            await EmailSender.SendCodeToEmail(person.Email, emailConfirmToken, cancellationToken);
+            await emailSender.SendCodeToEmail(person.Email, emailConfirmToken, cancellationToken);
             
             await transaction.CommitAsync(cancellationToken);
             

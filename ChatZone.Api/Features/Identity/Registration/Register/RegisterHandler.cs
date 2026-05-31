@@ -11,8 +11,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Identity.Registration.Register;
 
-public class RegisterHandler(ChatZoneDbContext dbContext,
-    IConfiguration configuration) : IRequestHandler<RegisterRequest, Result<bool>>
+public class RegisterHandler(
+    ChatZoneDbContext dbContext,
+    IConfiguration configuration,
+    EmailSender emailSender) : IRequestHandler<RegisterRequest, Result<bool>>
 {
     public async Task<Result<bool>> Handle(RegisterRequest request, CancellationToken cancellationToken)
     {
@@ -42,7 +44,7 @@ public class RegisterHandler(ChatZoneDbContext dbContext,
             await dbContext.Persons.AddAsync(person, cancellationToken);
             await dbContext.SaveChangesAsync(cancellationToken);
             
-            await EmailSender.SendCodeToEmail(person.Email, generatedEmailConfirmToken, cancellationToken);
+            await emailSender.SendCodeToEmail(person.Email, generatedEmailConfirmToken, cancellationToken);
             
             await transaction.CommitAsync(cancellationToken);
             

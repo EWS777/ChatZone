@@ -61,6 +61,9 @@ builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblies(typeof(CreateQ
 builder.Services.AddScoped<IToken, Token>();
 builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
 
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Gmail"));
+builder.Services.AddTransient<EmailSender>();
+
 builder.Services.AddDbContext<ChatZoneDbContext>(opt =>
 {
     string connString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -133,8 +136,6 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 var app = builder.Build();
-
-EmailSender.EmailSettings(app.Services.GetRequiredService<IConfiguration>());
 
 if (app.Environment.IsDevelopment())
 {

@@ -9,8 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Identity.Password.Reset;
 
-public class ResetPasswordHandler(ChatZoneDbContext dbContext,
-    IConfiguration configuration) : IRequestHandler<ResetPasswordRequest, Result<bool>>
+public class ResetPasswordHandler(
+    ChatZoneDbContext dbContext,
+    IConfiguration configuration,
+    EmailSender emailSender) : IRequestHandler<ResetPasswordRequest, Result<bool>>
 {
     public async Task<Result<bool>> Handle(ResetPasswordRequest request, CancellationToken cancellationToken)
     {
@@ -27,7 +29,7 @@ public class ResetPasswordHandler(ChatZoneDbContext dbContext,
             dbContext.Persons.Update(person);
             await dbContext.SaveChangesAsync(cancellationToken);
             
-            await EmailSender.ResetPassword(person.Email, passwordResetToken, cancellationToken);
+            await emailSender.ResetPassword(person.Email, passwordResetToken, cancellationToken);
             
             await transaction.CommitAsync(cancellationToken);
             
