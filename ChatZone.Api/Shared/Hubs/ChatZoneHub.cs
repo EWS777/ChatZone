@@ -104,7 +104,7 @@ public class ChatZoneHub(IMediator mediator) : Hub
         }
         catch (Exception)
         {
-            // ignored
+            await Clients.Caller.SendAsync("SearchError", "An unexpected error occurred during search.", cancellationToken: cts.Token);
         }
         finally
         {

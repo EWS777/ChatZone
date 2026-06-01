@@ -4,7 +4,7 @@ using MediatR;
 
 namespace ChatZone.Features.Filters.Update;
 
-public class UpdateFilterRequest : IRequest<Result<UpdateFilterResponse>>
+public class UpdateFilterRequest : IRequest<Result<bool>>
 {
     public int IdPerson { get; set; }
     public ThemeList? Theme { get; set; }
@@ -14,4 +14,5 @@ public class UpdateFilterRequest : IRequest<Result<UpdateFilterResponse>>
     public GenderList? YourGender { get; set; }
     public GenderList? PartnerGender { get; set; }
     public LangList? Language { get; set; }
+    public bool IsFindRandomPerson { get; set; }
 }

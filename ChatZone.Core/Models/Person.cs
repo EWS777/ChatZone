@@ -17,6 +17,7 @@ public class Person
     
     public LangList LangMenu { get; set; }
     public bool IsDarkTheme { get; set; }
+    public bool IsFindRandomPerson { get; set; }
     public ThemeList? Theme { get; set; }
     public CountryList? Country { get; set; }
     public CityList? City { get; set; }

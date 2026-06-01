@@ -16,5 +16,6 @@ public class FindPersonRequest : IRequest<Result<bool>>
     public GenderList? YourGender { get; set; }
     public GenderList? PartnerGender { get; set; }
     public LangList? Language { get; set; }
-    public bool IsRandomPartner { get; set; } = false;
+    public bool IsFindRandomPerson { get; set; } = false;
+    public bool IsSearchAgain { get; set; }
 }

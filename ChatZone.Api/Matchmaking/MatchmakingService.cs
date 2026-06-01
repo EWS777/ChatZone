@@ -11,7 +11,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
 {
     public async Task<Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>> FindMatch(FindPersonRequest request, CancellationToken cancellationToken)
     {
-        if(request.YourGender == null || request.PartnerGender == null || request.Language == null) return Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>.Failure(new ArgumentException("`YourGender`, `PartnerGender`, and `Language` fields are required for matchmaking."));
+        if(!request.IsFindRandomPerson && (request.YourGender == null || request.PartnerGender == null || request.Language == null)) return Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>.Failure(new ArgumentException("`YourGender`, `PartnerGender`, and `Language` fields are required for matchmaking."));
 
         var currentPerson = await dbContext.MatchQueues.FirstOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
 
@@ -25,11 +25,11 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                 Country = request.Country,
                 City = request.City,
                 Age = request.Age,
-                YourGender = request.YourGender.Value,
-                PartnerGender = request.PartnerGender.Value,
-                Language = request.Language.Value,
+                YourGender = request.YourGender ?? GenderList.Both,
+                PartnerGender = request.PartnerGender ?? GenderList.Both,
+                Language = request.Language ?? LangList.Random,
                 JoinedAt = DateTimeOffset.UtcNow,
-                IsRandomPartner = request.IsRandomPartner
+                IsRandomPartner = request.IsFindRandomPerson
             };
             dbContext.MatchQueues.Add(currentPerson);
         }
@@ -40,10 +40,10 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
             currentPerson.Country = request.Country;
             currentPerson.City = request.City;
             currentPerson.Age = request.Age;
-            currentPerson.YourGender = request.YourGender.Value;
-            currentPerson.PartnerGender = request.PartnerGender.Value;
-            currentPerson.Language = request.Language.Value;
-            currentPerson.IsRandomPartner = request.IsRandomPartner;
+            currentPerson.YourGender = request.YourGender ?? GenderList.Both;
+            currentPerson.PartnerGender = request.PartnerGender ?? GenderList.Both;
+            currentPerson.Language = request.Language ?? LangList.Random;
+            currentPerson.IsRandomPartner = request.IsFindRandomPerson;
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -117,8 +117,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
         {
             return await dbContext.MatchQueues
                 .Where(x => x.IdPerson != currentPerson.IdPerson && 
-                            !blockedUsers.Contains(x.IdPerson)
-                            && x.Language == currentPerson.Language &&
+                            !blockedUsers.Contains(x.IdPerson) &&
                             x.IsRandomPartner == true)
                 .OrderBy(x => x.JoinedAt)
                 .FirstOrDefaultAsync(cancellationToken);

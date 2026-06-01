@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Filters.Update;
 
-public class UpdateFilterHandler(ChatZoneDbContext dbContext) : IRequestHandler<UpdateFilterRequest, Result<UpdateFilterResponse>>
+public class UpdateFilterHandler(ChatZoneDbContext dbContext) : IRequestHandler<UpdateFilterRequest, Result<bool>>
 {
-    public async Task<Result<UpdateFilterResponse>> Handle(UpdateFilterRequest request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(UpdateFilterRequest request, CancellationToken cancellationToken)
     {
         var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
-        if (person is null) return Result<UpdateFilterResponse>.Failure(new NotFoundException("User is not found!"));
+        if (person is null) return Result<bool>.Failure(new NotFoundException("User is not found!"));
         
         person.Theme = request.Theme;
         person.Country = request.Country;
@@ -20,19 +20,11 @@ public class UpdateFilterHandler(ChatZoneDbContext dbContext) : IRequestHandler<
         person.YourGender = request.YourGender;
         person.PartnerGender = request.PartnerGender;
         person.Language = request.Language;
+        person.IsFindRandomPerson = request.IsFindRandomPerson;
 
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        return Result<UpdateFilterResponse>.Ok(new UpdateFilterResponse
-        {
-            Theme = person.Theme,
-            Age = person.Age,
-            City = person.City,
-            Country = person.Country,
-            YourGender = person.YourGender,
-            PartnerGender = person.PartnerGender,
-            Language = person.Language
-        });
+        return Result<bool>.Ok(true);
     }
 }
