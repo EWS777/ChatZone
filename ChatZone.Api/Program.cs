@@ -14,9 +14,18 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args); //zwraca obiekt i sluzy dla konfiguracji webowej
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+
+builder.Host.UseSerilog((context, configuration) =>
+    configuration
+        .WriteTo.Console()
+        .WriteTo.File(context.Configuration["LogSettings:FilePath"]!)
+        .MinimumLevel.Information()
+        .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+);
 
 builder.Services.AddCors(options =>
 {
@@ -136,6 +145,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 var app = builder.Build();
+app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
