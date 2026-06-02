@@ -16,12 +16,14 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
     [Route("get-list")]
-    public async Task<List<GetGroupMemberResponse>> GetGroupMember([FromQuery] int idGroup, CancellationToken cancellationToken)
+    public async Task<ActionResult<List<GetGroupMemberResponse>>> GetGroupMember([FromQuery] int idGroup, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
+        
         var groupMember = new GetGroupMemberRequest
         {
-            IdPerson = int.Parse(idPerson!),
+            IdPerson = int.Parse(idPerson),
             IdGroup = idGroup
         };
 
@@ -34,9 +36,11 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> AddGroupMember([FromQuery] int idGroup, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
+        
         var groupMember = new AddGroupMemberRequest
         {
-            IdPerson = int.Parse(idPerson!),
+            IdPerson = int.Parse(idPerson),
             IdGroup = idGroup
         };
 
@@ -49,9 +53,11 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> LeaveGroup([FromQuery] int idChat, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
+        
         var groupMember = new LeaveGroupRequest
         {
-            IdPerson = int.Parse(idPerson!),
+            IdPerson = int.Parse(idPerson),
             IdChat = idChat
         };
 
@@ -64,7 +70,7 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> ChangeAdmin([FromBody] ChangeAdminRequest request, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) throw new Exception("User does not exist!");
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
 
         request.IdPerson = int.Parse(idPerson);
         

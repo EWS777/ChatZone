@@ -17,10 +17,10 @@ public class ProfileController(IMediator mediator,
     [Authorize(Roles = "User")]
     [HttpGet]
     [Route("")]
-    public async Task<GetProfileResponse> GetProfile(CancellationToken cancellationToken)
+    public async Task<ActionResult<GetProfileResponse>> GetProfile(CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) throw new Exception("User does not exist!");
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
 
         var result = await mediator.Send(new GetProfileRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
         return result.Match(x => x, x => throw x);
@@ -29,13 +29,13 @@ public class ProfileController(IMediator mediator,
     [Authorize(Roles = "User")]
     [HttpPut]
     [Route("{username}")]
-    public async Task<UpdateProfileResponse> UpdateProfile(string username, [FromBody] UpdateProfileRequest profileRequest, CancellationToken cancellationToken)
+    public async Task<ActionResult<UpdateProfileResponse>> UpdateProfile(string username, [FromBody] UpdateProfileRequest profileRequest, CancellationToken cancellationToken)
     {
         var tokenUsername = User.FindFirst(ClaimTypes.Name)?.Value;
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (tokenUsername is null || idPerson is null) throw new Exception("User does not exist!");
-        if (tokenUsername != username) throw new ForbiddenAccessException("You are not an owner!");
+        if (tokenUsername is null || idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
+        if (tokenUsername != username) return StatusCode(StatusCodes.Status403Forbidden, new { message = "You are not an owner!" });
 
         profileRequest.IdPerson = int.Parse(idPerson);
         
@@ -71,7 +71,7 @@ public class ProfileController(IMediator mediator,
         CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) throw new Exception("User does not exist!");
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
 
         profileRequest.IdPerson = int.Parse(idPerson);
 

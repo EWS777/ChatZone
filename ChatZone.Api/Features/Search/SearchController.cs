@@ -15,8 +15,10 @@ public class SearchController(IMediator mediator) : ControllerBase
     [Route("cancel")]
     public async Task<IActionResult> Cancel(CancellationToken cancellationToken)
     {
-        var personId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var result = await mediator.Send(new CancelPersonRequest{IdPerson = int.Parse(personId!)}, cancellationToken);
+        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
+        
+        var result = await mediator.Send(new CancelPersonRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
         return result.Match(x => Ok(new {message = "Cancel finding is successful!"}), x=> throw x);
     }
 }

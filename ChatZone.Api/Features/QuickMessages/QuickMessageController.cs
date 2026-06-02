@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Features.QuickMessages.Create;
 using ChatZone.Features.QuickMessages.Delete;
 using ChatZone.Features.QuickMessages.GetList;
@@ -17,10 +16,10 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
     [Authorize(Roles = "User")]
     [HttpGet]
     [Route("")]
-    public async Task<List<GetQuickMessageListResponse>> GetQuickMessages(CancellationToken cancellationToken)
+    public async Task<ActionResult<List<GetQuickMessageListResponse>>> GetQuickMessages(CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) throw new Exception("User does not exist!");
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
 
         var result = await mediator.Send(new GetQuickMessageListRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
         return result.Match(x => x, x => throw x);
@@ -29,10 +28,10 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
     [Authorize(Roles = "User")]
     [HttpPost]
     [Route("add")]
-    public async Task<CreateQuickMessageResponse> CreateQuickMessage([FromBody] CreateQuickMessageRequest quickMessageRequest, CancellationToken cancellationToken)
+    public async Task<ActionResult<CreateQuickMessageResponse>> CreateQuickMessage([FromBody] CreateQuickMessageRequest quickMessageRequest, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) throw new NotFoundException("User does not exist!");
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
         quickMessageRequest.IdPerson = int.Parse(idPerson);
 
@@ -43,12 +42,12 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
     [Authorize(Roles = "User")]
     [HttpPut]
     [Route("{id}/update")]
-    public async Task<UpdateQuickMessageResponse> UpdateQuickMessage([FromRoute] int id,
+    public async Task<ActionResult<UpdateQuickMessageResponse>> UpdateQuickMessage([FromRoute] int id,
         [FromBody] UpdateQuickMessageRequest request, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        if (idPerson is null) throw new NotFoundException("User does not exist!");
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
         request.IdPerson = int.Parse(idPerson);
         var result = await mediator.Send(request, cancellationToken);
@@ -62,7 +61,7 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
-        if (idPerson is null) throw new NotFoundException("User does not exist!");
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
         var result = await mediator.Send(new DeleteQuickMessageRequest{IdPerson = int.Parse(idPerson), IdMessage = idQuickMessage}, cancellationToken);
         return result.Match<IActionResult>(x => Ok(new {message = "Quick message was deleted successfully!"}), x => throw x);

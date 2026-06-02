@@ -53,13 +53,13 @@ public class AuthenticationController(IMediator mediator,
     [Authorize(AuthenticationSchemes = "IgnoreTokenExpirationScheme", Roles = "User")]
     [HttpPost]
     [Route("refresh")]
-    public async Task<RefreshResponse> Refresh(CancellationToken cancellationToken)
+    public async Task<ActionResult<RefreshResponse>> Refresh(CancellationToken cancellationToken)
     {
         var oldRefreshToken = Request.Cookies["RefreshToken"];
-        if (string.IsNullOrEmpty(oldRefreshToken)) throw new SecurityTokenException("Refresh token is missing in cookies!");
+        if (string.IsNullOrEmpty(oldRefreshToken)) return UnprocessableEntity(new {message = "Refresh token is missing in cookies!" });
         
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) throw new Exception("User does not exist!");
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
         var result = await mediator.Send(new RefreshRequest
         {
@@ -94,8 +94,7 @@ public class AuthenticationController(IMediator mediator,
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        // if (idPerson is null) throw new Exception("User does not exist!");
-        if (idPerson is null) return Unauthorized(new { message = "User is not authorized!" });
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
         var result = await mediator.Send(new LogoutRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
         if (result.IsSuccess)

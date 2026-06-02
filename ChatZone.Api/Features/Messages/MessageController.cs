@@ -13,10 +13,10 @@ public class MessageController(IMediator mediator) : ControllerBase
     [Authorize(Roles = "User")]
     [Route("get")]
     [HttpPost]
-    public async Task<GetMessageResponse> GetMessages([FromBody] GetMessageRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<GetMessageResponse>> GetMessages([FromBody] GetMessageRequest request, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) throw new Exception("User doesn't exist!");
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
 
         request.IdPerson = int.Parse(idPerson);
         var result = await mediator.Send(request, cancellationToken);

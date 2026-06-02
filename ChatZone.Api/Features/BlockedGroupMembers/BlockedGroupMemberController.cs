@@ -16,7 +16,7 @@ public class BlockedGroupMemberController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> AddBlockedGroupMember([FromBody] AddBlockedGroupRequest request, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) throw new Exception("User does not exist!");
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
 
         request.IdAdminPerson = int.Parse(idPerson);
 

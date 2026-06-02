@@ -13,11 +13,11 @@ public class FilterController(IMediator mediator) : ControllerBase
     [Authorize(Roles = "User")]
     [HttpGet]
     [Route("")]
-    public async Task<GetFilterResponse> GetFilter(CancellationToken cancellationToken)
+    public async Task<ActionResult<GetFilterResponse>> GetFilter(CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (idPerson is null) throw new Exception("User does not exist!");
+        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         var result = await mediator.Send(new GetFilterRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
         return result.Match<GetFilterResponse>(e => e, x=> throw x);
     }
