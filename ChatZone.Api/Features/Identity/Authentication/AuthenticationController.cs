@@ -25,7 +25,6 @@ public class AuthenticationController(
         return Ok(new {username});
     }
     
-    [ValidateAntiForgeryToken]
     [AllowAnonymous]
     [HttpPost]
     [Route("login")]

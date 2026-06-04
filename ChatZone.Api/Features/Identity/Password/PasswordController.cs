@@ -12,7 +12,7 @@ namespace ChatZone.Features.Identity.Password;
 [Route("[controller]")]
 public class PasswordController(IMediator mediator) : ControllerBase
 {
-    [ValidateAntiForgeryToken]
+
     [AllowAnonymous]
     [HttpPost]
     [Route("reset-password")]
@@ -64,7 +64,6 @@ public class PasswordController(IMediator mediator) : ControllerBase
         }, x=> throw x);
     }
 
-    [ValidateAntiForgeryToken]
     [AllowAnonymous]
     [HttpPut]
     [Route("set-password")]

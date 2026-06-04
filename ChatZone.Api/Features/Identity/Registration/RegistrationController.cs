@@ -12,9 +12,8 @@ namespace ChatZone.Features.Identity.Registration;
 [Route("[controller]")]
 public class RegistrationController(IMediator mediator,
     IConfiguration configuration,
-    IAntiforgery antiforgery) : ControllerBase
-{
-    [ValidateAntiForgeryToken]
+    IAntiforgery antiforgery) : ControllerBase {
+    
     [AllowAnonymous]
     [HttpPost]
     [Route("register")]
@@ -24,7 +23,6 @@ public class RegistrationController(IMediator mediator,
         return result.Match<IActionResult>(_=>Ok(new {message = "Completed!"}), x => throw x);
     }
     
-    [ValidateAntiForgeryToken]
     [AllowAnonymous]
     [HttpPost]
     [Route("confirm")]
@@ -61,7 +59,6 @@ public class RegistrationController(IMediator mediator,
         return result.Match<ConfirmResponse>(x => x, x => throw x);
     }
 
-    [ValidateAntiForgeryToken]
     [AllowAnonymous]
     [HttpPost]
     [Route("reconfirm")]
