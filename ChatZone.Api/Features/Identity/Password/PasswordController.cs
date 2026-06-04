@@ -34,7 +34,8 @@ public class PasswordController(IMediator mediator) : ControllerBase
         request.IdPerson = int.Parse(idPerson);
         
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match<IActionResult>(_ =>
+        
+        if (result.IsSuccess)
         {
             Response.Cookies.Append("AccessToken", "", new CookieOptions
             {
@@ -59,9 +60,9 @@ public class PasswordController(IMediator mediator) : ControllerBase
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(-1)
             });
-            
-            return Ok(new { message = "Update password has completed successfully!" });
-        }, x=> throw x);
+        }
+        
+        return result.Match<IActionResult>(_ => Ok(new { message = "Update password has completed successfully!" }), x=> throw x);
     }
 
     [AllowAnonymous]
@@ -71,7 +72,7 @@ public class PasswordController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(request, cancellationToken);
         
-        return result.Match<IActionResult>(_ =>
+        if (result.IsSuccess)
         {
             Response.Cookies.Append("AccessToken", "", new CookieOptions
             {
@@ -96,8 +97,8 @@ public class PasswordController(IMediator mediator) : ControllerBase
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(-1)
             });
-            
-            return Ok(new { message = "Update password has completed successfully!" });
-        }, x=> throw x);
+        }
+        
+        return result.Match<IActionResult>(_ => Ok(new { message = "Update password has completed successfully!" }), x=> throw x);
     }
 }
