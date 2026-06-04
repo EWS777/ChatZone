@@ -19,6 +19,6 @@ public class FilterController(IMediator mediator) : ControllerBase
 
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         var result = await mediator.Send(new GetFilterRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
-        return result.Match<GetFilterResponse>(e => e, x=> throw x);
+        return result.Match<GetFilterResponse>(x => x, x=> throw x);
     }
 }

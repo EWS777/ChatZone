@@ -31,6 +31,7 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
         return result.Match(x => x, x => throw x);
     }
     
+    [ValidateAntiForgeryToken]
     [HttpPost]
     [Route("add")]
     public async Task<IActionResult> AddGroupMember([FromQuery] int idGroup, CancellationToken cancellationToken)
@@ -45,9 +46,10 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
         };
 
         var result = await mediator.Send(groupMember, cancellationToken);
-        return result.Match(x => Ok(), x => throw x);
+        return result.Match(_ => Ok(), x => throw x);
     }
 
+    [ValidateAntiForgeryToken]
     [HttpDelete]
     [Route("leave")]
     public async Task<IActionResult> LeaveGroup([FromQuery] int idChat, CancellationToken cancellationToken)
@@ -62,9 +64,10 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
         };
 
         var result = await mediator.Send(groupMember, cancellationToken);
-        return result.Match(x => Ok(), x => throw x);
+        return result.Match(_ => Ok(), x => throw x);
     }
     
+    [ValidateAntiForgeryToken]
     [HttpPut]
     [Route("change-admin")]
     public async Task<IActionResult> ChangeAdmin([FromBody] ChangeAdminRequest request, CancellationToken cancellationToken)
@@ -75,6 +78,6 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
         request.IdPerson = int.Parse(idPerson);
         
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match(x => Ok(), x => throw x);
+        return result.Match(_ => Ok(), x => throw x);
     }
 }

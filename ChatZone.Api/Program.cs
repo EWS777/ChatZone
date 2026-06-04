@@ -144,6 +144,14 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-XSRF-TOKEN";
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
+
 var app = builder.Build();
 app.UseSerilogRequestLogging();
 
@@ -158,7 +166,7 @@ app.UseRateLimiter();
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
-
+app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapHub<ChatZoneHub>("/chat").RequireAuthorization();

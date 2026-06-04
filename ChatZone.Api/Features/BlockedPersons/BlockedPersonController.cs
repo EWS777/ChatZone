@@ -25,7 +25,8 @@ public class BlockedPersonController(IMediator mediator) : ControllerBase
         return result.Match(x => x, x=>throw x);
     }
 
-    [Authorize]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "User")]
     [HttpPost]
     [Route("add/{idPartnerPerson}")]
     public async Task<IActionResult> CreateBlockedPerson([FromRoute] int idPartnerPerson, CancellationToken cancellationToken)
@@ -35,9 +36,10 @@ public class BlockedPersonController(IMediator mediator) : ControllerBase
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
 
         var result = await mediator.Send(new CreateBlockedPersonRequest { IdPerson = int.Parse(idPerson), IdPartnerPerson = idPartnerPerson }, cancellationToken);
-        return result.Match(x => Ok(new {message = "Person has blocked successfully!"}), x => throw x);
+        return result.Match(_ => Ok(new {message = "Person has blocked successfully!"}), x => throw x);
     }
     
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [HttpDelete]
     [Route("delete/{idBlockedPerson}")]
@@ -48,6 +50,6 @@ public class BlockedPersonController(IMediator mediator) : ControllerBase
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
         var result = await mediator.Send(new DeleteBlockedPersonRequest{IdPerson = int.Parse(idPerson), IdBlockedPerson = idBlockedPerson}, cancellationToken);
-        return result.Match<IActionResult>(x=>Ok(new {message = "User was deleted successfully!"}), x => throw x);
+        return result.Match<IActionResult>(_=>Ok(new {message = "User was deleted successfully!"}), x => throw x);
     }
 }

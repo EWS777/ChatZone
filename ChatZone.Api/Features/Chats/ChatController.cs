@@ -63,6 +63,7 @@ public class ChatController(IMediator mediator) : ControllerBase
         return result.Match(x => x, x => throw x);
     }
     
+    [ValidateAntiForgeryToken]
     [HttpPost]
     [Route("create")]
     public async Task<ActionResult<int>> CreateGroupChat([FromBody] CreateGroupChatRequest request, CancellationToken cancellationToken)
@@ -76,6 +77,7 @@ public class ChatController(IMediator mediator) : ControllerBase
         return result.Match(x => x, x => throw x);
     }
     
+    [ValidateAntiForgeryToken]
     [HttpPut]
     [Route("update")]
     public async Task<ActionResult<UpdateGroupChatResponse>> UpdateGroupChat([FromBody] UpdateGroupChatRequest request, CancellationToken cancellationToken)
@@ -89,6 +91,7 @@ public class ChatController(IMediator mediator) : ControllerBase
         return result.Match(x => x, x => throw x);
     }
     
+    [ValidateAntiForgeryToken]
     [HttpDelete]
     [Route("delete")]
     public async Task<IActionResult> DeleteGroupChat([FromQuery] int idGroup, CancellationToken cancellationToken)
@@ -103,9 +106,10 @@ public class ChatController(IMediator mediator) : ControllerBase
         };
         
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match(x => Ok(new {message = "Group was deleted successfully!"}), x => throw x);
+        return result.Match(_ => Ok(new {message = "Group was deleted successfully!"}), x => throw x);
     }
 
+    [ValidateAntiForgeryToken]
     [HttpPut]
     [Route("finish")]
     public async Task<IActionResult> FinishSingleChat([FromQuery] int idChat, CancellationToken cancellationToken)
@@ -119,6 +123,6 @@ public class ChatController(IMediator mediator) : ControllerBase
             IdPerson = int.Parse(idPerson)
         }, cancellationToken);
         
-        return result.Match(x => Ok(), x => throw x);
+        return result.Match(_ => Ok(), x => throw x);
     }
 }

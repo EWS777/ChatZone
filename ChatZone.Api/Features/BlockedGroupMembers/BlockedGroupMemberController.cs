@@ -10,6 +10,7 @@ namespace ChatZone.Features.BlockedGroupMembers;
 [Route("[controller]")]
 public class BlockedGroupMemberController(IMediator mediator) : ControllerBase
 {
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [HttpPost]
     [Route("add")]
@@ -21,6 +22,6 @@ public class BlockedGroupMemberController(IMediator mediator) : ControllerBase
         request.IdAdminPerson = int.Parse(idPerson);
 
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match(x => Ok(new {message = "Person has blocked successfully!"}), x => throw x);
+        return result.Match(_ => Ok(new {message = "Person has blocked successfully!"}), x => throw x);
     }
 }

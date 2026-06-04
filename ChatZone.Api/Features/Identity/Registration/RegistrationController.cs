@@ -2,6 +2,7 @@ using ChatZone.Features.Identity.Registration.Confirm;
 using ChatZone.Features.Identity.Registration.Reconfirm;
 using ChatZone.Features.Identity.Registration.Register;
 using MediatR;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,17 +11,20 @@ namespace ChatZone.Features.Identity.Registration;
 [ApiController]
 [Route("[controller]")]
 public class RegistrationController(IMediator mediator,
-    IConfiguration configuration) : ControllerBase
+    IConfiguration configuration,
+    IAntiforgery antiforgery) : ControllerBase
 {
+    [ValidateAntiForgeryToken]
     [AllowAnonymous]
     [HttpPost]
     [Route("register")]
     public async Task<IActionResult> Register([FromBody]RegisterRequest request, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match<IActionResult>(x=>Ok(new {message = "Completed!"}), x => throw x);
+        return result.Match<IActionResult>(_=>Ok(new {message = "Completed!"}), x => throw x);
     }
     
+    [ValidateAntiForgeryToken]
     [AllowAnonymous]
     [HttpPost]
     [Route("confirm")]
@@ -44,21 +48,26 @@ public class RegistrationController(IMediator mediator,
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!))
             });
+            
+            var tokens = antiforgery.GetAndStoreTokens(HttpContext);
+            Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
         }
         
-        return result.Match<ConfirmResponse>(e => e, x => throw x);
+        return result.Match<ConfirmResponse>(x => x, x => throw x);
     }
 
+    [ValidateAntiForgeryToken]
     [AllowAnonymous]
     [HttpPost]
     [Route("reconfirm")]
     public async Task<IActionResult> Reconfirm([FromQuery] string email, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new ReconfirmRequest{Email = email}, cancellationToken);
-        return result.Match<IActionResult>(e => Ok(new
-        {
-            message = "Link was sent!",
-            status = 200
-        }), x => throw x);
+        return result.Match<IActionResult>(_ => Ok(new { message = "Link was sent!" }), x => throw x);
     }
 }

@@ -10,6 +10,7 @@ namespace ChatZone.Features.Messages;
 [Route("[controller]")]
 public class MessageController(IMediator mediator) : ControllerBase
 {
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [Route("get")]
     [HttpPost]

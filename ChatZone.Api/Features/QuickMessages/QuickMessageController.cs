@@ -25,6 +25,7 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
         return result.Match(x => x, x => throw x);
     }
     
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [HttpPost]
     [Route("add")]
@@ -39,6 +40,7 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
         return result.Match<CreateQuickMessageResponse>(x => x, x => throw x);
     }
 
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [HttpPut]
     [Route("{id}/update")]
@@ -54,6 +56,7 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
         return result.Match<UpdateQuickMessageResponse>(x => x, x => throw x);
     }
 
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [HttpDelete]
     [Route("delete/{idQuickMessage:int}")]
@@ -64,6 +67,6 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
         var result = await mediator.Send(new DeleteQuickMessageRequest{IdPerson = int.Parse(idPerson), IdMessage = idQuickMessage}, cancellationToken);
-        return result.Match<IActionResult>(x => Ok(new {message = "Quick message was deleted successfully!"}), x => throw x);
+        return result.Match<IActionResult>(_ => Ok(new {message = "Quick message was deleted successfully!"}), x => throw x);
     }
 }

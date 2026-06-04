@@ -12,15 +12,17 @@ namespace ChatZone.Features.Identity.Password;
 [Route("[controller]")]
 public class PasswordController(IMediator mediator) : ControllerBase
 {
+    [ValidateAntiForgeryToken]
     [AllowAnonymous]
     [HttpPost]
     [Route("reset-password")]
     public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordRequest request, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match<IActionResult>(x => Ok(new {message = "The reset link was sent to your email!"}), x => throw x);
+        return result.Match<IActionResult>(_ => Ok(new {message = "The reset link was sent to your email!"}), x => throw x);
     }
 
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [HttpPut]
     [Route("change-password")]
@@ -32,7 +34,7 @@ public class PasswordController(IMediator mediator) : ControllerBase
         request.IdPerson = int.Parse(idPerson);
         
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match<IActionResult>(success =>
+        return result.Match<IActionResult>(_ =>
         {
             Response.Cookies.Append("AccessToken", "", new CookieOptions
             {
@@ -49,10 +51,20 @@ public class PasswordController(IMediator mediator) : ControllerBase
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(-1)
             });
+            
+            Response.Cookies.Append("XSRF-TOKEN", "", new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(-1)
+            });
+            
             return Ok(new { message = "Update password has completed successfully!" });
         }, x=> throw x);
     }
 
+    [ValidateAntiForgeryToken]
     [AllowAnonymous]
     [HttpPut]
     [Route("set-password")]
@@ -60,7 +72,7 @@ public class PasswordController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(request, cancellationToken);
         
-        return result.Match<IActionResult>(success =>
+        return result.Match<IActionResult>(_ =>
         {
             Response.Cookies.Append("AccessToken", "", new CookieOptions
             {
@@ -77,6 +89,15 @@ public class PasswordController(IMediator mediator) : ControllerBase
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(-1)
             });
+            
+            Response.Cookies.Append("XSRF-TOKEN", "", new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(-1)
+            });
+            
             return Ok(new { message = "Update password has completed successfully!" });
         }, x=> throw x);
     }

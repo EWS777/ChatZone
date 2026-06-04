@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using ChatZone.Core.Extensions.Exceptions;
+using Microsoft.AspNetCore.Antiforgery;
 using ChatZone.Features.Profiles.Delete;
 using ChatZone.Features.Profiles.Get;
 using ChatZone.Features.Profiles.Update;
@@ -12,7 +12,8 @@ namespace ChatZone.Features.Profiles;
 [ApiController]
 [Route("[controller]")]
 public class ProfileController(IMediator mediator,
-    IConfiguration configuration) : ControllerBase
+    IConfiguration configuration,
+    IAntiforgery antiforgery) : ControllerBase
 {
     [Authorize(Roles = "User")]
     [HttpGet]
@@ -26,6 +27,7 @@ public class ProfileController(IMediator mediator,
         return result.Match(x => x, x => throw x);
     }
     
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [HttpPut]
     [Route("{username}")]
@@ -55,15 +57,22 @@ public class ProfileController(IMediator mediator,
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddDays(
-                    double.Parse(configuration["JWT:RefreshTokenExpDays"]!)
-                    )
+                Expires = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!))
+            });
+            
+            var tokens = antiforgery.GetAndStoreTokens(HttpContext);
+            Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.None
             });
         }
         
         return result.Match(x => x, x => throw x);
     }
     
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [HttpPost]
     [Route("delete")]
@@ -93,8 +102,16 @@ public class ProfileController(IMediator mediator,
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(-1)
             });
+            
+            Response.Cookies.Delete("XSRF-TOKEN", new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(-1)
+            });
         }
 
-        return result.Match(x => Ok(new {message = "Profile was deleted successfully!"}), x => throw x);
+        return result.Match(_ => Ok(new {message = "Profile was deleted successfully!"}), x => throw x);
     }
 }

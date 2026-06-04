@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using ChatZone.Core.Extensions.Exceptions;
+using Microsoft.AspNetCore.Antiforgery;
 using ChatZone.Features.Identity.Authentication.Login;
 using ChatZone.Features.Identity.Authentication.Logout;
 using ChatZone.Features.Identity.Authentication.Refresh;
@@ -11,8 +11,10 @@ namespace ChatZone.Features.Identity.Authentication;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthenticationController(IMediator mediator,
-    IConfiguration configuration) : ControllerBase
+public class AuthenticationController(
+    IMediator mediator,
+    IConfiguration configuration,
+    IAntiforgery antiforgery) : ControllerBase
 {
     [Authorize(Roles = "User")]
     [HttpGet]
@@ -23,6 +25,7 @@ public class AuthenticationController(IMediator mediator,
         return Ok(new {username});
     }
     
+    [ValidateAntiForgeryToken]
     [AllowAnonymous]
     [HttpPost]
     [Route("login")]
@@ -46,10 +49,19 @@ public class AuthenticationController(IMediator mediator,
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!))
             });
+
+            var tokens = antiforgery.GetAndStoreTokens(HttpContext);
+            Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
         }
         return result.Match<LoginResponse>(x => x, x => throw x);
     }
 
+    [ValidateAntiForgeryToken]
     [Authorize(AuthenticationSchemes = "IgnoreTokenExpirationScheme", Roles = "User")]
     [HttpPost]
     [Route("refresh")]
@@ -83,11 +95,20 @@ public class AuthenticationController(IMediator mediator,
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!))
             });
+            
+            var tokens = antiforgery.GetAndStoreTokens(HttpContext);
+            Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
         }
         
-        return result.Match<RefreshResponse>(e => e, x => throw x);
+        return result.Match<RefreshResponse>(x => x, x => throw x);
     }
 
+    [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [HttpPost]
     [Route("logout")]
@@ -114,7 +135,15 @@ public class AuthenticationController(IMediator mediator,
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(-1)
             });
+            
+            Response.Cookies.Append("XSRF-TOKEN", "", new CookieOptions
+            {
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(-1)
+            });
         } 
-        return result.Match<IActionResult>(x => Ok(new {message = "Logout has completed successfully!"}), x => throw x);
+        return result.Match<IActionResult>(_ => Ok(new {message = "Logout has completed successfully!"}), x => throw x);
     }
 }
