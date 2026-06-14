@@ -64,7 +64,7 @@ public class ChatZoneHub(IMediator mediator) : Hub
         await Clients.Caller.SendAsync("ChatCreated");
     }
 
-    public async Task StartSearchSingeChat(FindPersonRequest request)
+    public async Task StartSearchSingleChat(FindPersonRequest request)
     {
         var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(idPerson)) throw new HubException("User does not exist or not authorized!");
