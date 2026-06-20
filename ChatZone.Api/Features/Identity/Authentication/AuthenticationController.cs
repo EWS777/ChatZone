@@ -48,14 +48,6 @@ public class AuthenticationController(
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!))
             });
-
-            var tokens = antiforgery.GetAndStoreTokens(HttpContext);
-            Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
-            {
-                HttpOnly = false,
-                Secure = true,
-                SameSite = SameSiteMode.None
-            });
         }
         return result.Match<LoginResponse>(x => x, x => throw x);
     }
@@ -144,5 +136,21 @@ public class AuthenticationController(
             });
         } 
         return result.Match<IActionResult>(_ => Ok(new {message = "Logout has completed successfully!"}), x => throw x);
+    }
+
+    [Authorize(Roles = "User")]
+    [HttpGet]
+    [Route("csrf")]
+    public IActionResult GetCsrfToken(CancellationToken cancellationToken)
+    {
+        var tokens = antiforgery.GetAndStoreTokens(HttpContext);
+        Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
+        {
+            HttpOnly = false,
+            Secure = true,
+            SameSite = SameSiteMode.None
+        });
+
+        return NoContent();
     }
 }
