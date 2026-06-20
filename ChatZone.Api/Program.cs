@@ -59,7 +59,7 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer(); //to create Swagger
 builder.Services.AddSwaggerGen(); //to create Swagger
-builder.Services.AddControllers(); //find all classes derived from ControllerBase which can be used
+builder.Services.AddControllersWithViews(); //find all classes derived from ControllerBase which can be used
 builder.Services.AddSignalR();
 
 builder.Services.AddFluentValidationAutoValidation();
@@ -153,6 +153,7 @@ builder.Services.AddAntiforgery(options =>
 });
 
 var app = builder.Build();
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
@@ -161,14 +162,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
 app.UseCors("AllowAngular");
 app.UseRateLimiter();
-app.UseMiddleware<ExceptionHandlerMiddleware>();
-
-app.UseHttpsRedirection();
-app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAntiforgery();
 app.MapHub<ChatZoneHub>("/chat").RequireAuthorization();
 
 app.MapControllers().RequireRateLimiting("RateLimitingPolicy"); //with 'builder.Services.AddControllers();'
