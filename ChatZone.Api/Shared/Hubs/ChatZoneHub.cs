@@ -72,43 +72,10 @@ public class ChatZoneHub(IMediator mediator) : Hub
         request.ConnectionId = Context.ConnectionId;
         request.IdPerson = int.Parse(idPerson);
 
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(Context.ConnectionAborted);
+        var result = await mediator.Send(request);
         
-        //to check if the person exists already
-        if (_activeSearches.TryRemove(Context.ConnectionId, out var oldConnection))
-        {
-            await oldConnection.CancelAsync();
-            oldConnection.Dispose();
-        }
+        if (!result.IsSuccess) throw new HubException(result.Exception?.Message ?? "An error occurred during search.");
 
-        _activeSearches.TryAdd(Context.ConnectionId, cts);
-
-        try
-        {
-            while (!cts.Token.IsCancellationRequested)
-            {
-                var result = await mediator.Send(request, cts.Token);
-                
-                if (result.IsSuccess && result.Value) break;
-                if (!result.IsSuccess) throw new HubException(result.Exception.Message);
-
-                await Task.Delay(3000, cts.Token);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-        }
-        catch (HubException)
-        {
-            throw;
-        }
-        catch (Exception)
-        {
-            await Clients.Caller.SendAsync("SearchError", "An unexpected error occurred during search.", cancellationToken: cts.Token);
-        }
-        finally
-        {
-            _activeSearches.TryRemove(Context.ConnectionId, out _);
-        }
+        await Clients.Caller.SendAsync("QueueJoined");
     }
 }
