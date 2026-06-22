@@ -9,9 +9,9 @@ namespace ChatZone.Matchmaking;
 
 public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingService
 {
-    public async Task<Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>> FindMatch(FindPersonRequest request, CancellationToken cancellationToken)
+    public async Task<Result<MatchResponse>> FindMatch(FindPersonRequest request, CancellationToken cancellationToken)
     {
-        if(!request.IsFindRandomPerson && (request.YourGender == null || request.PartnerGender == null || request.Language == null)) return Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>.Failure(new ArgumentException("`YourGender`, `PartnerGender`, and `Language` fields are required for matchmaking."));
+        if(!request.IsFindRandomPerson && (request.YourGender == null || request.PartnerGender == null || request.Language == null)) return Result<MatchResponse>.Failure(new ArgumentException("`YourGender`, `PartnerGender`, and `Language` fields are required for matchmaking."));
 
         var currentPerson = await dbContext.MatchQueues.FirstOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
 
@@ -61,7 +61,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                 if (!isPartnerStillAvailable || !isCurrentPersonStillAvailable)
                 {
                     await transaction.RollbackAsync(cancellationToken);
-                    return Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>.Ok(null);
+                    return Result<MatchResponse>.Ok(new MatchResponse{IsFound = false});
                 }
             
                 var newChat = new SingleChat
@@ -79,7 +79,8 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                 await dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
 
-                return Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>.Ok((currentPerson, partner, newChat.IdSingleChat));
+                return Result<MatchResponse>.Ok(new MatchResponse{Person1 = currentPerson, Person2 = partner, IdGroup = newChat.IdSingleChat, IsFound = true});
+                
             }
             catch (Exception)
             {
@@ -87,7 +88,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                 throw;
             }
         }
-        return Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>.Ok(null);
+        return Result<MatchResponse>.Ok(new MatchResponse{IsFound = false});
     }
 
     private async Task<MatchQueue?> FindBestPartnerAsync(MatchQueue currentPerson, CancellationToken cancellationToken)

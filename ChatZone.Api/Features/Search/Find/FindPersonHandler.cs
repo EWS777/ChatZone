@@ -61,13 +61,16 @@ public class FindPersonHandler(
         
         if(!matchResult.IsSuccess) return Result<bool>.Failure(matchResult.Exception);
         
-        if(matchResult.Value == null) return Result<bool>.Ok(false);
+        if(!matchResult.Value.IsFound) return Result<bool>.Ok(false);
 
-        var (person1, person2, idGroup) = matchResult.Value.Value;
+        var person1 = matchResult.Value.Person1!;
+        var person2 = matchResult.Value.Person2!;
+        var idGroup = matchResult.Value.IdGroup!.Value;
+        
         await hubContext.Groups.AddToGroupAsync(person1.ConnectionId, idGroup.ToString(), cancellationToken);
         await hubContext.Groups.AddToGroupAsync(person2.ConnectionId, idGroup.ToString(), cancellationToken);
 
-        await hubContext.Clients.Group(idGroup.ToString()).SendAsync("ChatCreated", cancellationToken);
+        await hubContext.Clients.Group(idGroup.ToString()).SendAsync("ChatCreated", cancellationToken: cancellationToken);
         return Result<bool>.Ok(true);
     }
 }

@@ -6,5 +6,5 @@ namespace ChatZone.Matchmaking;
 
 public interface IMatchmakingService
 {
-    Task<Result<(MatchQueue person1, MatchQueue person2, int idGroup)?>> FindMatch(FindPersonRequest request, CancellationToken cancellationToken);
+    Task<Result<MatchResponse>> FindMatch(FindPersonRequest request, CancellationToken cancellationToken);
 }
