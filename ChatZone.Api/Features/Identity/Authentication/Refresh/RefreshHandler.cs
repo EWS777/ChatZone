@@ -15,7 +15,10 @@ public class RefreshHandler(
 {
     public async Task<Result<RefreshResponse>> Handle(RefreshRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.IdPerson == request.IdPerson, cancellationToken);
+        var hashedRefreshToken = SecurityHelper.HashRefreshToken(request.RefreshToken);
+        
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.RefreshToken == hashedRefreshToken, cancellationToken);
+        
         if (person is null) return Result<RefreshResponse>.Failure(new NotFoundException("User is not found!"));
 
         if (person.RefreshTokenExp < DateTimeOffset.UtcNow) return Result<RefreshResponse>.Failure(new ExpiredTokenException("Refresh token expired"));

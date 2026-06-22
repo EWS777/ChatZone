@@ -52,8 +52,7 @@ public class AuthenticationController(
         return result.Match<LoginResponse>(x => x, x => throw x);
     }
 
-    [ValidateAntiForgeryToken]
-    [Authorize(AuthenticationSchemes = "IgnoreTokenExpirationScheme", Roles = "User")]
+    [AllowAnonymous]
     [HttpPost]
     [Route("refresh")]
     public async Task<ActionResult<RefreshResponse>> Refresh(CancellationToken cancellationToken)
@@ -61,12 +60,8 @@ public class AuthenticationController(
         var oldRefreshToken = Request.Cookies["RefreshToken"];
         if (string.IsNullOrEmpty(oldRefreshToken)) return UnprocessableEntity(new {message = "Refresh token is missing in cookies!" });
         
-        var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
-        
         var result = await mediator.Send(new RefreshRequest
         {
-            IdPerson = int.Parse(idPerson),
             RefreshToken = oldRefreshToken
         }, cancellationToken);
         
@@ -85,14 +80,6 @@ public class AuthenticationController(
                 Secure = true,
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!))
-            });
-            
-            var tokens = antiforgery.GetAndStoreTokens(HttpContext);
-            Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!, new CookieOptions
-            {
-                HttpOnly = false,
-                Secure = true,
-                SameSite = SameSiteMode.None
             });
         }
         
