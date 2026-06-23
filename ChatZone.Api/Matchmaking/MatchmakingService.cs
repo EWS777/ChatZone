@@ -116,10 +116,17 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
 
         if (currentPerson.IsRandomPartner)
         {
+            if (blockedUsers.Count > 0)
+            {
+                return await dbContext.MatchQueues
+                    .Where(x => x.IdPerson != currentPerson.IdPerson && 
+                                !blockedUsers.Contains(x.IdPerson) &&
+                                x.IsRandomPartner == true)
+                    .OrderBy(x => x.JoinedAt)
+                    .FirstOrDefaultAsync(cancellationToken);
+            }
             return await dbContext.MatchQueues
-                .Where(x => x.IdPerson != currentPerson.IdPerson && 
-                            !blockedUsers.Contains(x.IdPerson) &&
-                            x.IsRandomPartner == true)
+                .Where(x => x.IdPerson != currentPerson.IdPerson && x.IsRandomPartner == true)
                 .OrderBy(x => x.JoinedAt)
                 .FirstOrDefaultAsync(cancellationToken);
         }
