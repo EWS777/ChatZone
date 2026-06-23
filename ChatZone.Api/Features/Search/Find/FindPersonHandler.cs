@@ -57,20 +57,35 @@ public class FindPersonHandler(
             request.IsFindRandomPerson = result.IsFindRandomPerson;
         }
         
-        var matchResult = await matchmakingService.FindMatch(request, cancellationToken);
+        int maxAttempts = 20;
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            
+            var matchResult = await matchmakingService.FindMatch(request, cancellationToken);
         
-        if(!matchResult.IsSuccess) return Result<bool>.Failure(matchResult.Exception);
-        
-        if(!matchResult.Value.IsFound) return Result<bool>.Ok(false);
+            if(!matchResult.IsSuccess) return Result<bool>.Failure(matchResult.Exception);
 
-        var person1 = matchResult.Value.Person1!;
-        var person2 = matchResult.Value.Person2!;
-        var idGroup = matchResult.Value.IdGroup!.Value;
+            if (matchResult.Value.IsFound)
+            {
+                var person1 = matchResult.Value.Person1!;
+                var person2 = matchResult.Value.Person2!;
+                var idGroup = matchResult.Value.IdGroup!.Value;
         
-        await hubContext.Groups.AddToGroupAsync(person1.ConnectionId, idGroup.ToString(), cancellationToken);
-        await hubContext.Groups.AddToGroupAsync(person2.ConnectionId, idGroup.ToString(), cancellationToken);
+                await hubContext.Groups.AddToGroupAsync(person1.ConnectionId, idGroup.ToString(), cancellationToken);
+                await hubContext.Groups.AddToGroupAsync(person2.ConnectionId, idGroup.ToString(), cancellationToken);
 
-        await hubContext.Clients.Group(idGroup.ToString()).SendAsync("ChatCreated", cancellationToken: cancellationToken);
-        return Result<bool>.Ok(true);
+                await hubContext.Clients.Group(idGroup.ToString()).SendAsync("ChatCreated", cancellationToken: cancellationToken);
+                return Result<bool>.Ok(true);
+            }
+            
+            request.IsSearchAgain = true;
+        
+            dbContext.ChangeTracker.Clear();
+
+            await Task.Delay(3000, cancellationToken);
+        }
+        
+        return Result<bool>.Ok(false);
     }
 }
