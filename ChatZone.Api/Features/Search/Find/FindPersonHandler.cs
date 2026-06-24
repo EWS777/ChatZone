@@ -69,7 +69,15 @@ public class FindPersonHandler(
                     .AsNoTracking()
                     .Where(x => x.IdPerson == request.IdPerson)
                     .AnyAsync(cancellationToken);
-                if (!isStillSearching) return Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
+                if (!isStillSearching)
+                {
+                    var hasActiveChat = await dbContext.SingleChats
+                        .Where(x => (x.IdSecondPerson == request.IdPerson || x.IdFirstPerson == request.IdPerson) && x.FinishedAt == null)
+                        .AnyAsync(cancellationToken);
+                    if(hasActiveChat) return Result<bool>.Ok(true);
+                    
+                    return Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
+                }
             }
             
             var matchResult = await matchmakingService.FindMatch(request, cancellationToken);
