@@ -15,14 +15,6 @@ public class MatchQueueEfConfig : IEntityTypeConfiguration<MatchQueue>
             .ValueGeneratedNever();
 
         builder
-            .Property(x => x.YourGender)
-            .IsRequired();
-        
-        builder
-            .Property(x => x.PartnerGender)
-            .IsRequired();
-
-        builder
             .Property(x => x.Language)
             .IsRequired();
         
