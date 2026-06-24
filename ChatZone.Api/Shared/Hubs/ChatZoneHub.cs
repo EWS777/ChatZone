@@ -72,8 +72,8 @@ public class ChatZoneHub(IMediator mediator) : Hub
         request.ConnectionId = Context.ConnectionId;
         request.IdPerson = int.Parse(idPerson);
 
-        await Clients.Caller.SendAsync("QueueJoined");
-        var result = await mediator.Send(request);
+        await Clients.Caller.SendAsync("QueueJoined", Context.ConnectionAborted);
+        var result = await mediator.Send(request, Context.ConnectionAborted);
         
         if (!result.IsSuccess) throw new HubException(result.Exception?.Message ?? "An error occurred during search.");
     }

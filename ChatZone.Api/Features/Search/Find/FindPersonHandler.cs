@@ -1,5 +1,6 @@
 using ChatZone.Core.Extensions.Exceptions;
 using ChatZone.Features.Filters.Update;
+using ChatZone.Features.Search.Cancel;
 using ChatZone.Matchmaking;
 using ChatZone.Shared.Context;
 using ChatZone.Shared.DTOs;
@@ -61,6 +62,15 @@ public class FindPersonHandler(
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            if (attempt > 0)
+            {
+                var isStillSearching = await dbContext.MatchQueues
+                    .AsNoTracking()
+                    .Where(x => x.IdPerson == request.IdPerson)
+                    .AnyAsync(cancellationToken);
+                if (!isStillSearching) return Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
+            }
             
             var matchResult = await matchmakingService.FindMatch(request, cancellationToken);
         
@@ -82,10 +92,17 @@ public class FindPersonHandler(
             request.IsSearchAgain = true;
         
             dbContext.ChangeTracker.Clear();
-
-            await Task.Delay(3000, cancellationToken);
+            try
+            {
+                await Task.Delay(3000, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                await mediator.Send(new CancelPersonRequest { IdPerson = request.IdPerson }, CancellationToken.None);
+                return Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
+            }
         }
-        
+        await mediator.Send(new CancelPersonRequest { IdPerson = request.IdPerson }, CancellationToken.None);
         return Result<bool>.Ok(false);
     }
 }
