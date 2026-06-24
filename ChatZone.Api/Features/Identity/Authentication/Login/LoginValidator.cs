@@ -15,7 +15,7 @@ public class LoginValidator : AbstractValidator<LoginRequest>
                 if (usernameOrEmail.Contains('@'))
                 {
                     if(!Regex.IsMatch(usernameOrEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) context.AddFailure("Email format is incorrect");
-                    else if(usernameOrEmail.Trim().Replace(" ", "").Length > 265) context.AddFailure("Email max length is 264 characters");
+                    else if(usernameOrEmail.Trim().Replace(" ", "").Length > 255) context.AddFailure("Email max length is 254 characters");
                 }
                 else
                 {
