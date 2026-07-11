@@ -20,6 +20,50 @@ public class FindPersonHandler(
 {
     public async Task<Result<bool>> Handle(FindPersonRequest request, CancellationToken cancellationToken)
     {
+        var prepareResult = await PrepareRequestData(request, cancellationToken);
+        if (!prepareResult.IsSuccess) return Result<bool>.Failure(prepareResult.Exception);
+        
+        var maxAttempts = 20;
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (attempt > 0)
+            {
+                var statusResult = await CheckSearchStatus(request.IdPerson, cancellationToken);
+                if (statusResult != null) return statusResult;
+            }
+            
+            var matchResult = await matchmakingService.FindMatch(request, cancellationToken);
+            
+            if (!matchResult.IsSuccess) return Result<bool>.Failure(matchResult.Exception);
+
+            if (matchResult.Value.IsFound)
+            {
+                var person1 = matchResult.Value.Person1!;
+                var person2 = matchResult.Value.Person2!;
+                var idGroup = matchResult.Value.IdGroup!.Value;
+                
+                await hubContext.Groups.AddToGroupAsync(person1.ConnectionId, idGroup.ToString(), cancellationToken);
+                await hubContext.Groups.AddToGroupAsync(person2.ConnectionId, idGroup.ToString(), cancellationToken);
+
+                await hubContext.Clients.Group(idGroup.ToString()).SendAsync("ChatCreated", cancellationToken);
+                return Result<bool>.Ok(true);
+            }
+            
+            request.IsSearchAgain = true;
+            dbContext.ChangeTracker.Clear();
+            
+            var delayAttempt = await WaitForNextAttempt(request.IdPerson, cancellationToken);
+            if(!delayAttempt) return Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
+        }
+        
+        await mediator.Send(new CancelPersonRequest { IdPerson = request.IdPerson }, CancellationToken.None);
+        return Result<bool>.Ok(false);
+    }
+    
+    private async Task<Result<bool>> PrepareRequestData(FindPersonRequest request, CancellationToken cancellationToken)
+    {
         if (!request.IsSearchAgain)
         {
             var savedPersonFilter = await mediator.Send(new UpdateFilterRequest
@@ -37,8 +81,8 @@ public class FindPersonHandler(
             
             if (!savedPersonFilter.IsSuccess) return Result<bool>.Failure(savedPersonFilter.Exception);
         }
-        
-        if (request.IsSearchAgain)
+
+        else
         {
             var result = await dbContext.Persons
                 .AsNoTracking()
@@ -61,60 +105,36 @@ public class FindPersonHandler(
             request.IsFindRandomPerson = result.IsFindRandomPerson;
         }
         
-        var maxAttempts = 20;
-        for (var attempt = 0; attempt < maxAttempts; attempt++)
+        return Result<bool>.Ok(true);
+    }
+
+    private async Task<bool> WaitForNextAttempt(int idPerson, CancellationToken cancellationToken)
+    {
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (attempt > 0)
-            {
-                var isStillSearching = await dbContext.MatchQueues
-                    .AsNoTracking()
-                    .Where(x => x.IdPerson == request.IdPerson)
-                    .AnyAsync(cancellationToken);
-                if (!isStillSearching)
-                {
-                    var hasActiveChat = await dbContext.SingleChats
-                        .Where(x => (x.IdSecondPerson == request.IdPerson || x.IdFirstPerson == request.IdPerson) && x.FinishedAt == null)
-                        .AnyAsync(cancellationToken);
-                    if (hasActiveChat) return Result<bool>.Ok(true);
-                    
-                    return Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
-                }
-            }
-            
-            var matchResult = await matchmakingService.FindMatch(request, cancellationToken);
-            
-            if (!matchResult.IsSuccess) return Result<bool>.Failure(matchResult.Exception);
-
-            if (matchResult.Value.IsFound)
-            {
-                var person1 = matchResult.Value.Person1!;
-                var person2 = matchResult.Value.Person2!;
-                var idGroup = matchResult.Value.IdGroup!.Value;
-                
-                await hubContext.Groups.AddToGroupAsync(person1.ConnectionId, idGroup.ToString(), cancellationToken);
-                await hubContext.Groups.AddToGroupAsync(person2.ConnectionId, idGroup.ToString(), cancellationToken);
-
-                await hubContext.Clients.Group(idGroup.ToString()).SendAsync("ChatCreated", cancellationToken);
-                return Result<bool>.Ok(true);
-            }
-            
-            request.IsSearchAgain = true;
-            
-            dbContext.ChangeTracker.Clear();
-            try
-            {
-                await Task.Delay(3000, cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                await mediator.Send(new CancelPersonRequest { IdPerson = request.IdPerson }, CancellationToken.None);
-                return Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
-            }
+            await Task.Delay(3000, cancellationToken);
+            return true;
         }
+        catch (OperationCanceledException)
+        {
+            await mediator.Send(new CancelPersonRequest { IdPerson = idPerson }, CancellationToken.None);
+            return false;
+        }
+    }
+
+    private async Task<Result<bool>?> CheckSearchStatus(int idPerson, CancellationToken cancellationToken)
+    {
+        var isStillSearching = await dbContext.MatchQueues
+            .AsNoTracking()
+            .Where(x => x.IdPerson == idPerson)
+            .AnyAsync(cancellationToken);
+
+        if (isStillSearching) return null;
         
-        await mediator.Send(new CancelPersonRequest { IdPerson = request.IdPerson }, CancellationToken.None);
-        return Result<bool>.Ok(false);
+        var hasActiveChat = await dbContext.SingleChats
+            .Where(x => (x.IdSecondPerson == idPerson || x.IdFirstPerson == idPerson) && x.FinishedAt == null)
+            .AnyAsync(cancellationToken);
+        
+        return hasActiveChat ? Result<bool>.Ok(true) : Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
     }
 }
