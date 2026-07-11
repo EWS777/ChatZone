@@ -94,37 +94,15 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
     private async Task<MatchQueue?> FindBestPartnerAsync(MatchQueue currentPerson, CancellationToken cancellationToken)
     {
         var secondsWaiting = (DateTimeOffset.UtcNow - currentPerson.JoinedAt).TotalSeconds;
-        var fiveMinutesAgo = DateTimeOffset.UtcNow.AddMinutes(-5);
         
-        //skipping chats which was created less than 5 minutes and were active less than 30 seconds
-        var skippedChats = await dbContext.SingleChats
-            .Where(x => (x.IdSecondPerson == currentPerson.IdPerson || x.IdFirstPerson == currentPerson.IdPerson) 
-                        && x.FinishedAt != null
-                        && x.FinishedAt >= fiveMinutesAgo
-                        && x.FinishedAt <= x.CreatedAt.AddSeconds(30))
-            .Select(x => x.IdFirstPerson == currentPerson.IdPerson ? x.IdSecondPerson : x.IdFirstPerson)
-            .ToListAsync(cancellationToken);
+        var blockedUsers = await GetListOfBlockedUsersById(currentPerson.IdPerson, cancellationToken);
         
-        //list of blocked users by us and where someone blocked us
-        var blockedUsers = await dbContext.BlockedPeoples
-            .Where(x => x.IdBlockerPerson == currentPerson.IdPerson || x.IdBlockedPerson == currentPerson.IdPerson)
-            .Select(x => x.IdBlockerPerson == currentPerson.IdPerson ? x.IdBlockedPerson : x.IdBlockerPerson)
-            .ToListAsync(cancellationToken);
-        
-        //add IdPerson from skipped chats
-        blockedUsers.AddRange(skippedChats);
-
         if (currentPerson.IsRandomPartner)
         {
-            if (blockedUsers.Count > 0)
-                return await dbContext.MatchQueues
-                    .Where(x => x.IdPerson != currentPerson.IdPerson &&
-                                !blockedUsers.Contains(x.IdPerson) &&
-                                x.IsRandomPartner == true)
-                    .OrderBy(x => x.JoinedAt)
-                    .FirstOrDefaultAsync(cancellationToken);
             return await dbContext.MatchQueues
-                .Where(x => x.IdPerson != currentPerson.IdPerson && x.IsRandomPartner == true)
+                .Where(x => x.IdPerson != currentPerson.IdPerson
+                            && !blockedUsers.Contains(x.IdPerson)
+                            && x.IsRandomPartner == true)
                 .OrderBy(x => x.JoinedAt)
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -135,20 +113,8 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                         && !blockedUsers.Contains(x.IdPerson) //to eliminate blocked users 
                         && x.Language == currentPerson.Language
                         && x.IsRandomPartner == false
-                        &&
-                        (
-                            //me && partner is concrete
-                            (currentPerson.PartnerGender == x.YourGender && x.PartnerGender == currentPerson.YourGender)
-                            ||
-                            //no matter for me && partner is concrete
-                            (currentPerson.PartnerGender == GenderList.Both && x.PartnerGender == currentPerson.YourGender)
-                            ||
-                            //I'm concrete && no matter for partner
-                            (currentPerson.PartnerGender == x.YourGender && x.PartnerGender == GenderList.Both)
-                            ||
-                            //we are both no matter
-                            (currentPerson.PartnerGender == GenderList.Both && x.PartnerGender == GenderList.Both)
-                        )
+                        && (currentPerson.PartnerGender == GenderList.Both || currentPerson.PartnerGender == x.YourGender)
+                        && (x.PartnerGender == GenderList.Both || x.PartnerGender == currentPerson.YourGender)
             );
 
         var scoredQuery = filteredPeople.Select(q => new
@@ -160,15 +126,48 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                     (q.Country == currentPerson.Country ? 1 : 0)
         });
         
-        if (secondsWaiting < 15) scoredQuery = scoredQuery.Where(x => x.Score >= 6); //all
-        else if (secondsWaiting < 30) scoredQuery = scoredQuery.Where(x => x.Score >= 5); //age + theme
-        else if (secondsWaiting < 45) scoredQuery = scoredQuery.Where(x => x.Score >= 3); //age
-        else if (secondsWaiting < 60) scoredQuery = scoredQuery.Where(x => x.Score >= 2); //theme
+        var requiredScore = GetRequiredScore(secondsWaiting);
+        scoredQuery = scoredQuery.Where(x => x.Score >= requiredScore);
 
         return await scoredQuery
             .OrderByDescending(x => x.Score)
             .ThenBy(x => x.Queue.JoinedAt)
             .Select(x => x.Queue)
             .FirstOrDefaultAsync(cancellationToken);
+    }
+    
+    private async Task<List<int>> GetListOfBlockedUsersById(int currentPersonId, CancellationToken cancellationToken)
+    {
+        var fiveMinutesAgo = DateTimeOffset.UtcNow.AddMinutes(-5);
+        
+        //skipping chats which was created less than 5 minutes and were active less than 30 seconds
+        var skippedChats = await dbContext.SingleChats
+            .Where(x => (x.IdSecondPerson == currentPersonId || x.IdFirstPerson == currentPersonId) 
+                        && x.FinishedAt != null
+                        && x.FinishedAt >= fiveMinutesAgo
+                        && x.FinishedAt <= x.CreatedAt.AddSeconds(30))
+            .Select(x => x.IdFirstPerson == currentPersonId ? x.IdSecondPerson : x.IdFirstPerson)
+            .ToListAsync(cancellationToken);
+        
+        //list of blocked users by us and where someone blocked us
+        var blockedUsers = await dbContext.BlockedPeoples
+            .Where(x => x.IdBlockerPerson == currentPersonId || x.IdBlockedPerson == currentPersonId)
+            .Select(x => x.IdBlockerPerson == currentPersonId ? x.IdBlockedPerson : x.IdBlockerPerson)
+            .ToListAsync(cancellationToken);
+        
+        //add IdPerson from skipped chats
+        blockedUsers.AddRange(skippedChats);
+        
+        return blockedUsers;
+    }
+    
+    private static int GetRequiredScore(double secondsWaiting)
+    {
+        if (secondsWaiting < 15) return 6; // all
+        if (secondsWaiting < 30) return 5; // age + theme
+        if (secondsWaiting < 45) return 3; // age
+        if (secondsWaiting < 60) return 2; // theme
+        
+        return 0;
     }
 }
