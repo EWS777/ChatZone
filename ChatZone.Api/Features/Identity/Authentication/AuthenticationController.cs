@@ -1,9 +1,9 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Antiforgery;
 using ChatZone.Features.Identity.Authentication.Login;
 using ChatZone.Features.Identity.Authentication.Logout;
 using ChatZone.Features.Identity.Authentication.Refresh;
 using MediatR;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,13 +22,13 @@ public class AuthenticationController(
     public IActionResult Me()
     {
         var username = User.FindFirst(ClaimTypes.Name)?.Value;
-        return Ok(new {username});
+        return Ok(new { username });
     }
     
     [AllowAnonymous]
     [HttpPost]
     [Route("login")]
-    public async Task<LoginResponse> Login([FromBody]LoginRequest request, CancellationToken cancellationToken)
+    public async Task<LoginResponse> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(request, cancellationToken);
 
@@ -49,6 +49,7 @@ public class AuthenticationController(
                 Expires = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!))
             });
         }
+        
         return result.Match<LoginResponse>(x => x, x => throw x);
     }
 
@@ -58,7 +59,7 @@ public class AuthenticationController(
     public async Task<ActionResult<RefreshResponse>> Refresh(CancellationToken cancellationToken)
     {
         var oldRefreshToken = Request.Cookies["RefreshToken"];
-        if (string.IsNullOrEmpty(oldRefreshToken)) return UnprocessableEntity(new {message = "Refresh token is missing in cookies!" });
+        if (string.IsNullOrEmpty(oldRefreshToken)) return UnprocessableEntity(new { message = "Refresh token is missing in cookies!" });
         
         var result = await mediator.Send(new RefreshRequest
         {
@@ -95,7 +96,7 @@ public class AuthenticationController(
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
-        var result = await mediator.Send(new LogoutRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
+        var result = await mediator.Send(new LogoutRequest { IdPerson = int.Parse(idPerson) }, cancellationToken);
         if (result.IsSuccess)
         {
             Response.Cookies.Append("AccessToken", "", new CookieOptions
@@ -105,7 +106,7 @@ public class AuthenticationController(
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(-1)
             });
-        
+            
             Response.Cookies.Append("RefreshToken", "", new CookieOptions
             {
                 HttpOnly = true,
@@ -121,8 +122,9 @@ public class AuthenticationController(
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(-1)
             });
-        } 
-        return result.Match<IActionResult>(_ => Ok(new {message = "Logout has completed successfully!"}), x => throw x);
+        }
+        
+        return result.Match<IActionResult>(_ => Ok(new { message = "Logout has completed successfully!" }), x => throw x);
     }
 
     [Authorize(Roles = "User")]

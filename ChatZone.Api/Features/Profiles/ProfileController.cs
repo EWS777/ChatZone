@@ -1,9 +1,9 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Antiforgery;
 using ChatZone.Features.Profiles.Delete;
 using ChatZone.Features.Profiles.Get;
 using ChatZone.Features.Profiles.Update;
 using MediatR;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +11,8 @@ namespace ChatZone.Features.Profiles;
 
 [ApiController]
 [Route("[controller]")]
-public class ProfileController(IMediator mediator,
+public class ProfileController(
+    IMediator mediator,
     IConfiguration configuration,
     IAntiforgery antiforgery) : ControllerBase
 {
@@ -23,10 +24,10 @@ public class ProfileController(IMediator mediator,
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
 
-        var result = await mediator.Send(new GetProfileRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
+        var result = await mediator.Send(new GetProfileRequest { IdPerson = int.Parse(idPerson) }, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
-    
+
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [HttpPut]
@@ -112,6 +113,6 @@ public class ProfileController(IMediator mediator,
             });
         }
 
-        return result.Match(_ => Ok(new {message = "Profile was deleted successfully!"}), x => throw x);
+        return result.Match(_ => Ok(new { message = "Profile was deleted successfully!" }), x => throw x);
     }
 }

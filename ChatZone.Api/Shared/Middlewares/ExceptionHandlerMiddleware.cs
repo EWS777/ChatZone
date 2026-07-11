@@ -12,7 +12,7 @@ public class ExceptionHandlerMiddleware(RequestDelegate next, ILogger<ExceptionH
         {
             await next(context);
         }
-        catch(Exception exception)
+        catch (Exception exception)
         {
             if (exception is ValidationException validationException)
             {
@@ -44,12 +44,11 @@ public class ExceptionHandlerMiddleware(RequestDelegate next, ILogger<ExceptionH
                 statusCode = customException.StatusCode;
                 errorMessage = customException.Message;
             }
-            
 
             var problemDetails = new ProblemDetails
             {
                 Status = statusCode,
-                Title = errorMessage,
+                Title = errorMessage
             };
             context.Response.StatusCode = statusCode;
             

@@ -5,14 +5,9 @@ namespace ChatZone.Shared.DTOs;
 
 public class Result<T>
 {
-    private readonly T? _value;
     private readonly Exception? _exception;
     private readonly List<ValidationFailure>? _validationFailures;
-    public bool IsSuccess { get; }
-    
-    public Exception Exception => _exception ?? throw new InvalidOperationException("Exception is not set!");
-    public T Value => _value ?? throw new InvalidOperationException("Value is not set!");
-    public IReadOnlyList<ValidationFailure> ValidationFailures => _validationFailures ?? new List<ValidationFailure>();
+    private readonly T? _value;
     
     private Result(bool isSuccess, Exception? exception, T? value, List<ValidationFailure>? validationFailures)
     {
@@ -22,6 +17,12 @@ public class Result<T>
         _validationFailures = validationFailures;
     }
 
+    public bool IsSuccess { get; }
+    
+    public Exception Exception => _exception ?? throw new InvalidOperationException("Exception is not set!");
+    public T Value => _value ?? throw new InvalidOperationException("Value is not set!");
+    public IReadOnlyList<ValidationFailure> ValidationFailures => _validationFailures ?? new List<ValidationFailure>();
+    
     public static Result<T> Ok(T value)
     {
         return new Result<T>(true, null, value, null);

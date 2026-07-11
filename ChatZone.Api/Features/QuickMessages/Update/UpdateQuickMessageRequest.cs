@@ -7,8 +7,10 @@ namespace ChatZone.Features.QuickMessages.Update;
 public class UpdateQuickMessageRequest : IRequest<Result<UpdateQuickMessageResponse>>
 {
     public int IdQuickMessage { get; set; }
+
     [Required(ErrorMessage = "Message can't be empty!")]
     [MaxLength(50, ErrorMessage = "Message can't be longer than 50 characters!")]
     public required string Message { get; set; }
+
     public int IdPerson { get; set; }
 }

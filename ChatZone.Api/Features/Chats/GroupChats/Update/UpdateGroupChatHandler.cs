@@ -19,7 +19,7 @@ public class UpdateGroupChatHandler(
         if (!isAdmin) return Result<UpdateGroupChatResponse>.Failure(new ForbiddenAccessException("You are not an owner of this group!"));
 
         var group = await dbContext.GroupChats.SingleOrDefaultAsync(x => x.IdGroupChat == request.IdGroup, cancellationToken);
-        if(group is null) return Result<UpdateGroupChatResponse>.Failure(new NotFoundException("Group is not found!"));
+        if (group is null) return Result<UpdateGroupChatResponse>.Failure(new NotFoundException("Group is not found!"));
 
         group.Title = request.Title;
         group.Country = request.Country;

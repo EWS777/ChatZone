@@ -4,7 +4,6 @@ using ChatZone.Shared.Context;
 using ChatZone.Shared.DTOs;
 using ChatZone.Shared.Hubs;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,12 +16,12 @@ public class AddBlockedGroupMemberHandler(
     public async Task<Result<bool>> Handle(AddBlockedGroupRequest request, CancellationToken cancellationToken)
     {
         var isAdmin = await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdChat && x.IdGroupMember == request.IdAdminPerson && x.IsAdmin == true, cancellationToken);
-        if(!isAdmin) return Result<bool>.Failure(new ForbiddenAccessException("You are not an owner of this group!"));
+        if (!isAdmin) return Result<bool>.Failure(new ForbiddenAccessException("You are not an owner of this group!"));
 
         var groupMember = await dbContext.GroupMembers
-            .Include(x=>x.GroupChat)
-            .SingleOrDefaultAsync(x=>x.IdChat == request.IdChat && x.IdGroupMember == request.IdBlockedPerson, cancellationToken);
-        if(groupMember is null) return Result<bool>.Failure(new NotFoundException("Person is not found in group!")); 
+            .Include(x => x.GroupChat)
+            .SingleOrDefaultAsync(x => x.IdChat == request.IdChat && x.IdGroupMember == request.IdBlockedPerson, cancellationToken);
+        if (groupMember is null) return Result<bool>.Failure(new NotFoundException("Person is not found in group!"));
         
         dbContext.GroupMembers.Remove(groupMember);
         groupMember.GroupChat.UserCount -= 1;

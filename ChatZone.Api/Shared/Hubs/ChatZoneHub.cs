@@ -11,10 +11,11 @@ namespace ChatZone.Shared.Hubs;
 public class ChatZoneHub(IMediator mediator) : Hub
 {
     private static readonly ConcurrentDictionary<string, CancellationTokenSource> _activeSearches = new();
+
     public async Task SendMessage(int idGroup, string message, bool isSingleChat)
     {
         if (string.IsNullOrWhiteSpace(message)) throw new HubException("Message is required!");
-        if(message.Length >= 1025) throw new HubException("Message max length is 1024 characters!");
+        if (message.Length >= 1025) throw new HubException("Message max length is 1024 characters!");
         var idSender = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idSender is null) throw new Exception("User does not exist!");
 
@@ -27,14 +28,8 @@ public class ChatZoneHub(IMediator mediator) : Hub
             IsSingleChat = isSingleChat,
             CreatedAt = createdAt
         });
-        if (result.IsSuccess)
-        {
-            await Clients.Group(idGroup.ToString()).SendAsync("Receive", int.Parse(idSender!), message, createdAt);
-        }
-        else
-        {
-            throw new HubException(result.Exception.Message);
-        }
+        if (result.IsSuccess) await Clients.Group(idGroup.ToString()).SendAsync("Receive", int.Parse(idSender), message, createdAt);
+        else throw new HubException(result.Exception.Message);
     }
     
     public override async Task OnConnectedAsync()
@@ -42,11 +37,9 @@ public class ChatZoneHub(IMediator mediator) : Hub
         var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!string.IsNullOrEmpty(idPerson))
         {
-            var groupChatResult = await mediator.Send(new GetActiveChatRequest { IdPerson = int.Parse(idPerson)});
+            var groupChatResult = await mediator.Send(new GetActiveChatRequest { IdPerson = int.Parse(idPerson) });
             if (groupChatResult.IsSuccess && groupChatResult.Value.IsSingleChat != null && groupChatResult.Value.IdChat != null)
-            {
                 await Groups.AddToGroupAsync(Context.ConnectionId, groupChatResult.Value.IdChat.ToString()!);
-            }
         }
         
         await base.OnConnectedAsync();

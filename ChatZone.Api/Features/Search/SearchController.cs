@@ -19,7 +19,7 @@ public class SearchController(IMediator mediator) : ControllerBase
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
-        var result = await mediator.Send(new CancelPersonRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
-        return result.Match(_ => Ok(new {message = "Cancel finding is successful!"}), x=> throw x);
+        var result = await mediator.Send(new CancelPersonRequest { IdPerson = int.Parse(idPerson) }, cancellationToken);
+        return result.Match(_ => Ok(new { message = "Cancel finding is successful!" }), x => throw x);
     }
 }

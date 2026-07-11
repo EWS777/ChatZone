@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args); //zwraca obiekt i sluzy dla konfiguracji webowej
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
@@ -24,7 +25,7 @@ builder.Host.UseSerilog((context, configuration) =>
         .WriteTo.Console()
         .WriteTo.File(context.Configuration["LogSettings:FilePath"]!)
         .MinimumLevel.Information()
-        .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
 );
 
 builder.Services.AddCors(options =>
@@ -39,9 +40,9 @@ builder.Services.AddCors(options =>
     });
 });
 
-var requestLimit = builder.Configuration.GetValue<int>("RateLimiting:RequestLimit", 50);
-var requestInSeconds = builder.Configuration.GetValue<int>("RateLimiting:RequestInSeconds", 60);
-var queueLimit = builder.Configuration.GetValue<int>("RateLimiting:QueueLimit", 2);
+var requestLimit = builder.Configuration.GetValue("RateLimiting:RequestLimit", 50);
+var requestInSeconds = builder.Configuration.GetValue("RateLimiting:RequestInSeconds", 60);
+var queueLimit = builder.Configuration.GetValue("RateLimiting:QueueLimit", 2);
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -75,7 +76,7 @@ builder.Services.AddTransient<EmailSender>();
 
 builder.Services.AddDbContext<ChatZoneDbContext>(opt =>
 {
-    string connString = builder.Configuration.GetConnectionString("DefaultConnection");
+    var connString = builder.Configuration.GetConnectionString("DefaultConnection");
     opt.UseSqlServer(connString);
 });
 
@@ -92,27 +93,21 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(2),
         ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidAudience = builder.Configuration["JWT:Audience"], 
+        ValidAudience = builder.Configuration["JWT:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecretKey"]))
     };
-     
+    
     opt.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
             var tokenFromCookie = context.Request.Cookies["AccessToken"];
-            if (!string.IsNullOrEmpty(tokenFromCookie))
-            {
-                context.Token = tokenFromCookie;
-            }
+            if (!string.IsNullOrEmpty(tokenFromCookie)) context.Token = tokenFromCookie;
             return Task.CompletedTask;
         },
         OnAuthenticationFailed = context =>
         {
-            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
-            {
-                context.Response.Headers.Add("Token-expired", "true");
-            }
+            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException)) context.Response.Headers.Add("Token-expired", "true");
             return Task.CompletedTask;
         }
     };

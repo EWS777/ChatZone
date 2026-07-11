@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using ChatZone.Shared.DTOs;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ChatZone.Features.Identity.Registration.Register;
 
@@ -14,8 +13,8 @@ public class RegisterRequest : IRequest<Result<bool>>
     public required string Email { get; set; }
     
     [Required(ErrorMessage = "Username is required!")]
-    [MinLength(8,ErrorMessage = "Username min length is 8 characters")]
-    [MaxLength(30,ErrorMessage = "Username max length is 30 characters")]
+    [MinLength(8, ErrorMessage = "Username min length is 8 characters")]
+    [MaxLength(30, ErrorMessage = "Username max length is 30 characters")]
     [RegularExpression("^[^@]*$", ErrorMessage = "Username can not contains '@'")]
     public required string Username { get; set; }
     

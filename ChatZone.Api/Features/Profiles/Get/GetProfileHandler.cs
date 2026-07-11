@@ -20,6 +20,8 @@ public class GetProfileHandler(ChatZoneDbContext dbContext) : IRequestHandler<Ge
             })
             .SingleOrDefaultAsync(cancellationToken);
         
-        return person is null ? Result<GetProfileResponse>.Failure(new NotFoundException("User is not found!")) : Result<GetProfileResponse>.Ok(person);
+        return person is null
+            ? Result<GetProfileResponse>.Failure(new NotFoundException("User is not found!"))
+            : Result<GetProfileResponse>.Ok(person);
     }
 }

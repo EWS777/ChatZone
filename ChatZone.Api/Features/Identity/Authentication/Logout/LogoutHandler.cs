@@ -11,7 +11,7 @@ public class LogoutHandler(ChatZoneDbContext dbContext) : IRequestHandler<Logout
     public async Task<Result<bool>> Handle(LogoutRequest request, CancellationToken cancellationToken)
     {
         var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
-        if(person is null) return Result<bool>.Failure(new NotFoundException("The person does not exist!"));
+        if (person is null) return Result<bool>.Failure(new NotFoundException("The person does not exist!"));
 
         person.RefreshToken = "";
         person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(-1);

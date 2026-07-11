@@ -25,7 +25,7 @@ public class ChatController(IMediator mediator) : ControllerBase
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
-        var result = await mediator.Send(new GetActiveChatRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
+        var result = await mediator.Send(new GetActiveChatRequest { IdPerson = int.Parse(idPerson) }, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     
@@ -36,10 +36,9 @@ public class ChatController(IMediator mediator) : ControllerBase
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
-        var result = await mediator.Send(new GetChatPersonInfoRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
-        return result.Match<GetChatPersonInfoResponse>(e => e, x=> throw x);
+        var result = await mediator.Send(new GetChatPersonInfoRequest { IdPerson = int.Parse(idPerson) }, cancellationToken);
+        return result.Match<GetChatPersonInfoResponse>(e => e, x => throw x);
     }
-    
     
     [HttpGet]
     [Route("get-group")]
@@ -48,7 +47,7 @@ public class ChatController(IMediator mediator) : ControllerBase
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
-        var result = await mediator.Send(new GetGroupChatRequest{IdGroup = idGroup, IdPerson = int.Parse(idPerson)}, cancellationToken);
+        var result = await mediator.Send(new GetGroupChatRequest { IdGroup = idGroup, IdPerson = int.Parse(idPerson) }, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     
@@ -59,7 +58,7 @@ public class ChatController(IMediator mediator) : ControllerBase
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
-        var result = await mediator.Send(new GetGroupChatsRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
+        var result = await mediator.Send(new GetGroupChatsRequest { IdPerson = int.Parse(idPerson) }, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     
@@ -106,7 +105,7 @@ public class ChatController(IMediator mediator) : ControllerBase
         };
         
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match(_ => Ok(new {message = "Group was deleted successfully!"}), x => throw x);
+        return result.Match(_ => Ok(new { message = "Group was deleted successfully!" }), x => throw x);
     }
 
     [ValidateAntiForgeryToken]

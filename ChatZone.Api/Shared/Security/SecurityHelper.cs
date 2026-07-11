@@ -6,29 +6,32 @@ namespace ChatZone.Shared.Security;
 
 public static class SecurityHelper
 {
-    public static Tuple<string, string> GetHashedPasswordAndSalt(string password, IConfiguration configuration){
-        byte[] salt = new byte[128 / 8];
-        using (var rng = RandomNumberGenerator.Create()) {
+    public static Tuple<string, string> GetHashedPasswordAndSalt(string password, IConfiguration configuration)
+    {
+        var salt = new byte[128 / 8];
+        using (var rng = RandomNumberGenerator.Create())
+        {
             rng.GetBytes(salt);
         }
 
-        string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+        var hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
             password: password,
             salt: salt,
             prf: KeyDerivationPrf.HMACSHA512,
             iterationCount: int.Parse(configuration["Security:PasswordHashIterationCount"]!),
             numBytesRequested: 256 / 8));
 
-        string saltBase64 = Convert.ToBase64String(salt);
+        var saltBase64 = Convert.ToBase64String(salt);
 
-        return new(hashed, saltBase64);
+        return new Tuple<string, string>(hashed, saltBase64);
         //hashed => password
-    } 
+    }
     
-    public static string GetHashedPasswordWithSalt(string password, string salt, IConfiguration configuration) {
-        byte[] saltBytes = Convert.FromBase64String(salt);
+    public static string GetHashedPasswordWithSalt(string password, string salt, IConfiguration configuration)
+    {
+        var saltBytes = Convert.FromBase64String(salt);
 
-        string currentHashedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+        var currentHashedPassword = Convert.ToBase64String(KeyDerivation.Pbkdf2(
             password: password,
             salt: saltBytes,
             prf: KeyDerivationPrf.HMACSHA512,

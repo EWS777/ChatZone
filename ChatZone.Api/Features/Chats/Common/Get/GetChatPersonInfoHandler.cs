@@ -22,7 +22,7 @@ public class GetChatPersonInfoHandler(
             .SingleOrDefaultAsync(cancellationToken);
         if (singleChat is not null)
         {
-            var isSentMessage = await dbContext.SingleMessages.AnyAsync(x=>x.IdChat==singleChat.IdSingleChat && x.IdSender == request.IdPerson, cancellationToken);
+            var isSentMessage = await dbContext.SingleMessages.AnyAsync(x => x.IdChat == singleChat.IdSingleChat && x.IdSender == request.IdPerson, cancellationToken);
             
             return Result<GetChatPersonInfoResponse>.Ok(new GetChatPersonInfoResponse
             {
@@ -33,10 +33,10 @@ public class GetChatPersonInfoHandler(
                 IsSentMessage = isSentMessage
             });
         }
-        
+
         var groupChat = await dbContext.GroupMembers
             .AsNoTracking()
-            .Where(x=>x.IdGroupMember == request.IdPerson)
+            .Where(x => x.IdGroupMember == request.IdPerson)
             .Select(x => new
             {
                 x.IdChat
@@ -44,7 +44,7 @@ public class GetChatPersonInfoHandler(
             .SingleOrDefaultAsync(cancellationToken);
         if (groupChat is not null)
         {
-            var isSentMessage = await dbContext.GroupMessages.AnyAsync(x=>x.IdChat==groupChat.IdChat && x.IdSender == request.IdPerson, cancellationToken);
+            var isSentMessage = await dbContext.GroupMessages.AnyAsync(x => x.IdChat == groupChat.IdChat && x.IdSender == request.IdPerson, cancellationToken);
             
             return Result<GetChatPersonInfoResponse>.Ok(new GetChatPersonInfoResponse
             {

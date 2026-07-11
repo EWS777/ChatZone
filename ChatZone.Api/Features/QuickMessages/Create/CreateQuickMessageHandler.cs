@@ -17,7 +17,7 @@ public class CreateQuickMessageHandler(
             .Where(x => x.IdPerson == request.IdPerson)
             .Take(3)
             .CountAsync(cancellationToken);
-        if(quickMessageAmount >= 3) return Result<CreateQuickMessageResponse>.Failure(new IsExistsException("You can not create more than 3 quick messages!"));
+        if (quickMessageAmount >= 3) return Result<CreateQuickMessageResponse>.Failure(new IsExistsException("You can not create more than 3 quick messages!"));
         
         var quickMessage = new QuickMessage
         {

@@ -21,10 +21,12 @@ public class GetFilterHandler(ChatZoneDbContext dbContext) : IRequestHandler<Get
                 Age = x.Age,
                 YourGender = x.YourGender,
                 PartnerGender = x.PartnerGender,
-                Language = x.Language,
+                Language = x.Language
             })
             .SingleOrDefaultAsync(cancellationToken);
         
-        return person is null ? Result<GetFilterResponse>.Failure(new NotFoundException("User is not found!")) : Result<GetFilterResponse>.Ok(person);
+        return person is null
+            ? Result<GetFilterResponse>.Failure(new NotFoundException("User is not found!"))
+            : Result<GetFilterResponse>.Ok(person);
     }
 }

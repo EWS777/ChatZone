@@ -1,8 +1,8 @@
 ﻿using System.Security.Claims;
 using ChatZone.Features.GroupMembers.Add;
-using ChatZone.Features.GroupMembers.LeaveGroup;
-using ChatZone.Features.GroupMembers.GetList;
 using ChatZone.Features.GroupMembers.ChangeAdmin;
+using ChatZone.Features.GroupMembers.GetList;
+using ChatZone.Features.GroupMembers.LeaveGroup;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

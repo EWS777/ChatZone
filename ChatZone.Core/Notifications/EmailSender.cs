@@ -10,18 +10,18 @@ public class EmailSender(IOptions<SmtpSettings> options)
 
     public Task SendCodeToEmail(string email, string token, CancellationToken cancellationToken)
     {
-        string linkToClick = $"{_settings.LinkToClick}confirm?link={token}";
-        string subject = "Hello! Please confirm the registration";
-        string title = "Activate Your Profile";
+        var linkToClick = $"{_settings.LinkToClick}confirm?link={token}";
+        var subject = "Hello! Please confirm the registration";
+        var title = "Activate Your Profile";
 
         return SendEmailAsync(email, subject, title, linkToClick, cancellationToken);
     }
 
     public Task ResetPassword(string email, string token, CancellationToken cancellationToken)
     {
-        string linkToClick = $"{_settings.LinkToClick}reset?link={token}";
-        string subject = "Hello! Password Reset Request";
-        string title = "Reset Your Password";
+        var linkToClick = $"{_settings.LinkToClick}reset?link={token}";
+        var subject = "Hello! Password Reset Request";
+        var title = "Reset Your Password";
 
         return SendEmailAsync(email, subject, title, linkToClick, cancellationToken);
     }

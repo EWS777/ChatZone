@@ -1,5 +1,4 @@
-﻿using ChatZone.Core.Models;
-using ChatZone.Features.Search.Find;
+﻿using ChatZone.Features.Search.Find;
 using ChatZone.Shared.DTOs;
 
 namespace ChatZone.Matchmaking;

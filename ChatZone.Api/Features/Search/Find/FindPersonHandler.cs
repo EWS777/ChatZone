@@ -6,7 +6,6 @@ using ChatZone.Shared.Context;
 using ChatZone.Shared.DTOs;
 using ChatZone.Shared.Hubs;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,17 +35,21 @@ public class FindPersonHandler(
                 IsFindRandomPerson = request.IsFindRandomPerson
             }, cancellationToken);
             
-            if(!savedPersonFilter.IsSuccess) return Result<bool>.Failure(savedPersonFilter.Exception);
+            if (!savedPersonFilter.IsSuccess) return Result<bool>.Failure(savedPersonFilter.Exception);
         }
+        
         if (request.IsSearchAgain)
         {
             var result = await dbContext.Persons
                 .AsNoTracking()
                 .Where(x => x.IdPerson == request.IdPerson)
-                .Select(x => new { x.Theme, x.Country, x.City, x.Age, x.YourGender, x.PartnerGender, x.Language, x.IsFindRandomPerson })
+                .Select(x => new
+                {
+                    x.Theme, x.Country, x.City, x.Age, x.YourGender, x.PartnerGender, x.Language, x.IsFindRandomPerson
+                })
                 .SingleOrDefaultAsync(cancellationToken);
             
-            if(result == null) return Result<bool>.Failure(new NotFoundException("User is not found!"));
+            if (result == null) return Result<bool>.Failure(new NotFoundException("User is not found!"));
 
             request.Theme = result.Theme;
             request.Country = result.Country;
@@ -58,8 +61,8 @@ public class FindPersonHandler(
             request.IsFindRandomPerson = result.IsFindRandomPerson;
         }
         
-        int maxAttempts = 20;
-        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        var maxAttempts = 20;
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -74,31 +77,31 @@ public class FindPersonHandler(
                     var hasActiveChat = await dbContext.SingleChats
                         .Where(x => (x.IdSecondPerson == request.IdPerson || x.IdFirstPerson == request.IdPerson) && x.FinishedAt == null)
                         .AnyAsync(cancellationToken);
-                    if(hasActiveChat) return Result<bool>.Ok(true);
+                    if (hasActiveChat) return Result<bool>.Ok(true);
                     
                     return Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
                 }
             }
             
             var matchResult = await matchmakingService.FindMatch(request, cancellationToken);
-        
-            if(!matchResult.IsSuccess) return Result<bool>.Failure(matchResult.Exception);
+            
+            if (!matchResult.IsSuccess) return Result<bool>.Failure(matchResult.Exception);
 
             if (matchResult.Value.IsFound)
             {
                 var person1 = matchResult.Value.Person1!;
                 var person2 = matchResult.Value.Person2!;
                 var idGroup = matchResult.Value.IdGroup!.Value;
-        
+                
                 await hubContext.Groups.AddToGroupAsync(person1.ConnectionId, idGroup.ToString(), cancellationToken);
                 await hubContext.Groups.AddToGroupAsync(person2.ConnectionId, idGroup.ToString(), cancellationToken);
 
-                await hubContext.Clients.Group(idGroup.ToString()).SendAsync("ChatCreated", cancellationToken: cancellationToken);
+                await hubContext.Clients.Group(idGroup.ToString()).SendAsync("ChatCreated", cancellationToken);
                 return Result<bool>.Ok(true);
             }
             
             request.IsSearchAgain = true;
-        
+            
             dbContext.ChangeTracker.Clear();
             try
             {
@@ -110,6 +113,7 @@ public class FindPersonHandler(
                 return Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
             }
         }
+        
         await mediator.Send(new CancelPersonRequest { IdPerson = request.IdPerson }, CancellationToken.None);
         return Result<bool>.Ok(false);
     }

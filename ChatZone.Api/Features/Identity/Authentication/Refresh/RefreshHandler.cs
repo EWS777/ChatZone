@@ -24,7 +24,7 @@ public class RefreshHandler(
         if (person.RefreshTokenExp < DateTimeOffset.UtcNow) return Result<RefreshResponse>.Failure(new ExpiredTokenException("Refresh token expired"));
 
         var currentHashedRefreshToken = SecurityHelper.HashRefreshToken(request.RefreshToken);
-        if(currentHashedRefreshToken != person.RefreshToken) return Result<RefreshResponse>.Failure(new SecurityTokenException("Invalid refresh token!"));
+        if (currentHashedRefreshToken != person.RefreshToken) return Result<RefreshResponse>.Failure(new SecurityTokenException("Invalid refresh token!"));
         
         var generatedAccessToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
         var newRefreshToken = SecurityHelper.GenerateRefreshToken();
@@ -35,7 +35,8 @@ public class RefreshHandler(
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        return Result<RefreshResponse>.Ok(new RefreshResponse{
+        return Result<RefreshResponse>.Ok(new RefreshResponse
+        {
             AccessToken = new JwtSecurityTokenHandler().WriteToken(generatedAccessToken),
             RefreshToken = newRefreshToken
         });

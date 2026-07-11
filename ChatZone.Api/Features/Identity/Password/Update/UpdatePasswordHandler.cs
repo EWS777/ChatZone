@@ -3,7 +3,6 @@ using ChatZone.Shared.Context;
 using ChatZone.Shared.DTOs;
 using ChatZone.Shared.Security;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatZone.Features.Identity.Password.Update;
@@ -12,7 +11,7 @@ public class UpdatePasswordHandler(ChatZoneDbContext dbContext, IConfiguration c
 {
     public async Task<Result<bool>> Handle(UpdatePasswordRequest request, CancellationToken cancellationToken)
     {
-        var person = await dbContext.Persons.SingleOrDefaultAsync(x=>x.IdPerson == request.IdPerson, cancellationToken);
+        var person = await dbContext.Persons.SingleOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
         if (person is null) return Result<bool>.Failure(new NotFoundException("User is not found!"));
         
         var oldHashedPassword = SecurityHelper.GetHashedPasswordWithSalt(request.OldPassword, person.Salt, configuration);

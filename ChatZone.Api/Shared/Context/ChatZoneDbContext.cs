@@ -6,6 +6,10 @@ namespace ChatZone.Shared.Context;
 
 public class ChatZoneDbContext : DbContext
 {
+    public ChatZoneDbContext(DbContextOptions<ChatZoneDbContext> options) : base(options)
+    {
+    }
+
     public DbSet<BlockedPerson> BlockedPeoples { get; set; }
     public DbSet<GroupMessage> GroupMessages { get; set; }
     public DbSet<GroupMember> GroupMembers { get; set; }
@@ -18,10 +22,6 @@ public class ChatZoneDbContext : DbContext
     public DbSet<Statistic> Statistics { get; set; }
     public DbSet<MatchQueue> MatchQueues { get; set; }
     public DbSet<BlockedGroupMember> BlockedGroupMembers { get; set; }
-    public ChatZoneDbContext(DbContextOptions<ChatZoneDbContext> options) : base(options)
-    {
-        
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

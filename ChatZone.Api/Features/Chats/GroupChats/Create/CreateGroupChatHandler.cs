@@ -15,7 +15,7 @@ public class CreateGroupChatHandler(
         var isAnyActiveGroupChat = await dbContext.GroupMembers.AnyAsync(x => x.IdGroupMember == request.IdPerson, cancellationToken);
         if (isAnyActiveGroupChat) return Result<int>.Failure(new ExistPersonException("You already have an active group chat!"));
         
-        var isAnyActiveSingleChat = await dbContext.SingleChats.AnyAsync(x =>  (x.IdFirstPerson == request.IdPerson || x.IdSecondPerson == request.IdPerson) && x.FinishedAt == null, cancellationToken);
+        var isAnyActiveSingleChat = await dbContext.SingleChats.AnyAsync(x => (x.IdFirstPerson == request.IdPerson || x.IdSecondPerson == request.IdPerson) && x.FinishedAt == null, cancellationToken);
         if (isAnyActiveSingleChat) return Result<int>.Failure(new ExistPersonException("You already have an active single chat!"));
         
         var chat = new GroupChat
@@ -28,7 +28,7 @@ public class CreateGroupChatHandler(
             UserCount = 1,
             GroupMembers = new List<GroupMember>
             {
-                new GroupMember
+                new()
                 {
                     IdGroupMember = request.IdPerson,
                     IsAdmin = true,

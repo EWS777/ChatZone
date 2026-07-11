@@ -12,21 +12,20 @@ namespace ChatZone.Features.Identity.Password;
 [Route("[controller]")]
 public class PasswordController(IMediator mediator) : ControllerBase
 {
-
     [AllowAnonymous]
     [HttpPost]
     [Route("reset-password")]
     public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordRequest request, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(request, cancellationToken);
-        return result.Match<IActionResult>(_ => Ok(new {message = "The reset link was sent to your email!"}), x => throw x);
+        return result.Match<IActionResult>(_ => Ok(new { message = "The reset link was sent to your email!" }), x => throw x);
     }
 
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "User")]
     [HttpPut]
     [Route("change-password")]
-    public async Task<IActionResult> UpdatePassword([FromBody]UpdatePasswordRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest request, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -44,7 +43,7 @@ public class PasswordController(IMediator mediator) : ControllerBase
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(-1)
             });
-        
+            
             Response.Cookies.Append("RefreshToken", "", new CookieOptions
             {
                 HttpOnly = true,
@@ -62,7 +61,7 @@ public class PasswordController(IMediator mediator) : ControllerBase
             });
         }
         
-        return result.Match<IActionResult>(_ => Ok(new { message = "Update password has completed successfully!" }), x=> throw x);
+        return result.Match<IActionResult>(_ => Ok(new { message = "Update password has completed successfully!" }), x => throw x);
     }
 
     [AllowAnonymous]
@@ -81,7 +80,7 @@ public class PasswordController(IMediator mediator) : ControllerBase
                 SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(-1)
             });
-        
+            
             Response.Cookies.Append("RefreshToken", "", new CookieOptions
             {
                 HttpOnly = true,
@@ -99,6 +98,6 @@ public class PasswordController(IMediator mediator) : ControllerBase
             });
         }
         
-        return result.Match<IActionResult>(_ => Ok(new { message = "Update password has completed successfully!" }), x=> throw x);
+        return result.Match<IActionResult>(_ => Ok(new { message = "Update password has completed successfully!" }), x => throw x);
     }
 }

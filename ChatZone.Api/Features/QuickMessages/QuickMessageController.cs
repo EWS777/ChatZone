@@ -21,7 +21,7 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
 
-        var result = await mediator.Send(new GetQuickMessageListRequest{IdPerson = int.Parse(idPerson)}, cancellationToken);
+        var result = await mediator.Send(new GetQuickMessageListRequest { IdPerson = int.Parse(idPerson) }, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     
@@ -66,7 +66,7 @@ public class QuickMessageController(IMediator mediator) : ControllerBase
         
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
-        var result = await mediator.Send(new DeleteQuickMessageRequest{IdPerson = int.Parse(idPerson), IdMessage = idQuickMessage}, cancellationToken);
-        return result.Match<IActionResult>(_ => Ok(new {message = "Quick message was deleted successfully!"}), x => throw x);
+        var result = await mediator.Send(new DeleteQuickMessageRequest { IdPerson = int.Parse(idPerson), IdMessage = idQuickMessage }, cancellationToken);
+        return result.Match<IActionResult>(_ => Ok(new { message = "Quick message was deleted successfully!" }), x => throw x);
     }
 }

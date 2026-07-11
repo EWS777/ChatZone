@@ -30,7 +30,7 @@ public class SingleMessageEfConfig : IEntityTypeConfiguration<SingleMessage>
         builder
             .Property(x => x.CreatedAt)
             .IsRequired();
-            
+
         builder.ToTable(nameof(SingleMessage));
     }
 }

@@ -15,9 +15,9 @@ public class AddMessageHandler(
         if (request.IsSingleChat)
         {
             var isPersonExists = await dbContext.SingleChats.AnyAsync(
-                x => x.IdSingleChat == request.IdChat && 
-                (x.IdFirstPerson == request.IdSender || x.IdSecondPerson == request.IdSender) &&
-                x.FinishedAt == null, cancellationToken);
+                x => x.IdSingleChat == request.IdChat &&
+                     (x.IdFirstPerson == request.IdSender || x.IdSecondPerson == request.IdSender) &&
+                     x.FinishedAt == null, cancellationToken);
             if (!isPersonExists) return Result<bool>.Failure(new NotFoundException("User is not exists in this active chat!"));
             
             var message = new SingleMessage
@@ -43,6 +43,7 @@ public class AddMessageHandler(
             };
             await dbContext.GroupMessages.AddAsync(message, cancellationToken);
         }
+        
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result<bool>.Ok(true);
     }

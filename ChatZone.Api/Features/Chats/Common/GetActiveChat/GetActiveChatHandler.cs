@@ -15,7 +15,7 @@ public class GetActiveChatHandler(ChatZoneDbContext dbContext) : IRequestHandler
             .Select(x => (int?)x.IdSingleChat)
             .SingleOrDefaultAsync(cancellationToken);
         
-        if (singleChatId.HasValue) return Result<GetActiveChatResponse>.Ok(new GetActiveChatResponse{ IdChat = singleChatId.Value, IsSingleChat = true });
+        if (singleChatId.HasValue) return Result<GetActiveChatResponse>.Ok(new GetActiveChatResponse { IdChat = singleChatId.Value, IsSingleChat = true });
         
         var groupChatId = await dbContext.GroupMembers
             .AsNoTracking()
@@ -24,6 +24,6 @@ public class GetActiveChatHandler(ChatZoneDbContext dbContext) : IRequestHandler
             .SingleOrDefaultAsync(cancellationToken);
         
         if (groupChatId.HasValue) return Result<GetActiveChatResponse>.Ok(new GetActiveChatResponse { IdChat = groupChatId.Value, IsSingleChat = false });
-        return Result<GetActiveChatResponse>.Ok(new GetActiveChatResponse { IdChat = null, IsSingleChat = null } );
+        return Result<GetActiveChatResponse>.Ok(new GetActiveChatResponse { IdChat = null, IsSingleChat = null });
     }
 }

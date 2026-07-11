@@ -12,8 +12,9 @@ public class GetMessageHandler(
     public async Task<Result<GetMessageResponse>> Handle(GetMessageRequest request, CancellationToken cancellationToken)
     {
         var isPersonExists = request.IsSingleChat
-            ? await dbContext.SingleChats.AnyAsync(x => x.IdSingleChat == request.IdChat && 
-                                                    (x.IdFirstPerson == request.IdPerson || x.IdSecondPerson == request.IdPerson) && x.FinishedAt == null, cancellationToken)
+            ? await dbContext.SingleChats.AnyAsync(x => x.IdSingleChat == request.IdChat &&
+                                                        (x.IdFirstPerson == request.IdPerson ||
+                                                         x.IdSecondPerson == request.IdPerson) && x.FinishedAt == null, cancellationToken)
             : await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdChat && x.IdGroupMember == request.IdPerson, cancellationToken);
 
         if (!isPersonExists) return Result<GetMessageResponse>.Failure(new ForbiddenAccessException("You don't have access to this chat!"));
@@ -22,7 +23,7 @@ public class GetMessageHandler(
             ? await dbContext.SingleMessages
                 .AsNoTracking()
                 .Where(x => x.IdChat == request.IdChat)
-                .OrderByDescending(x=>x.CreatedAt)
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip(request.SkipMessage)
                 .Take(40)
                 .Select(x => new MessageInfoDTO
@@ -35,7 +36,7 @@ public class GetMessageHandler(
             : await dbContext.GroupMessages
                 .AsNoTracking()
                 .Where(x => x.IdChat == request.IdChat)
-                .OrderByDescending(x=>x.CreatedAt)
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip(request.SkipMessage)
                 .Take(40)
                 .Select(x => new MessageInfoDTO

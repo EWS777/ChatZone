@@ -8,7 +8,7 @@ public class GroupMemberEfConfig : IEntityTypeConfiguration<GroupMember>
 {
     public void Configure(EntityTypeBuilder<GroupMember> builder)
     {
-        builder.HasKey(x => new {x.IdChat, x.IdGroupMember});
+        builder.HasKey(x => new { x.IdChat, x.IdGroupMember });
 
         builder
             .HasOne(x => x.Person)

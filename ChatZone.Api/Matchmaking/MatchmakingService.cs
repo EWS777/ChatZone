@@ -11,7 +11,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
 {
     public async Task<Result<MatchResponse>> FindMatch(FindPersonRequest request, CancellationToken cancellationToken)
     {
-        if(!request.IsFindRandomPerson && (request.YourGender == null || request.PartnerGender == null || request.Language == null)) return Result<MatchResponse>.Failure(new ArgumentException("`YourGender`, `PartnerGender`, and `Language` fields are required for matchmaking."));
+        if (!request.IsFindRandomPerson && (request.YourGender == null || request.PartnerGender == null || request.Language == null)) return Result<MatchResponse>.Failure(new ArgumentException("`YourGender`, `PartnerGender`, and `Language` fields are required for matchmaking."));
 
         var currentPerson = await dbContext.MatchQueues.FirstOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
 
@@ -61,9 +61,9 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                 if (!isPartnerStillAvailable || !isCurrentPersonStillAvailable)
                 {
                     await transaction.RollbackAsync(cancellationToken);
-                    return Result<MatchResponse>.Ok(new MatchResponse{IsFound = false});
+                    return Result<MatchResponse>.Ok(new MatchResponse { IsFound = false });
                 }
-            
+                
                 var newChat = new SingleChat
                 {
                     IdFirstPerson = currentPerson.IdPerson,
@@ -79,8 +79,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                 await dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
 
-                return Result<MatchResponse>.Ok(new MatchResponse{Person1 = currentPerson, Person2 = partner, IdGroup = newChat.IdSingleChat, IsFound = true});
-                
+                return Result<MatchResponse>.Ok(new MatchResponse { Person1 = currentPerson, Person2 = partner, IdGroup = newChat.IdSingleChat, IsFound = true });
             }
             catch (Exception)
             {
@@ -88,7 +87,8 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                 throw;
             }
         }
-        return Result<MatchResponse>.Ok(new MatchResponse{IsFound = false});
+        
+        return Result<MatchResponse>.Ok(new MatchResponse { IsFound = false });
     }
 
     private async Task<MatchQueue?> FindBestPartnerAsync(MatchQueue currentPerson, CancellationToken cancellationToken)
@@ -98,17 +98,17 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
         
         //skipping chats which was created less than 5 minutes and were active less than 30 seconds
         var skippedChats = await dbContext.SingleChats
-            .Where(x => (x.IdSecondPerson == currentPerson.IdPerson || x.IdFirstPerson == currentPerson.IdPerson)
-                && x.FinishedAt != null
-                && x.FinishedAt >= fiveMinutesAgo
-                && x.FinishedAt <= x.CreatedAt.AddSeconds(30))
+            .Where(x => (x.IdSecondPerson == currentPerson.IdPerson || x.IdFirstPerson == currentPerson.IdPerson) 
+                        && x.FinishedAt != null
+                        && x.FinishedAt >= fiveMinutesAgo
+                        && x.FinishedAt <= x.CreatedAt.AddSeconds(30))
             .Select(x => x.IdFirstPerson == currentPerson.IdPerson ? x.IdSecondPerson : x.IdFirstPerson)
             .ToListAsync(cancellationToken);
         
         //list of blocked users by us and where someone blocked us
         var blockedUsers = await dbContext.BlockedPeoples
             .Where(x => x.IdBlockerPerson == currentPerson.IdPerson || x.IdBlockedPerson == currentPerson.IdPerson)
-            .Select(x=>x.IdBlockerPerson == currentPerson.IdPerson ? x.IdBlockedPerson : x.IdBlockerPerson)
+            .Select(x => x.IdBlockerPerson == currentPerson.IdPerson ? x.IdBlockedPerson : x.IdBlockerPerson)
             .ToListAsync(cancellationToken);
         
         //add IdPerson from skipped chats
@@ -117,14 +117,12 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
         if (currentPerson.IsRandomPartner)
         {
             if (blockedUsers.Count > 0)
-            {
                 return await dbContext.MatchQueues
-                    .Where(x => x.IdPerson != currentPerson.IdPerson && 
+                    .Where(x => x.IdPerson != currentPerson.IdPerson &&
                                 !blockedUsers.Contains(x.IdPerson) &&
                                 x.IsRandomPartner == true)
                     .OrderBy(x => x.JoinedAt)
                     .FirstOrDefaultAsync(cancellationToken);
-            }
             return await dbContext.MatchQueues
                 .Where(x => x.IdPerson != currentPerson.IdPerson && x.IsRandomPartner == true)
                 .OrderBy(x => x.JoinedAt)
@@ -134,23 +132,23 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
         //main filter
         var filteredPeople = dbContext.MatchQueues
             .Where(x => x.IdPerson != currentPerson.IdPerson
-                    && !blockedUsers.Contains(x.IdPerson)  //to eliminate blocked users 
-                    && x.Language == currentPerson.Language 
-                    && x.IsRandomPartner == false
-                    &&
-                     (
-                         //me && partner is concrete
-                         (currentPerson.PartnerGender == x.YourGender && x.PartnerGender == currentPerson.YourGender)
-                         ||
-                         //no matter for me && partner is concrete
-                         (currentPerson.PartnerGender == GenderList.Both && x.PartnerGender == currentPerson.YourGender)
-                         ||
-                         //I'm concrete && no matter for partner
-                         (currentPerson.PartnerGender == x.YourGender && x.PartnerGender == GenderList.Both)
-                         ||
-                         //we are both no matter
-                         (currentPerson.PartnerGender == GenderList.Both && x.PartnerGender == GenderList.Both)
-                     )
+                        && !blockedUsers.Contains(x.IdPerson) //to eliminate blocked users 
+                        && x.Language == currentPerson.Language
+                        && x.IsRandomPartner == false
+                        &&
+                        (
+                            //me && partner is concrete
+                            (currentPerson.PartnerGender == x.YourGender && x.PartnerGender == currentPerson.YourGender)
+                            ||
+                            //no matter for me && partner is concrete
+                            (currentPerson.PartnerGender == GenderList.Both && x.PartnerGender == currentPerson.YourGender)
+                            ||
+                            //I'm concrete && no matter for partner
+                            (currentPerson.PartnerGender == x.YourGender && x.PartnerGender == GenderList.Both)
+                            ||
+                            //we are both no matter
+                            (currentPerson.PartnerGender == GenderList.Both && x.PartnerGender == GenderList.Both)
+                        )
             );
 
         var scoredQuery = filteredPeople.Select(q => new
@@ -163,9 +161,9 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
         });
         
         if (secondsWaiting < 15) scoredQuery = scoredQuery.Where(x => x.Score >= 6); //all
-        else if (secondsWaiting < 30) scoredQuery =  scoredQuery.Where(x => x.Score >= 5); //age + theme
-        else if (secondsWaiting < 45) scoredQuery =  scoredQuery.Where(x => x.Score >= 3); //age
-        else if (secondsWaiting < 60) scoredQuery =  scoredQuery.Where(x => x.Score >= 2); //theme
+        else if (secondsWaiting < 30) scoredQuery = scoredQuery.Where(x => x.Score >= 5); //age + theme
+        else if (secondsWaiting < 45) scoredQuery = scoredQuery.Where(x => x.Score >= 3); //age
+        else if (secondsWaiting < 60) scoredQuery = scoredQuery.Where(x => x.Score >= 2); //theme
 
         return await scoredQuery
             .OrderByDescending(x => x.Score)

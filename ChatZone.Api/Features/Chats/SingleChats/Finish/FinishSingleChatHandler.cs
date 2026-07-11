@@ -14,8 +14,8 @@ public class FinishSingleChatHandler(
 {
     public async Task<Result<bool>> Handle(FinishSingleChatRequest request, CancellationToken cancellationToken)
     {
-        var singleChat = await dbContext.SingleChats.FirstOrDefaultAsync(x=>x.IdSingleChat == request.IdChat && (x.IdFirstPerson == request.IdPerson || x.IdSecondPerson == request.IdPerson), cancellationToken);
-        if(singleChat is null) return Result<bool>.Failure(new NotFoundException("Chat is not found or you don't have access!"));
+        var singleChat = await dbContext.SingleChats.FirstOrDefaultAsync(x => x.IdSingleChat == request.IdChat && (x.IdFirstPerson == request.IdPerson || x.IdSecondPerson == request.IdPerson), cancellationToken);
+        if (singleChat is null) return Result<bool>.Failure(new NotFoundException("Chat is not found or you don't have access!"));
         
         singleChat.FinishedAt = DateTimeOffset.UtcNow;
 

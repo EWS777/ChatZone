@@ -12,7 +12,7 @@ namespace ChatZone.Features.Identity.Authentication.Login;
 
 public class LoginHandler(
     ChatZoneDbContext dbContext,
-    IValidator<LoginRequest> validator, 
+    IValidator<LoginRequest> validator,
     IToken token,
     IConfiguration configuration) : IRequestHandler<LoginRequest, Result<LoginResponse>>
 {
@@ -22,8 +22,8 @@ public class LoginHandler(
         if (!validation.IsValid) return Result<LoginResponse>.Failure(validation.Errors.ToList());
         
         var person = request.UsernameOrEmail.Contains('@')
-            ? await dbContext.Persons.SingleOrDefaultAsync(x=>x.Email == request.UsernameOrEmail, cancellationToken)
-            : await dbContext.Persons.SingleOrDefaultAsync(x=>x.Username == request.UsernameOrEmail, cancellationToken);
+            ? await dbContext.Persons.SingleOrDefaultAsync(x => x.Email == request.UsernameOrEmail, cancellationToken)
+            : await dbContext.Persons.SingleOrDefaultAsync(x => x.Username == request.UsernameOrEmail, cancellationToken);
 
         if (person is null || person.Role != PersonRole.User) return Result<LoginResponse>.Failure(new ForbiddenAccessException("Email or password is not correct!"));
 
@@ -41,7 +41,8 @@ public class LoginHandler(
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        return Result<LoginResponse>.Ok(new LoginResponse{
+        return Result<LoginResponse>.Ok(new LoginResponse
+        {
             AccessToken = new JwtSecurityTokenHandler().WriteToken(generatedAccessToken),
             RefreshToken = generatedRefreshToken
         });
