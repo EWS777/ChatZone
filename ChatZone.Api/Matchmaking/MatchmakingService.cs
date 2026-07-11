@@ -102,7 +102,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
             return await dbContext.MatchQueues
                 .Where(x => x.IdPerson != currentPerson.IdPerson
                             && !blockedUsers.Contains(x.IdPerson)
-                            && x.IsRandomPartner == true)
+                            && x.IsRandomPartner)
                 .OrderBy(x => x.JoinedAt)
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -112,7 +112,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
             .Where(x => x.IdPerson != currentPerson.IdPerson
                         && !blockedUsers.Contains(x.IdPerson) //to eliminate blocked users 
                         && x.Language == currentPerson.Language
-                        && x.IsRandomPartner == false
+                        && !x.IsRandomPartner
                         && (currentPerson.PartnerGender == GenderList.Both || currentPerson.PartnerGender == x.YourGender)
                         && (x.PartnerGender == GenderList.Both || x.PartnerGender == currentPerson.YourGender)
             );

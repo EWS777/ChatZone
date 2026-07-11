@@ -15,7 +15,7 @@ public class UpdateGroupChatHandler(
     public async Task<Result<UpdateGroupChatResponse>> Handle(UpdateGroupChatRequest request,
         CancellationToken cancellationToken)
     {
-        var isAdmin = await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson && x.IsAdmin == true, cancellationToken);
+        var isAdmin = await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson && x.IsAdmin, cancellationToken);
         if (!isAdmin) return Result<UpdateGroupChatResponse>.Failure(new ForbiddenAccessException("You are not an owner of this group!"));
 
         var group = await dbContext.GroupChats.SingleOrDefaultAsync(x => x.IdGroupChat == request.IdGroup, cancellationToken);

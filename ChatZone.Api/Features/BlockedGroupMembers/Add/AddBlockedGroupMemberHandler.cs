@@ -15,7 +15,7 @@ public class AddBlockedGroupMemberHandler(
 {
     public async Task<Result<bool>> Handle(AddBlockedGroupRequest request, CancellationToken cancellationToken)
     {
-        var isAdmin = await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdChat && x.IdGroupMember == request.IdAdminPerson && x.IsAdmin == true, cancellationToken);
+        var isAdmin = await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdChat && x.IdGroupMember == request.IdAdminPerson && x.IsAdmin, cancellationToken);
         if (!isAdmin) return Result<bool>.Failure(new ForbiddenAccessException("You are not an owner of this group!"));
 
         var groupMember = await dbContext.GroupMembers

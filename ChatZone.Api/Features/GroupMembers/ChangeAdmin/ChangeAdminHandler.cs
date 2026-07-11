@@ -14,10 +14,10 @@ public class ChangeAdminHandler(
 {
     public async Task<Result<bool>> Handle(ChangeAdminRequest request, CancellationToken cancellationToken)
     {
-        var currentAdmin = await dbContext.GroupMembers.SingleOrDefaultAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson && x.IsAdmin == true, cancellationToken);
+        var currentAdmin = await dbContext.GroupMembers.SingleOrDefaultAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson && x.IsAdmin, cancellationToken);
         if (currentAdmin is null) return Result<bool>.Failure(new ForbiddenAccessException("You are not exist in this group or you are not an admin!"));
 
-        var newAdminPerson = await dbContext.GroupMembers.SingleOrDefaultAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdNewAdminPerson && x.IsAdmin == false, cancellationToken);
+        var newAdminPerson = await dbContext.GroupMembers.SingleOrDefaultAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdNewAdminPerson && !x.IsAdmin, cancellationToken);
         if (newAdminPerson is null) return Result<bool>.Failure(new ForbiddenAccessException("You are not exist in this group or you are an admin already!"));
 
         currentAdmin.IsAdmin = false;
