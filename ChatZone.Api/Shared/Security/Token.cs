@@ -18,7 +18,8 @@ public class Token(IConfiguration configuration) : IToken
             new Claim(ClaimTypes.NameIdentifier, idPerson.ToString())
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:SecretKey"]));
+        var secretKey = configuration["JWT:SecretKey"] ?? throw new InvalidOperationException("JWT Secret Key is not configured.");
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         return new JwtSecurityToken(
