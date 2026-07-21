@@ -11,6 +11,7 @@ public class GroupChat
     public AgeList? Age { get; set; }
     public LangList? Lang { get; set; }
     public int UserCount { set; get; }
+    public DateTimeOffset CreatedAt { get; set; }
     public ICollection<GroupMember> GroupMembers { get; set; } = new List<GroupMember>();
     public ICollection<GroupMessage> GroupMessages { get; set; } = new List<GroupMessage>();
     public ICollection<BlockedGroupMember> BlockedGroupMembers { get; set; } = new List<BlockedGroupMember>();

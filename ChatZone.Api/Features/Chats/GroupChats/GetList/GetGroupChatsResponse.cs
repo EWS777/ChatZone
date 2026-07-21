@@ -11,4 +11,5 @@ public class GetGroupChatsResponse
     public CityList? City { get; set; }
     public AgeList? Age { get; set; }
     public LangList? Lang { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }

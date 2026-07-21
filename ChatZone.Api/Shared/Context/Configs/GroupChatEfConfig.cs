@@ -19,6 +19,10 @@ public class GroupChatEfConfig : IEntityTypeConfiguration<GroupChat>
             .Property(x => x.UserCount)
             .IsRequired();
         
+        builder
+            .Property(x => x.CreatedAt)
+            .IsRequired();
+        
         builder.ToTable(nameof(GroupChat));
     }
 }

@@ -26,6 +26,7 @@ public class CreateGroupChatHandler(
             Age = request.Age,
             Lang = request.Lang,
             UserCount = 1,
+            CreatedAt = DateTimeOffset.UtcNow,
             GroupMembers = new List<GroupMember>
             {
                 new()
