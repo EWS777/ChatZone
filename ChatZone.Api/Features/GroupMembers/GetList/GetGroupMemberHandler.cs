@@ -13,13 +13,20 @@ public class GetGroupMemberHandler(ChatZoneDbContext dbContext) : IRequestHandle
         var isAdmin = await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson && x.IsAdmin, cancellationToken);
         if (!isAdmin) return Result<List<GetGroupMemberResponse>>.Failure(new ForbiddenAccessException("You are not an admin of this group!"));
 
-        var groupList = await dbContext.GroupMembers
+        var query = dbContext.GroupMembers
             .AsNoTracking()
-            .Where(x => x.IdChat == request.IdGroup && x.IdGroupMember != request.IdPerson)
+            .Where(x => x.IdChat == request.IdGroup && x.IdGroupMember != request.IdPerson);
+
+        if (request.Cursor.HasValue) query = query.Where(x => x.JoinedAt < request.Cursor.Value);
+
+        var groupList = await query
+            .OrderByDescending(x => x.JoinedAt)
+            .Take(request.TakePerson)
             .Select(x => new GetGroupMemberResponse
             {
                 IdPerson = x.IdGroupMember,
-                Username = x.Person.Username
+                Username = x.Person.Username,
+                JoinedAt = x.JoinedAt
             })
             .ToListAsync(cancellationToken);
         

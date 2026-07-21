@@ -16,18 +16,14 @@ public class GroupMemberController(IMediator mediator) : ControllerBase
 {
     [HttpGet]
     [Route("get-list")]
-    public async Task<ActionResult<List<GetGroupMemberResponse>>> GetGroupMember([FromQuery] int idGroup, CancellationToken cancellationToken)
+    public async Task<ActionResult<List<GetGroupMemberResponse>>> GetGroupMember([FromQuery] GetGroupMemberRequest request, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
-        var groupMember = new GetGroupMemberRequest
-        {
-            IdPerson = int.Parse(idPerson),
-            IdGroup = idGroup
-        };
+        request.IdPerson = int.Parse(idPerson);
 
-        var result = await mediator.Send(groupMember, cancellationToken);
+        var result = await mediator.Send(request, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     

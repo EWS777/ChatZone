@@ -4,4 +4,5 @@ public class GetGroupMemberResponse
 {
     public int IdPerson { get; set; }
     public required string Username { get; set; }
+    public DateTimeOffset JoinedAt { get; set; }
 }
