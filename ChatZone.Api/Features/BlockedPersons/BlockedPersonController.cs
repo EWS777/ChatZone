@@ -15,13 +15,15 @@ public class BlockedPersonController(IMediator mediator) : ControllerBase
     [Authorize(Roles = "User")]
     [HttpGet]
     [Route("")]
-    public async Task<ActionResult<List<GetBlockedPersonsResponse>>> GetBlockedPersons(CancellationToken cancellationToken)
+    public async Task<ActionResult<List<GetBlockedPersonsResponse>>> GetBlockedPersons([FromQuery] GetBlockedPersonsRequest request, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
 
-        var result = await mediator.Send(new GetBlockedPersonsRequest { IdPerson = int.Parse(idPerson) }, cancellationToken);
+        request.IdPerson = int.Parse(idPerson);
+
+        var result = await mediator.Send(request, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
 

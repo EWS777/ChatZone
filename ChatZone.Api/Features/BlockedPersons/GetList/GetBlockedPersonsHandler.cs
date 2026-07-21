@@ -10,10 +10,15 @@ public class GetBlockedPersonsHandler(
 {
     public async Task<Result<List<GetBlockedPersonsResponse>>> Handle(GetBlockedPersonsRequest request, CancellationToken cancellationToken)
     {
-        var blockedPersons = await dbContext.BlockedPeoples
+        var query = dbContext.BlockedPeoples
             .AsNoTracking()
-            .Where(x => x.IdBlockerPerson == request.IdPerson)
+            .Where(x => x.IdBlockerPerson == request.IdPerson);
+
+        if (request.Cursor.HasValue) query = query.Where(x => x.CreatedAt < request.Cursor.Value);
+        
+        var blockedPersons = await query
             .OrderByDescending(x => x.CreatedAt)
+            .Take(request.TakePerson)
             .Select(x => new GetBlockedPersonsResponse
             {
                 IdBlockedPerson = x.IdBlockedPerson,
