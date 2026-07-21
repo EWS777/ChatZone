@@ -10,9 +10,15 @@ public class GetGroupChatsHandler(
 {
     public async Task<Result<List<GetGroupChatsResponse>>> Handle(GetGroupChatsRequest request, CancellationToken cancellationToken)
     {
-        var groupChats = await dbContext.GroupChats
+        var query = dbContext.GroupChats
             .AsNoTracking()
-            .Where(x => x.BlockedGroupMembers.All(q => q.IdBlockedPerson != request.IdPerson))
+            .Where(x => x.BlockedGroupMembers.All(q => q.IdBlockedPerson != request.IdPerson));
+        
+        if (request.Cursor.HasValue) query = query.Where(x => x.CreatedAt < request.Cursor.Value);
+        
+        var groupChats = await query
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(request.TakeGroup)
             .Select(x => new GetGroupChatsResponse
             {
                 IdGroup = x.IdGroupChat,
@@ -21,7 +27,8 @@ public class GetGroupChatsHandler(
                 City = x.City,
                 Age = x.Age,
                 Lang = x.Lang,
-                PersonCount = x.UserCount
+                PersonCount = x.UserCount,
+                CreatedAt = x.CreatedAt
             }).ToListAsync(cancellationToken);
         
         return Result<List<GetGroupChatsResponse>>.Ok(groupChats);

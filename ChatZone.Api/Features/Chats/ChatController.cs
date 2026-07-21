@@ -53,12 +53,14 @@ public class ChatController(IMediator mediator) : ControllerBase
     
     [HttpGet]
     [Route("get")]
-    public async Task<ActionResult<List<GetGroupChatsResponse>>> GetGroupChats(CancellationToken cancellationToken)
+    public async Task<ActionResult<List<GetGroupChatsResponse>>> GetGroupChats([FromQuery] GetGroupChatsRequest request, CancellationToken cancellationToken)
     {
         var idPerson = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (idPerson is null) return Unauthorized(new { message = "You are not authorized!" });
         
-        var result = await mediator.Send(new GetGroupChatsRequest { IdPerson = int.Parse(idPerson) }, cancellationToken);
+        request.IdPerson = int.Parse(idPerson);
+        
+        var result = await mediator.Send(request, cancellationToken);
         return result.Match(x => x, x => throw x);
     }
     
