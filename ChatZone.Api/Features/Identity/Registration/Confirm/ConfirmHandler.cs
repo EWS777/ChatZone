@@ -22,13 +22,14 @@ public class ConfirmHandler(
         if (person is null || person.EmailConfirmTokenExp < DateTimeOffset.UtcNow) return Result<ConfirmResponse>.Failure(new ExpiredTokenException("The activation link is not correct or time activate is expired! Please confirm your email again."));
         
         var generatedRefreshToken = SecurityHelper.GenerateRefreshToken();
-        var generatedAccessToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
         
         person.Role = PersonRole.User;
         person.EmailConfirmToken = null;
         person.EmailConfirmTokenExp = null;
         person.RefreshToken = SecurityHelper.HashRefreshToken(generatedRefreshToken);
         person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!));
+        
+        var generatedAccessToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
         
         dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
