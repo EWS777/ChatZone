@@ -23,43 +23,51 @@ public class FindPersonHandler(
         var prepareResult = await PrepareRequestData(request, cancellationToken);
         if (!prepareResult.IsSuccess) return Result<bool>.Failure(prepareResult.Exception);
         
-        var maxAttempts = 20;
-        for (var attempt = 0; attempt < maxAttempts; attempt++)
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (attempt > 0)
+            var maxAttempts = 20;
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
             {
-                var statusResult = await CheckSearchStatus(request.IdPerson, cancellationToken);
-                if (statusResult != null) return statusResult;
-            }
-            
-            var matchResult = await matchmakingService.FindMatch(request, cancellationToken);
-            
-            if (!matchResult.IsSuccess) return Result<bool>.Failure(matchResult.Exception);
+                cancellationToken.ThrowIfCancellationRequested();
 
-            if (matchResult.Value.IsFound)
-            {
-                var person1 = matchResult.Value.Person1!;
-                var person2 = matchResult.Value.Person2!;
-                var idGroup = matchResult.Value.IdGroup!.Value;
+                if (attempt > 0)
+                {
+                    var statusResult = await CheckSearchStatus(request.IdPerson, cancellationToken);
+                    if (statusResult != null) return statusResult;
+                }
                 
-                await hubContext.Groups.AddToGroupAsync(person1.ConnectionId, idGroup.ToString(), cancellationToken);
-                await hubContext.Groups.AddToGroupAsync(person2.ConnectionId, idGroup.ToString(), cancellationToken);
+                var matchResult = await matchmakingService.FindMatch(request, cancellationToken);
+                
+                if (!matchResult.IsSuccess) return Result<bool>.Failure(matchResult.Exception);
 
-                await hubContext.Clients.Group(idGroup.ToString()).SendAsync("ChatCreated", cancellationToken);
-                return Result<bool>.Ok(true);
+                if (matchResult.Value.IsFound)
+                {
+                    var person1 = matchResult.Value.Person1!;
+                    var person2 = matchResult.Value.Person2!;
+                    var idGroup = matchResult.Value.IdGroup!.Value;
+                    
+                    await hubContext.Groups.AddToGroupAsync(person1.ConnectionId, idGroup.ToString(), cancellationToken);
+                    await hubContext.Groups.AddToGroupAsync(person2.ConnectionId, idGroup.ToString(), cancellationToken);
+
+                    await hubContext.Clients.Group(idGroup.ToString()).SendAsync("ChatCreated", cancellationToken);
+                    return Result<bool>.Ok(true);
+                }
+                
+                request.IsSearchAgain = true;
+                dbContext.ChangeTracker.Clear();
+                
+                var delayAttempt = await WaitForNextAttempt(request.IdPerson, cancellationToken);
+                if(!delayAttempt) return Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
             }
             
-            request.IsSearchAgain = true;
-            dbContext.ChangeTracker.Clear();
-            
-            var delayAttempt = await WaitForNextAttempt(request.IdPerson, cancellationToken);
-            if(!delayAttempt) return Result<bool>.Failure(new OperationCanceledException("Finding has cancelled by Person!"));
+            await mediator.Send(new CancelPersonRequest { IdPerson = request.IdPerson }, CancellationToken.None);
+            return Result<bool>.Ok(false);
         }
-        
-        await mediator.Send(new CancelPersonRequest { IdPerson = request.IdPerson }, CancellationToken.None);
-        return Result<bool>.Ok(false);
+        catch
+        {
+            await mediator.Send(new CancelPersonRequest { IdPerson = request.IdPerson }, CancellationToken.None);
+            throw;
+        }
     }
     
     private async Task<Result<bool>> PrepareRequestData(FindPersonRequest request, CancellationToken cancellationToken)
