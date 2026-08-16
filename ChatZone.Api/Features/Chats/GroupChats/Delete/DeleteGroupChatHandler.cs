@@ -40,14 +40,14 @@ public class DeleteGroupChatHandler(
                 .ExecuteDeleteAsync(cancellationToken);
             
             await transaction.CommitAsync(cancellationToken);
-            
-            await hubContext.Clients.Group(request.IdGroup.ToString()).SendAsync("NotifyDeleteGroup", cancellationToken);
-            return Result<bool>.Ok(true);
         }
         catch (Exception)
         {
             await transaction.RollbackAsync(cancellationToken);
             return Result<bool>.Failure(new BackendException());
         }
+
+        await hubContext.Clients.Group(request.IdGroup.ToString()).SendAsync("NotifyDeleteGroup", cancellationToken);
+        return Result<bool>.Ok(true);
     }
 }
