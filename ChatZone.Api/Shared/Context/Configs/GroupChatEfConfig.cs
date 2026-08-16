@@ -23,6 +23,9 @@ public class GroupChatEfConfig : IEntityTypeConfiguration<GroupChat>
             .Property(x => x.CreatedAt)
             .IsRequired();
         
+        builder
+            .HasIndex(x => new { x.CreatedAt, x.IdGroupChat });
+
         builder.ToTable(nameof(GroupChat));
     }
 }

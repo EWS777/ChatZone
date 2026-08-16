@@ -31,6 +31,22 @@ public class SingleChatEfConfig : IEntityTypeConfiguration<SingleChat>
             .Property(x => x.FinishedAt)
             .IsRequired(false);
         
+        builder
+            .HasIndex(x => x.IdFirstPerson)
+            .HasFilter("[FinishedAt] IS NULL")
+            .IsUnique();
+
+        builder
+            .HasIndex(x => x.IdSecondPerson)
+            .HasFilter("[FinishedAt] IS NULL")
+            .IsUnique();
+        
+        builder
+            .HasIndex(x => new { x.IdFirstPerson, x.FinishedAt });
+
+        builder
+            .HasIndex(x => new { x.IdSecondPerson, x.FinishedAt });
+
         builder.ToTable(nameof(SingleChat));
     }
 }

@@ -21,6 +21,10 @@ public class QuickMessageEfConfig : IEntityTypeConfiguration<QuickMessage>
             .Property(x => x.Message)
             .IsRequired()
             .HasMaxLength(50);
+
+        builder
+            .HasIndex(x => x.IdPerson)
+            .IncludeProperties(x => x.Message);
         
         builder.ToTable(nameof(QuickMessage));
     }

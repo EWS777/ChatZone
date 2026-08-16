@@ -27,6 +27,9 @@ public class BlockedPersonEfConfig : IEntityTypeConfiguration<BlockedPerson>
             .Property(x => x.CreatedAt)
             .IsRequired();
         
+        builder
+            .HasIndex(x => new { x.IdBlockerPerson, x.CreatedAt });
+
         builder.ToTable(nameof(BlockedPerson));
     }
 }

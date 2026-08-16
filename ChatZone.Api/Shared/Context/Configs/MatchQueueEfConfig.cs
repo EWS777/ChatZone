@@ -22,6 +22,9 @@ public class MatchQueueEfConfig : IEntityTypeConfiguration<MatchQueue>
             .Property(x => x.JoinedAt)
             .IsRequired();
         
+        builder
+            .HasIndex(x => new { x.IsRandomPartner, x.Language });
+
         builder.ToTable(nameof(MatchQueue));
     }
 }

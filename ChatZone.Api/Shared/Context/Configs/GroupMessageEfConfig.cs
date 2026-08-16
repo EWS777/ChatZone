@@ -31,6 +31,9 @@ public class GroupMessageEfConfig : IEntityTypeConfiguration<GroupMessage>
             .Property(x => x.CreatedAt)
             .IsRequired();
         
+        builder
+            .HasIndex(x => new { x.IdChat, x.CreatedAt });
+
         builder.ToTable(nameof(GroupMessage));
     }
 }

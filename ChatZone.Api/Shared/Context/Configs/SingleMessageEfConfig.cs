@@ -30,6 +30,12 @@ public class SingleMessageEfConfig : IEntityTypeConfiguration<SingleMessage>
         builder
             .Property(x => x.CreatedAt)
             .IsRequired();
+        
+        builder
+            .HasIndex(x => new { x.IdChat, x.CreatedAt });
+        
+        builder
+            .HasIndex(x => x.IdSender);
 
         builder.ToTable(nameof(SingleMessage));
     }

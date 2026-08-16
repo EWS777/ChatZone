@@ -61,6 +61,16 @@ public class PersonEfConfig : IEntityTypeConfiguration<Person>
             .IsRequired()
             .HasDefaultValue(false);
 
+        builder
+            .HasIndex(x => x.RefreshToken)
+            .IsUnique()
+            .HasFilter("[RefreshToken] <> ''");
+
+        builder
+            .HasIndex(x => x.EmailConfirmToken)
+            .IsUnique()
+            .HasFilter("[EmailConfirmToken] IS NOT NULL");
+
         builder.ToTable(nameof(Person));
     }
 }
