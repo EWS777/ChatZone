@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using ChatZone.Features.Chats.Common.GetActiveChat;
 using ChatZone.Features.Messages.Add;
+using ChatZone.Features.Search.Cancel;
 using ChatZone.Features.Search.Find;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
@@ -44,7 +45,16 @@ public class ChatZoneHub(IMediator mediator) : Hub
         
         await base.OnConnectedAsync();
     }
-    
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(idPerson))
+            await mediator.Send(new CancelPersonRequest { IdPerson = int.Parse(idPerson) });
+
+        await base.OnDisconnectedAsync(exception);
+    }
+
     //get connectionId and add to database while matching 
     public string GetConnectionId()
     {
