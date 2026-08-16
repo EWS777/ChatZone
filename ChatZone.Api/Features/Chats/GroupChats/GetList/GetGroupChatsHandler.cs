@@ -14,10 +14,15 @@ public class GetGroupChatsHandler(
             .AsNoTracking()
             .Where(x => x.BlockedGroupMembers.All(q => q.IdBlockedPerson != request.IdPerson));
         
-        if (request.Cursor.HasValue) query = query.Where(x => x.CreatedAt < request.Cursor.Value);
-        
+        if (request.Cursor.HasValue)
+        {
+            var cursorId = request.CursorId ?? int.MaxValue;
+            query = query.Where(x => x.CreatedAt < request.Cursor.Value || (x.CreatedAt == request.Cursor.Value && x.IdGroupChat < cursorId));
+        }
+
         var groupChats = await query
             .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.IdGroupChat)
             .Take(request.TakeGroup)
             .Select(x => new GetGroupChatsResponse
             {
