@@ -56,9 +56,14 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
 
             try
             {
-                var isPartnerStillAvailable = await dbContext.MatchQueues.AnyAsync(x => x.IdPerson == partner.IdPerson, cancellationToken);
-                var isCurrentPersonStillAvailable = await dbContext.MatchQueues.AnyAsync(x => x.IdPerson == currentPerson.IdPerson, cancellationToken);
-                if (!isPartnerStillAvailable || !isCurrentPersonStillAvailable)
+                var partnerDeleted = await dbContext.MatchQueues
+                    .Where(x => x.IdPerson == partner.IdPerson)
+                    .ExecuteDeleteAsync(cancellationToken);
+                var currentPersonDeleted = await dbContext.MatchQueues
+                    .Where(x => x.IdPerson == currentPerson.IdPerson)
+                    .ExecuteDeleteAsync(cancellationToken);
+                
+                if (partnerDeleted == 0 || currentPersonDeleted == 0)
                 {
                     await transaction.RollbackAsync(cancellationToken);
                     return Result<MatchResponse>.Ok(new MatchResponse { IsFound = false });
@@ -72,9 +77,6 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                 };
 
                 await dbContext.SingleChats.AddAsync(newChat, cancellationToken);
-
-                dbContext.MatchQueues.Remove(currentPerson);
-                dbContext.MatchQueues.Remove(partner);
 
                 await dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
