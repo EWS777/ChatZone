@@ -14,10 +14,16 @@ public class GetBlockedPersonsHandler(
             .AsNoTracking()
             .Where(x => x.IdBlockerPerson == request.IdPerson);
 
-        if (request.Cursor.HasValue) query = query.Where(x => x.CreatedAt < request.Cursor.Value);
-        
+        if (request.Cursor.HasValue)
+        {
+            var cursorId = request.CursorId ?? int.MaxValue;
+            var cursorUpperBound = request.Cursor.Value.AddMilliseconds(1);
+            query = query.Where(x => x.CreatedAt < request.Cursor.Value || (x.CreatedAt < cursorUpperBound && x.IdBlockedPerson < cursorId));
+        }
+
         var blockedPersons = await query
             .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.IdBlockedPerson)
             .Take(request.TakePerson)
             .Select(x => new GetBlockedPersonsResponse
             {

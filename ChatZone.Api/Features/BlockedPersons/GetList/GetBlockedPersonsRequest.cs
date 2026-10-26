@@ -7,5 +7,6 @@ public class GetBlockedPersonsRequest : IRequest<Result<List<GetBlockedPersonsRe
 {
     public int IdPerson { get; set; }
     public DateTimeOffset? Cursor { get; set; }
+    public int? CursorId { get; set; }
     public int TakePerson { get; set; }
 }
