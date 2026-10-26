@@ -56,14 +56,11 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
 
             try
             {
-                var partnerDeleted = await dbContext.MatchQueues
-                    .Where(x => x.IdPerson == partner.IdPerson)
-                    .ExecuteDeleteAsync(cancellationToken);
-                var currentPersonDeleted = await dbContext.MatchQueues
-                    .Where(x => x.IdPerson == currentPerson.IdPerson)
+                var deletedCount = await dbContext.MatchQueues
+                    .Where(x => x.IdPerson == partner.IdPerson || x.IdPerson == currentPerson.IdPerson)
                     .ExecuteDeleteAsync(cancellationToken);
                 
-                if (partnerDeleted == 0 || currentPersonDeleted == 0)
+                if (deletedCount < 2)
                 {
                     await transaction.RollbackAsync(cancellationToken);
                     return Result<MatchResponse>.Ok(new MatchResponse { IsFound = false });
