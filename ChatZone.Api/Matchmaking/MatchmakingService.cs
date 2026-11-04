@@ -66,11 +66,17 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                     return Result<MatchResponse>.Ok(new MatchResponse { IsFound = false });
                 }
                 
+                var isRandom = currentPerson.IsRandomPartner || partner.IsRandomPartner;
                 var newChat = new SingleChat
                 {
                     IdFirstPerson = currentPerson.IdPerson,
                     IdSecondPerson = partner.IdPerson,
-                    CreatedAt = DateTimeOffset.UtcNow
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    Theme = isRandom ? null : Common(currentPerson.Theme, partner.Theme),
+                    Country = isRandom ? null : Common(currentPerson.Country, partner.Country),
+                    City = isRandom ? null : Common(currentPerson.City, partner.City),
+                    Age = isRandom ? null : Common(currentPerson.Age, partner.Age),
+                    Language = isRandom ? null : Common<LangList>(currentPerson.Language, partner.Language)
                 };
 
                 await dbContext.SingleChats.AddAsync(newChat, cancellationToken);
@@ -89,6 +95,9 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
         
         return Result<MatchResponse>.Ok(new MatchResponse { IsFound = false });
     }
+
+    private static T? Common<T>(T? first, T? second) where T : struct =>
+        first.HasValue && EqualityComparer<T?>.Default.Equals(first, second) ? first : null;
 
     private async Task<MatchQueue?> FindBestPartnerAsync(MatchQueue currentPerson, CancellationToken cancellationToken)
     {

@@ -1,4 +1,6 @@
-﻿namespace ChatZone.Core.Models;
+﻿using ChatZone.Core.Models.Enums;
+
+namespace ChatZone.Core.Models;
 
 public class SingleChat
 {
@@ -9,6 +11,12 @@ public class SingleChat
     public Person SecondPerson { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? FinishedAt { get; set; }
+    
+    public ThemeList? Theme { get; set; }
+    public AgeList? Age { get; set; }
+    public CountryList? Country { get; set; }
+    public CityList? City { get; set; }
+    public LangList? Language { get; set; }
 
     public ICollection<SingleMessage> SingleMessages { get; set; } = new List<SingleMessage>();
 }

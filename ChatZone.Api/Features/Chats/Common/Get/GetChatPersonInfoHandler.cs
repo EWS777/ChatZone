@@ -17,20 +17,39 @@ public class GetChatPersonInfoHandler(
             {
                 x.IdSingleChat,
                 x.IdFirstPerson,
-                x.IdSecondPerson
+                x.IdSecondPerson,
+                FirstUsername = x.FirstPerson.Username,
+                SecondUsername = x.SecondPerson.Username,
+                x.Theme,
+                x.Country,
+                x.City,
+                x.Age,
+                x.Language
             })
             .SingleOrDefaultAsync(cancellationToken);
         if (singleChat is not null)
         {
             var isSentMessage = await dbContext.SingleMessages.AnyAsync(x => x.IdChat == singleChat.IdSingleChat && x.IdSender == request.IdPerson, cancellationToken);
             
+            var isFirst = request.IdPerson == singleChat.IdFirstPerson;
+            var hasSearch = singleChat.Theme != null || singleChat.Country != null || singleChat.City != null || singleChat.Age != null || singleChat.Language != null;
+
             return Result<GetChatPersonInfoResponse>.Ok(new GetChatPersonInfoResponse
             {
                 IdPerson = request.IdPerson,
                 IdGroup = singleChat.IdSingleChat,
                 IsSingleChat = true,
-                IdPartnerPerson = request.IdPerson == singleChat.IdFirstPerson ? singleChat.IdSecondPerson : singleChat.IdFirstPerson,
-                IsSentMessage = isSentMessage
+                IdPartnerPerson = isFirst ? singleChat.IdSecondPerson : singleChat.IdFirstPerson,
+                IsSentMessage = isSentMessage,
+                PartnerUsername = isFirst ? singleChat.SecondUsername : singleChat.FirstUsername,
+                Search = !hasSearch ? null : new ChatSearchInfo
+                {
+                    Theme = (int?)singleChat.Theme,
+                    Country = (int?)singleChat.Country,
+                    City = (int?)singleChat.City,
+                    Age = (int?)singleChat.Age,
+                    Language = (int?)singleChat.Language
+                }
             });
         }
 
