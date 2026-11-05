@@ -17,6 +17,12 @@ public class AddGroupMemberHandler(ChatZoneDbContext dbContext) : IRequestHandle
         var isPersonExists = await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdGroup && x.IdGroupMember == request.IdPerson, cancellationToken);
         if (isPersonExists) return Result<bool>.Ok(true);
         
+        var isAnyActiveGroupChat = await dbContext.GroupMembers.AnyAsync(x => x.IdGroupMember == request.IdPerson, cancellationToken);
+        if (isAnyActiveGroupChat) return Result<bool>.Failure(new ExistPersonException("You already have an active group chat!"));
+
+        var isAnyActiveSingleChat = await dbContext.SingleChats.AnyAsync(x => (x.IdFirstPerson == request.IdPerson || x.IdSecondPerson == request.IdPerson) && x.FinishedAt == null, cancellationToken);
+        if (isAnyActiveSingleChat) return Result<bool>.Failure(new ExistPersonException("You already have an active single chat!"));
+
         var isPersonBlocked = await dbContext.BlockedGroupMembers.AnyAsync(x => x.IdChat == request.IdGroup && x.IdBlockedPerson == request.IdPerson, cancellationToken);
         if (isPersonBlocked) return Result<bool>.Failure(new ForbiddenAccessException("You are blocked in this group!"));
         
