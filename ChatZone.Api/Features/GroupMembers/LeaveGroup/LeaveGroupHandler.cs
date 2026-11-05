@@ -15,6 +15,8 @@ public class LeaveGroupHandler(ChatZoneDbContext dbContext) : IRequestHandler<Le
             .SingleOrDefaultAsync(x => x.IdChat == request.IdChat && x.IdGroupMember == request.IdPerson, cancellationToken);
         if (groupMember is null) return Result<bool>.Failure(new NotFoundException("You are not a member of this group!"));
         
+        if (groupMember.IsAdmin) return Result<bool>.Failure(new ForbiddenAccessException("You are an admin: assign a new admin or delete the group before leaving!"));
+
         groupMember.GroupChat.UserCount -= 1;
         
         dbContext.GroupMembers.Remove(groupMember);
