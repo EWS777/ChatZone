@@ -22,7 +22,6 @@ public class UpdateFilterHandler(ChatZoneDbContext dbContext) : IRequestHandler<
         person.Language = request.Language;
         person.IsFindRandomPerson = request.IsFindRandomPerson;
 
-        dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<bool>.Ok(true);

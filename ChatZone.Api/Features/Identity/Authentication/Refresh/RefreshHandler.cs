@@ -32,7 +32,6 @@ public class RefreshHandler(
         person.RefreshToken = SecurityHelper.HashRefreshToken(newRefreshToken);
         person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!));
         
-        dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<RefreshResponse>.Ok(new RefreshResponse

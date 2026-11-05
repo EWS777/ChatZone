@@ -28,7 +28,6 @@ public class SetNewPasswordHandler(ChatZoneDbContext dbContext, IConfiguration c
         person.RefreshToken = "";
         person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(-1);
         
-        dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<bool>.Ok(true);

@@ -38,7 +38,6 @@ public class LoginHandler(
         person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!));
         person.RefreshToken = SecurityHelper.HashRefreshToken(generatedRefreshToken);
         
-        dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<LoginResponse>.Ok(new LoginResponse

@@ -16,7 +16,6 @@ public class LogoutHandler(ChatZoneDbContext dbContext) : IRequestHandler<Logout
         person.RefreshToken = "";
         person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(-1);
 
-        dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<bool>.Ok(true);

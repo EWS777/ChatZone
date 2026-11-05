@@ -26,7 +26,6 @@ public class DeleteProfileHandler(ChatZoneDbContext dbContext, IConfiguration co
         person.RefreshToken = "";
         person.RefreshTokenExp = DateTimeOffset.MinValue;
         
-        dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         return Result<bool>.Ok(true);

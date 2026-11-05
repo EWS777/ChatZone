@@ -31,7 +31,6 @@ public class ConfirmHandler(
         
         var generatedAccessToken = token.GenerateJwtToken(person.Username, person.Role, person.IdPerson);
         
-        dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result<ConfirmResponse>.Ok(new ConfirmResponse

@@ -27,7 +27,6 @@ public class UpdateGroupChatHandler(
         group.Age = request.Age;
         group.Lang = request.Lang;
 
-        dbContext.GroupChats.Update(group);
         await dbContext.SaveChangesAsync(cancellationToken);
         
         var result = new UpdateGroupChatResponse

@@ -14,7 +14,6 @@ public class UpdateQuickMessageHandler(ChatZoneDbContext dbContext) : IRequestHa
         if (quickMessage is null) return Result<UpdateQuickMessageResponse>.Failure(new ForbiddenAccessException("Quick message is not found or you are not an owner of this quick message!"));
 
         quickMessage.Message = request.Message;
-        dbContext.QuickMessages.Update(quickMessage);
 
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result<UpdateQuickMessageResponse>.Ok(new UpdateQuickMessageResponse

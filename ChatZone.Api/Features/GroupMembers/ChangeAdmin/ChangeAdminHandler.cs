@@ -23,8 +23,6 @@ public class ChangeAdminHandler(
         currentAdmin.IsAdmin = false;
         newAdminPerson.IsAdmin = true;
 
-        dbContext.GroupMembers.Update(currentAdmin);
-        dbContext.GroupMembers.Update(newAdminPerson);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         await hubContext.Clients.User(request.IdPerson.ToString()).SendAsync("AdminChanged", false, cancellationToken);

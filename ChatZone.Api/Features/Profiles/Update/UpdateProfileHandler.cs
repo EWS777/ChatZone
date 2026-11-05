@@ -34,7 +34,6 @@ public class UpdateProfileHandler(
             person.RefreshTokenExp = DateTimeOffset.UtcNow.AddDays(double.Parse(configuration["JWT:RefreshTokenExpDays"]!));
         }
         
-        dbContext.Persons.Update(person);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         if (isUsernameChanged)

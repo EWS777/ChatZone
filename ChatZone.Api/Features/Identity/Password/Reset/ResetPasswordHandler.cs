@@ -25,7 +25,6 @@ public class ResetPasswordHandler(
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            dbContext.Persons.Update(person);
             await dbContext.SaveChangesAsync(cancellationToken);
             
             await emailSender.ResetPassword(person.Email, passwordResetToken, cancellationToken);
