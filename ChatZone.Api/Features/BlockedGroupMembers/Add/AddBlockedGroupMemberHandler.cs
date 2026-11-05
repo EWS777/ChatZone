@@ -18,6 +18,8 @@ public class AddBlockedGroupMemberHandler(
         var isAdmin = await dbContext.GroupMembers.AnyAsync(x => x.IdChat == request.IdChat && x.IdGroupMember == request.IdAdminPerson && x.IsAdmin, cancellationToken);
         if (!isAdmin) return Result<bool>.Failure(new ForbiddenAccessException("You are not an owner of this group!"));
 
+        if (request.IdBlockedPerson == request.IdAdminPerson) return Result<bool>.Failure(new ForbiddenAccessException("You can not block yourself!"));
+
         var groupMember = await dbContext.GroupMembers
             .Include(x => x.GroupChat)
             .SingleOrDefaultAsync(x => x.IdChat == request.IdChat && x.IdGroupMember == request.IdBlockedPerson, cancellationToken);
