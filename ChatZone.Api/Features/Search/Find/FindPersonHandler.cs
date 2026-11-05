@@ -20,6 +20,12 @@ public class FindPersonHandler(
 {
     public async Task<Result<bool>> Handle(FindPersonRequest request, CancellationToken cancellationToken)
     {
+        var hasActiveGroupChat = await dbContext.GroupMembers.AnyAsync(x => x.IdGroupMember == request.IdPerson, cancellationToken);
+        if (hasActiveGroupChat) return Result<bool>.Failure(new ExistPersonException("You already have an active group chat!"));
+
+        var hasActiveSingleChat = await dbContext.SingleChats.AnyAsync(x => (x.IdFirstPerson == request.IdPerson || x.IdSecondPerson == request.IdPerson) && x.FinishedAt == null, cancellationToken);
+        if (hasActiveSingleChat) return Result<bool>.Failure(new ExistPersonException("You already have an active single chat!"));
+
         var prepareResult = await PrepareRequestData(request, cancellationToken);
         if (!prepareResult.IsSuccess) return Result<bool>.Failure(prepareResult.Exception);
         
