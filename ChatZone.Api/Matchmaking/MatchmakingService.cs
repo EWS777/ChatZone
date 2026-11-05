@@ -11,8 +11,6 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
 {
     public async Task<Result<MatchResponse>> FindMatch(FindPersonRequest request, CancellationToken cancellationToken)
     {
-        if (!request.IsFindRandomPerson && (request.YourGender == null || request.PartnerGender == null || request.Language == null)) return Result<MatchResponse>.Failure(new ArgumentException("`YourGender`, `PartnerGender`, and `Language` fields are required for matchmaking."));
-
         var currentPerson = await dbContext.MatchQueues.FirstOrDefaultAsync(x => x.IdPerson == request.IdPerson, cancellationToken);
 
         if (currentPerson == null)
@@ -76,7 +74,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                     Country = isRandom ? null : Common(currentPerson.Country, partner.Country),
                     City = isRandom ? null : Common(currentPerson.City, partner.City),
                     Age = isRandom ? null : Common(currentPerson.Age, partner.Age),
-                    Language = isRandom ? null : Common<LangList>(currentPerson.Language, partner.Language)
+                    Language = isRandom || currentPerson.Language == LangList.Random || partner.Language == LangList.Random ? null : Common<LangList>(currentPerson.Language, partner.Language)
                 };
 
                 await dbContext.SingleChats.AddAsync(newChat, cancellationToken);
@@ -119,7 +117,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
         var filteredPeople = dbContext.MatchQueues
             .Where(x => x.IdPerson != currentPerson.IdPerson
                         && !blockedUsers.Contains(x.IdPerson) //to eliminate blocked users 
-                        && x.Language == currentPerson.Language
+                        && (currentPerson.Language == LangList.Random || x.Language == LangList.Random || x.Language == currentPerson.Language) //Random = any language
                         && !x.IsRandomPartner
                         && (currentPerson.PartnerGender == GenderList.Both || currentPerson.PartnerGender == x.YourGender)
                         && (x.PartnerGender == GenderList.Both || x.PartnerGender == currentPerson.YourGender)
