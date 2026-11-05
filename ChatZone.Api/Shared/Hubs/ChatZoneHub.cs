@@ -63,6 +63,12 @@ public class ChatZoneHub(IMediator mediator) : Hub
 
     public async Task AddToGroup(int idGroup)
     {
+        var idPerson = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(idPerson)) throw new HubException("User does not exist or not authorized!");
+
+        var activeChat = await mediator.Send(new GetActiveChatRequest { IdPerson = int.Parse(idPerson) });
+        if (!activeChat.IsSuccess || activeChat.Value.IsSingleChat != false || activeChat.Value.IdChat != idGroup) throw new HubException("You are not a member of this group!");
+
         await Groups.AddToGroupAsync(Context.ConnectionId, idGroup.ToString());
         await Clients.Caller.SendAsync("ChatCreated");
     }
