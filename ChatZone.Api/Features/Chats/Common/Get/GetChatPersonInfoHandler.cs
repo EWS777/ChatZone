@@ -21,10 +21,10 @@ public class GetChatPersonInfoHandler(
                 FirstUsername = x.FirstPerson.Username,
                 SecondUsername = x.SecondPerson.Username,
                 x.Theme,
-                x.Country,
-                x.City,
+                Country = x.Country == null ? null : new NamedItemDto { Id = x.Country.IdCountry, Name = x.Country.Name },
+                City = x.City == null ? null : new NamedItemDto { Id = x.City.IdCity, Name = x.City.Name },
                 x.Age,
-                x.Language
+                Language = x.Language == null ? null : new NamedItemDto { Id = x.Language.IdLanguage, Name = x.Language.Name }
             })
             .SingleOrDefaultAsync(cancellationToken);
         if (singleChat is not null)
@@ -45,10 +45,10 @@ public class GetChatPersonInfoHandler(
                 Search = !hasSearch ? null : new ChatSearchInfo
                 {
                     Theme = (int?)singleChat.Theme,
-                    Country = (int?)singleChat.Country,
-                    City = (int?)singleChat.City,
+                    Country = singleChat.Country,
+                    City = singleChat.City,
                     Age = (int?)singleChat.Age,
-                    Language = (int?)singleChat.Language
+                    Language = singleChat.Language
                 }
             });
         }

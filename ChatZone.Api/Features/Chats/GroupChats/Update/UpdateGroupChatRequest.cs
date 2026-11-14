@@ -15,8 +15,8 @@ public class UpdateGroupChatRequest : IRequest<Result<UpdateGroupChatResponse>>
     [MaxLength(50, ErrorMessage = "Title max length is 50 characters")]
     public required string Title { get; set; }
 
-    public CountryList? Country { get; set; }
-    public CityList? City { get; set; }
+    public int? IdCountry { get; set; }
+    public int? IdCity { get; set; }
     public AgeList? Age { get; set; }
-    public LangList? Lang { get; set; }
+    public int? IdLanguage { get; set; }
 }

@@ -13,16 +13,19 @@ public class Person
     public required string Salt { get; set; }
     public required string RefreshToken { get; set; }
     public required DateTimeOffset RefreshTokenExp { get; set; }
-    public LangList LangMenu { get; set; }
+    public LangList LangMenu { get; set; } = LangList.English;
     public bool IsDarkTheme { get; set; }
     public bool IsFindRandomPerson { get; set; }
     public ThemeList? Theme { get; set; }
-    public CountryList? Country { get; set; }
-    public CityList? City { get; set; }
+    public int? IdCountry { get; set; }
+    public Country? Country { get; set; }
+    public int? IdCity { get; set; }
+    public City? City { get; set; }
     public AgeList? Age { get; set; }
     public GenderList? YourGender { get; set; }
     public GenderList? PartnerGender { get; set; }
-    public LangList? Language { get; set; }
+    public int? IdLanguage { get; set; }
+    public Language? Language { get; set; }
     public string? EmailConfirmToken { get; set; }
     public DateTimeOffset? EmailConfirmTokenExp { get; set; }
     public string? PasswordResetToken { get; set; }

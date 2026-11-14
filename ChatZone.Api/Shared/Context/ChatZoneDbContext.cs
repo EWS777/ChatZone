@@ -1,4 +1,4 @@
-﻿using ChatZone.Core.Models;
+using ChatZone.Core.Models;
 using ChatZone.Shared.Context.Configs;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +22,9 @@ public class ChatZoneDbContext : DbContext
     public DbSet<Statistic> Statistics { get; set; }
     public DbSet<MatchQueue> MatchQueues { get; set; }
     public DbSet<BlockedGroupMember> BlockedGroupMembers { get; set; }
+    public DbSet<Country> Countries { get; set; }
+    public DbSet<City> Cities { get; set; }
+    public DbSet<Language> Languages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

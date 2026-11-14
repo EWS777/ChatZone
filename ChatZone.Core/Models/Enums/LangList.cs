@@ -2,7 +2,6 @@ namespace ChatZone.Core.Models.Enums;
 
 public enum LangList
 {
-    Random,
-    English,
-    Polish
+    English = 1,
+    Polish = 2
 }

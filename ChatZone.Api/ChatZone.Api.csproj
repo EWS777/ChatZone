@@ -25,6 +25,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Update="Shared\Context\Seed\Data\*.tsv" CopyToOutputDirectory="PreserveNewest"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\ChatZone.Core\ChatZone.Core.csproj"/>
     </ItemGroup>
 

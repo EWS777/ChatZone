@@ -1,4 +1,6 @@
-﻿namespace ChatZone.Features.Chats.Common.Get;
+﻿using ChatZone.Shared.DTOs;
+
+namespace ChatZone.Features.Chats.Common.Get;
 
 public class GetChatPersonInfoResponse
 {
@@ -14,8 +16,8 @@ public class GetChatPersonInfoResponse
 public class ChatSearchInfo
 {
     public int? Theme { get; set; }
-    public int? Country { get; set; }
-    public int? City { get; set; }
+    public NamedItemDto? Country { get; set; }
+    public NamedItemDto? City { get; set; }
     public int? Age { get; set; }
-    public int? Language { get; set; }
+    public NamedItemDto? Language { get; set; }
 }

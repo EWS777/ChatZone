@@ -21,23 +21,30 @@ public class UpdateGroupChatHandler(
         var group = await dbContext.GroupChats.SingleOrDefaultAsync(x => x.IdGroupChat == request.IdGroup, cancellationToken);
         if (group is null) return Result<UpdateGroupChatResponse>.Failure(new NotFoundException("Group is not found!"));
 
+        var locationError = await dbContext.ValidateLocationAsync(request.IdCountry, request.IdCity, request.IdLanguage, cancellationToken);
+        if (locationError is not null) return Result<UpdateGroupChatResponse>.Failure(locationError);
+
         group.Title = request.Title;
-        group.Country = request.Country;
-        group.City = request.City;
+        group.IdCountry = request.IdCountry;
+        group.IdCity = request.IdCity;
         group.Age = request.Age;
-        group.Lang = request.Lang;
+        group.IdLanguage = request.IdLanguage;
 
         await dbContext.SaveChangesAsync(cancellationToken);
         
-        var result = new UpdateGroupChatResponse
-        {
-            IdGroup = group.IdGroupChat,
-            Title = group.Title,
-            Country = group.Country,
-            City = group.City,
-            Age = group.Age,
-            Lang = group.Lang
-        };
+        var result = await dbContext.GroupChats
+            .AsNoTracking()
+            .Where(x => x.IdGroupChat == group.IdGroupChat)
+            .Select(x => new UpdateGroupChatResponse
+            {
+                IdGroup = x.IdGroupChat,
+                Title = x.Title,
+                Country = x.Country == null ? null : new NamedItemDto { Id = x.Country.IdCountry, Name = x.Country.Name },
+                City = x.City == null ? null : new NamedItemDto { Id = x.City.IdCity, Name = x.City.Name },
+                Age = x.Age,
+                Language = x.Language == null ? null : new NamedItemDto { Id = x.Language.IdLanguage, Name = x.Language.Name }
+            })
+            .SingleAsync(cancellationToken);
         
         await hubContext.Clients.Group(group.IdGroupChat.ToString()).SendAsync("UpdateGroupChatParam", result, cancellationToken);
         return Result<UpdateGroupChatResponse>.Ok(result);

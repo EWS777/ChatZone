@@ -20,12 +20,12 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                 IdPerson = request.IdPerson,
                 ConnectionId = request.ConnectionId,
                 Theme = request.Theme,
-                Country = request.Country,
-                City = request.City,
+                IdCountry = request.IdCountry,
+                IdCity = request.IdCity,
                 Age = request.Age,
                 YourGender = request.YourGender ?? GenderList.Both,
                 PartnerGender = request.PartnerGender ?? GenderList.Both,
-                Language = request.Language ?? LangList.Random,
+                IdLanguage = request.IdLanguage,
                 JoinedAt = DateTimeOffset.UtcNow,
                 IsRandomPartner = request.IsFindRandomPerson
             };
@@ -35,12 +35,12 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
         {
             currentPerson.ConnectionId = request.ConnectionId;
             currentPerson.Theme = request.Theme;
-            currentPerson.Country = request.Country;
-            currentPerson.City = request.City;
+            currentPerson.IdCountry = request.IdCountry;
+            currentPerson.IdCity = request.IdCity;
             currentPerson.Age = request.Age;
             currentPerson.YourGender = request.YourGender ?? GenderList.Both;
             currentPerson.PartnerGender = request.PartnerGender ?? GenderList.Both;
-            currentPerson.Language = request.Language ?? LangList.Random;
+            currentPerson.IdLanguage = request.IdLanguage;
             currentPerson.IsRandomPartner = request.IsFindRandomPerson;
         }
 
@@ -71,10 +71,10 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
                     IdSecondPerson = partner.IdPerson,
                     CreatedAt = DateTimeOffset.UtcNow,
                     Theme = isRandom ? null : Common(currentPerson.Theme, partner.Theme),
-                    Country = isRandom ? null : Common(currentPerson.Country, partner.Country),
-                    City = isRandom ? null : Common(currentPerson.City, partner.City),
+                    IdCountry = isRandom ? null : Common(currentPerson.IdCountry, partner.IdCountry),
+                    IdCity = isRandom ? null : Common(currentPerson.IdCity, partner.IdCity),
                     Age = isRandom ? null : Common(currentPerson.Age, partner.Age),
-                    Language = isRandom || currentPerson.Language == LangList.Random || partner.Language == LangList.Random ? null : Common<LangList>(currentPerson.Language, partner.Language)
+                    IdLanguage = isRandom ? null : Common(currentPerson.IdLanguage, partner.IdLanguage)
                 };
 
                 await dbContext.SingleChats.AddAsync(newChat, cancellationToken);
@@ -117,7 +117,7 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
         var filteredPeople = dbContext.MatchQueues
             .Where(x => x.IdPerson != currentPerson.IdPerson
                         && !blockedUsers.Contains(x.IdPerson) //to eliminate blocked users 
-                        && (currentPerson.Language == LangList.Random || x.Language == LangList.Random || x.Language == currentPerson.Language) //Random = any language
+                        && (currentPerson.IdLanguage == null || x.IdLanguage == null || x.IdLanguage == currentPerson.IdLanguage) //null = any language
                         && !x.IsRandomPartner
                         && (currentPerson.PartnerGender == GenderList.Both || currentPerson.PartnerGender == x.YourGender)
                         && (x.PartnerGender == GenderList.Both || x.PartnerGender == currentPerson.YourGender)
@@ -128,8 +128,8 @@ public class MatchmakingService(ChatZoneDbContext dbContext) : IMatchmakingServi
             Queue = q,
             Score = (q.Age == currentPerson.Age ? 3 : 0) +
                     (q.Theme == currentPerson.Theme ? 2 : 0) +
-                    (q.City == currentPerson.City ? 1 : 0) +
-                    (q.Country == currentPerson.Country ? 1 : 0)
+                    (q.IdCity == currentPerson.IdCity ? 1 : 0) +
+                    (q.IdCountry == currentPerson.IdCountry ? 1 : 0)
         });
         
         var requiredScore = GetRequiredScore(secondsWaiting);

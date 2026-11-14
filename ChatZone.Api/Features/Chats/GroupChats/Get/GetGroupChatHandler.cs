@@ -18,10 +18,10 @@ public class GetGroupChatHandler(
             {
                 IdGroup = x.IdGroupChat,
                 Title = x.Title,
-                Country = x.Country,
-                City = x.City,
+                Country = x.Country == null ? null : new NamedItemDto { Id = x.Country.IdCountry, Name = x.Country.Name },
+                City = x.City == null ? null : new NamedItemDto { Id = x.City.IdCity, Name = x.City.Name },
                 Age = x.Age,
-                Lang = x.Lang,
+                Language = x.Language == null ? null : new NamedItemDto { Id = x.Language.IdLanguage, Name = x.Language.Name },
                 IsAdmin = x.GroupMembers
                     .Where(q => q.IdGroupMember == request.IdPerson)
                     .Select(q => q.IsAdmin)

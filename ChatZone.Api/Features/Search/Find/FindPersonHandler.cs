@@ -84,12 +84,12 @@ public class FindPersonHandler(
             {
                 IdPerson = request.IdPerson,
                 Theme = request.Theme,
-                Country = request.Country,
-                City = request.City,
+                IdCountry = request.IdCountry,
+                IdCity = request.IdCity,
                 Age = request.Age,
                 YourGender = request.YourGender,
                 PartnerGender = request.PartnerGender,
-                Language = request.Language,
+                IdLanguage = request.IdLanguage,
                 IsFindRandomPerson = request.IsFindRandomPerson
             }, cancellationToken);
             
@@ -103,19 +103,19 @@ public class FindPersonHandler(
                 .Where(x => x.IdPerson == request.IdPerson)
                 .Select(x => new
                 {
-                    x.Theme, x.Country, x.City, x.Age, x.YourGender, x.PartnerGender, x.Language, x.IsFindRandomPerson
+                    x.Theme, x.IdCountry, x.IdCity, x.Age, x.YourGender, x.PartnerGender, x.IdLanguage, x.IsFindRandomPerson
                 })
                 .SingleOrDefaultAsync(cancellationToken);
             
             if (result == null) return Result<bool>.Failure(new NotFoundException("User is not found!"));
 
             request.Theme = result.Theme;
-            request.Country = result.Country;
-            request.City = result.City;
+            request.IdCountry = result.IdCountry;
+            request.IdCity = result.IdCity;
             request.Age = result.Age;
             request.YourGender = result.YourGender;
             request.PartnerGender = result.PartnerGender;
-            request.Language = result.Language;
+            request.IdLanguage = result.IdLanguage;
             request.IsFindRandomPerson = result.IsFindRandomPerson;
         }
         

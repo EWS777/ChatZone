@@ -1,4 +1,4 @@
-﻿using ChatZone.Core.Models;
+using ChatZone.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -25,6 +25,24 @@ public class GroupChatEfConfig : IEntityTypeConfiguration<GroupChat>
         
         builder
             .HasIndex(x => new { x.CreatedAt, x.IdGroupChat });
+
+        builder
+            .HasOne(x => x.Country)
+            .WithMany()
+            .HasForeignKey(x => x.IdCountry)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(x => x.City)
+            .WithMany()
+            .HasForeignKey(x => x.IdCity)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(x => x.Language)
+            .WithMany()
+            .HasForeignKey(x => x.IdLanguage)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.ToTable(nameof(GroupChat));
     }

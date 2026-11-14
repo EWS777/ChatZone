@@ -5,6 +5,7 @@ using ChatZone.Features.Identity.Authentication.Login;
 using ChatZone.Features.QuickMessages.Create;
 using ChatZone.Matchmaking;
 using ChatZone.Shared.Context;
+using ChatZone.Shared.Context.Seed;
 using ChatZone.Shared.Hubs;
 using ChatZone.Shared.Middlewares;
 using ChatZone.Shared.Security;
@@ -70,6 +71,7 @@ builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblies(typeof(CreateQ
 
 builder.Services.AddScoped<IToken, Token>();
 builder.Services.AddScoped<IMatchmakingService, MatchmakingService>();
+builder.Services.AddMemoryCache();
 
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Gmail"));
 builder.Services.AddTransient<EmailSender>();
@@ -123,6 +125,13 @@ builder.Services.AddAntiforgery(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ChatZoneDbContext>();
+    await LocationSeeder.SeedAsync(dbContext, app.Logger);
+}
+
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseSerilogRequestLogging();
 

@@ -47,6 +47,24 @@ public class SingleChatEfConfig : IEntityTypeConfiguration<SingleChat>
         builder
             .HasIndex(x => new { x.IdSecondPerson, x.FinishedAt });
 
+        builder
+            .HasOne(x => x.Country)
+            .WithMany()
+            .HasForeignKey(x => x.IdCountry)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(x => x.City)
+            .WithMany()
+            .HasForeignKey(x => x.IdCity)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(x => x.Language)
+            .WithMany()
+            .HasForeignKey(x => x.IdLanguage)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.ToTable(nameof(SingleChat));
     }
 }

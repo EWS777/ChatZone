@@ -14,9 +14,12 @@ public class SingleChat
     
     public ThemeList? Theme { get; set; }
     public AgeList? Age { get; set; }
-    public CountryList? Country { get; set; }
-    public CityList? City { get; set; }
-    public LangList? Language { get; set; }
+    public int? IdCountry { get; set; }
+    public Country? Country { get; set; }
+    public int? IdCity { get; set; }
+    public City? City { get; set; }
+    public int? IdLanguage { get; set; }
+    public Language? Language { get; set; }
 
     public ICollection<SingleMessage> SingleMessages { get; set; } = new List<SingleMessage>();
 }

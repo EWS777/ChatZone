@@ -23,3 +23,5 @@ public class ExpiredTokenException(string message) : DomainException(message, 41
 public class SecurityTokenException(string message) : DomainException(message, 401);
 
 public class BackendException() : DomainException("Something went wrong. Please try again", 500);
+
+public class BadRequestException(string message) : DomainException(message, 400);

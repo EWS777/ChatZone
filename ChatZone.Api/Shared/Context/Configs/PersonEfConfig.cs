@@ -1,5 +1,4 @@
-﻿using ChatZone.Core.Models;
-using ChatZone.Core.Models.Enums;
+using ChatZone.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -53,8 +52,7 @@ public class PersonEfConfig : IEntityTypeConfiguration<Person>
 
         builder
             .Property(x => x.LangMenu)
-            .IsRequired()
-            .HasDefaultValue(LangList.English);
+            .IsRequired();
 
         builder
             .Property(x => x.IsDarkTheme)
@@ -70,6 +68,24 @@ public class PersonEfConfig : IEntityTypeConfiguration<Person>
             .HasIndex(x => x.EmailConfirmToken)
             .IsUnique()
             .HasFilter("[EmailConfirmToken] IS NOT NULL");
+
+        builder
+            .HasOne(x => x.Country)
+            .WithMany()
+            .HasForeignKey(x => x.IdCountry)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(x => x.City)
+            .WithMany()
+            .HasForeignKey(x => x.IdCity)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(x => x.Language)
+            .WithMany()
+            .HasForeignKey(x => x.IdLanguage)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.ToTable(nameof(Person));
     }
