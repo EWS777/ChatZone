@@ -15,7 +15,7 @@ public class SetNewPasswordHandler(ChatZoneDbContext dbContext, IConfiguration c
         if (person is null) return Result<bool>.Failure(new NotFoundException("User is not found!"));
         
         var hashedPasswordResetTokenRequest = SecurityHelper.HashRefreshToken(request.Token);
-        if (hashedPasswordResetTokenRequest != person.PasswordResetToken) return Result<bool>.Failure(new SecurityTokenException("Invalid password reset token"));
+        if (hashedPasswordResetTokenRequest != person.PasswordResetToken) return Result<bool>.Failure(new BadRequestException("Invalid password reset token"));
         
         if (person.PasswordResetTokenExp < DateTimeOffset.UtcNow) return Result<bool>.Failure(new ExpiredTokenException("Your token has expired. Please try again"));
         
