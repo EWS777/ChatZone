@@ -17,14 +17,13 @@ public class GetBlockedPersonsHandler(
         if (request.Cursor.HasValue)
         {
             var cursorId = request.CursorId ?? int.MaxValue;
-            var cursorUpperBound = request.Cursor.Value.AddMilliseconds(1);
-            query = query.Where(x => x.CreatedAt < request.Cursor.Value || (x.CreatedAt < cursorUpperBound && x.IdBlockedPerson < cursorId));
+            query = query.Where(x => x.CreatedAt < request.Cursor.Value || (x.CreatedAt == request.Cursor.Value && x.IdBlockedPerson < cursorId));
         }
 
         var blockedPersons = await query
             .OrderByDescending(x => x.CreatedAt)
             .ThenByDescending(x => x.IdBlockedPerson)
-            .Take(request.TakePerson)
+            .Take(Math.Clamp(request.TakePerson, 1, 50))
             .Select(x => new GetBlockedPersonsResponse
             {
                 IdBlockedPerson = x.IdBlockedPerson,

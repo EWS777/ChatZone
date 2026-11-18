@@ -17,11 +17,16 @@ public class GetGroupMemberHandler(ChatZoneDbContext dbContext) : IRequestHandle
             .AsNoTracking()
             .Where(x => x.IdChat == request.IdGroup && x.IdGroupMember != request.IdPerson);
 
-        if (request.Cursor.HasValue) query = query.Where(x => x.JoinedAt < request.Cursor.Value);
+        if (request.Cursor.HasValue)
+        {
+            var cursorId = request.CursorId ?? int.MaxValue;
+            query = query.Where(x => x.JoinedAt < request.Cursor.Value || (x.JoinedAt == request.Cursor.Value && x.IdGroupMember < cursorId));
+        }
 
         var groupList = await query
             .OrderByDescending(x => x.JoinedAt)
-            .Take(request.TakePerson)
+            .ThenByDescending(x => x.IdGroupMember)
+            .Take(Math.Clamp(request.TakePerson, 1, 50))
             .Select(x => new GetGroupMemberResponse
             {
                 IdPerson = x.IdGroupMember,

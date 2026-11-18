@@ -23,7 +23,7 @@ public class GetGroupChatsHandler(
         var groupChats = await query
             .OrderByDescending(x => x.CreatedAt)
             .ThenByDescending(x => x.IdGroupChat)
-            .Take(request.TakeGroup)
+            .Take(Math.Clamp(request.TakeGroup, 1, 50))
             .Select(x => new GetGroupChatsResponse
             {
                 IdGroup = x.IdGroupChat,
